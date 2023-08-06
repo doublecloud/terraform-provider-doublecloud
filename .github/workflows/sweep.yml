@@ -1,0 +1,41 @@
+name: Sweep
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      # - uses: nick-invision/retry@v2
+      #   if: always()
+      #   with:
+      #     timeout_minutes: 15
+      #     max_attempts: 15
+      #     command: |
+      - name: sweep
+        run: |
+            echo $DC_KEY > authorized_key.json
+            ls -lah authorized_key.json
+            export DC_AUTHKEY=$(pwd)/authorized_key.json
+            echo $DC_AUTHKEY
+            make sweep
+        env:
+          DC_KEY: ${{ secrets.TF_ACC_AUTHKEY }}
+          DC_PROJECT_ID: ${{ secrets.TF_ACC_PROJECT_ID }}
+          DC_NETWORK_ID: ${{ secrets.TF_ACC_NETWORK_ID }}

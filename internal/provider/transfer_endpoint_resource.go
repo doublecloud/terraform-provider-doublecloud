@@ -1,0 +1,501 @@
+package provider
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1"
+	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgentf "github.com/doublecloud/go-sdk/gen/transfer"
+)
+
+// Ensure provider defined types fully satisfy framework interfaces.
+var _ resource.Resource = &TransferEndpointResource{}
+var _ resource.ResourceWithImportState = &TransferEndpointResource{}
+
+func NewTransferEndpointResource() resource.Resource {
+	return &TransferEndpointResource{}
+}
+
+type TransferEndpointResource struct {
+	sdk             *dcsdk.SDK
+	endpointService *dcgentf.EndpointServiceClient
+}
+
+type TransferEndpointModel struct {
+	Id          types.String      `tfsdk:"id"`
+	ProjectID   types.String      `tfsdk:"project_id"`
+	Name        types.String      `tfsdk:"name"`
+	Description types.String      `tfsdk:"description"`
+	Settings    *endpointSettings `tfsdk:"settings"`
+}
+
+type endpointSettings struct {
+	ClickhouseSource *endpointClickhouseSourceSettings `tfsdk:"clickhouse_source"`
+	KafkaSource      *endpointKafkaSourceSettings      `tfsdk:"kafka_source"`
+	PostgresSource   *endpointPostgresSourceSettings   `tfsdk:"postgres_source"`
+	MysqlSource      *endpointMysqlSourceSettings      `tfsdk:"mysql_source"`
+	MongoSource      *endpointMongoSourceSettings      `tfsdk:"mongo_source"`
+	S3Source         *endpointS3SourceSettings         `tfsdk:"s3_source"`
+
+	ClickhouseTarget *endpointClickhouseTargetSettings `tfsdk:"clickhouse_target"`
+	KafkaTarget      *endpointKafkaTargetSettings      `tfsdk:"kafka_target"`
+	PostgresTarget   *endpointPostgresTargetSettings   `tfsdk:"postgres_target"`
+	MysqlTarget      *endpointMysqlTargetSettings      `tfsdk:"mysql_target"`
+	MongoTarget      *endpointMongoTargetSettings      `tfsdk:"mongo_target"`
+}
+
+func (r *TransferEndpointResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_transfer_endpoint"
+}
+
+func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Transfer endpoint resource",
+
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Transfer endpoint id",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"project_id": schema.StringAttribute{
+				Required:            true,
+				MarkdownDescription: "Project identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"name": schema.StringAttribute{
+				Required:            true,
+				MarkdownDescription: "Name of endpoint",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Description of endpoint",
+				Default:             stringdefault.StaticString(""),
+			},
+		},
+		Blocks: map[string]schema.Block{
+			"settings": schema.SingleNestedBlock{
+				Description: "Settings",
+				Blocks: map[string]schema.Block{
+					"clickhouse_source": transferEndpointChSourceSchema(),
+					"kafka_source":      transferEndpointKafkaSourceSchema(),
+					"postgres_source":   transferEndpointPostgresSourceSchema(),
+					"mysql_source":      transferEndpointMysqlSourceSchema(),
+					"mongo_source":      transferEndpointMongoSourceSchema(),
+					"s3_source":         transferEndpointS3SourceSchema(),
+
+					"clickhouse_target": transferEndpointChTargetSchema(),
+					"kafka_target":      transferEndpointKafkaTargetSchema(),
+					"postgres_target":   transferEndpointPostgresTargetSchema(),
+					"mysql_target":      transferEndpointMysqlTargetSchema(),
+					"mongo_target":      transferEndpointMongoTargetSchema(),
+				},
+			},
+		},
+	}
+}
+
+func (r *TransferEndpointResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	sdk, ok := req.ProviderData.(*dcsdk.SDK)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *dcsdk.SDK, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+		return
+	}
+
+	r.sdk = sdk
+	r.endpointService = r.sdk.Transfer().Endpoint()
+}
+
+func createEndpointRequest(m *TransferEndpointModel) (*transfer.CreateEndpointRequest, diag.Diagnostics) {
+	var diag diag.Diagnostics
+
+	rq := &transfer.CreateEndpointRequest{}
+	rq.Name = m.Name.ValueString()
+	rq.Description = m.Description.ValueString()
+	rq.ProjectId = m.ProjectID.ValueString()
+
+	settings, diag := transferEndpointSettings(m)
+	rq.Settings = settings
+
+	if diag.HasError() {
+		return nil, diag
+	}
+
+	return rq, nil
+}
+
+func deleteEndpointRequest(m *TransferEndpointModel) (*transfer.DeleteEndpointRequest, diag.Diagnostics) {
+	return &transfer.DeleteEndpointRequest{
+		EndpointId: m.Id.ValueString(),
+	}, nil
+}
+
+func (r *TransferEndpointResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *TransferEndpointModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	rq, diag := createEndpointRequest(data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
+	net, err := r.endpointService.Create(ctx, rq)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create", err.Error())
+		return
+	}
+	op, err := r.sdk.WrapOperation(net, err)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create", err.Error())
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create", err.Error())
+	}
+
+	data.Id = types.StringValue(op.ResourceId())
+	// Update computed fields
+	{
+		rs, err := r.endpointService.Get(ctx, &transfer.GetEndpointRequest{EndpointId: data.Id.ValueString()})
+		if err != nil {
+			resp.Diagnostics.AddError("failed to get", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(data.parseTransferEndpoint(ctx, rs)...)
+	}
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *TransferEndpointResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *TransferEndpointModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	rs, err := r.endpointService.Get(ctx, &transfer.GetEndpointRequest{EndpointId: data.Id.ValueString()})
+	if err != nil {
+		resp.Diagnostics.AddError("failed to get", err.Error())
+		return
+	}
+
+	resp.Diagnostics.Append(data.parseTransferEndpoint(ctx, rs)...)
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func updateEndpointRequest(m *TransferEndpointModel) (*transfer.UpdateEndpointRequest, diag.Diagnostics) {
+	settings, diag := transferEndpointSettings(m)
+	if diag.HasError() {
+		return nil, diag
+	}
+
+	return &transfer.UpdateEndpointRequest{
+		EndpointId:  m.Id.ValueString(),
+		Name:        m.Name.ValueString(),
+		Description: m.Description.ValueString(),
+		Settings:    settings,
+	}, nil
+}
+
+func (r *TransferEndpointResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *TransferEndpointModel
+
+	var diag diag.Diagnostics
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	rq, diag := updateEndpointRequest(data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
+	net, err := r.endpointService.Update(ctx, rq)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to update", err.Error())
+		return
+	}
+	op, err := r.sdk.WrapOperation(net, err)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to update", err.Error())
+		return
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to update", err.Error())
+		return
+	}
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *TransferEndpointResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *TransferEndpointModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	rq, diag := deleteEndpointRequest(data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
+	rs, err := r.endpointService.Delete(ctx, rq)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete", err.Error())
+		return
+	}
+	op, err := r.sdk.WrapOperation(rs, err)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete", err.Error())
+	}
+	err = op.Wait(ctx)
+
+	tflog.Trace(ctx, fmt.Sprintf("deleted endpoint: %s", data.Id))
+}
+
+func (r *TransferEndpointResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSettings, diag.Diagnostics) {
+	var diag diag.Diagnostics
+
+	if m.Settings == nil {
+		diag.AddError("unknwon settings", "specify settings block for transfer_endpoint")
+		return nil, diag
+	}
+
+	if m.Settings.ClickhouseSource != nil {
+		s, d := chSourceEndpointSettings(m.Settings.ClickhouseSource)
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+
+	if m.Settings.KafkaSource != nil {
+		s, d := kafkaSourceEndpointSettings(m.Settings.KafkaSource)
+		if d.HasError() {
+			diag.Append(d...)
+
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+
+	if m.Settings.PostgresSource != nil {
+		s, d := postgresSourceEndpointSettings(m.Settings.PostgresSource)
+		if d.HasError() {
+			diag.Append(d...)
+
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.MysqlSource != nil {
+		s, d := m.Settings.MysqlSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.MongoSource != nil {
+		s, d := m.Settings.MongoSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.S3Source != nil {
+		s, d := m.Settings.S3Source.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+
+	if m.Settings.ClickhouseTarget != nil {
+		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+
+	if m.Settings.KafkaTarget != nil {
+		s, d := kafkaTargetEndpointSettings(m.Settings.KafkaTarget)
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+
+	}
+	if m.Settings.PostgresTarget != nil {
+		s, d := postgresTargetEndpointSettings(m.Settings.PostgresTarget)
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.MysqlTarget != nil {
+		s, d := m.Settings.MysqlTarget.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.MongoTarget != nil {
+		s, d := m.Settings.MongoTarget.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+
+	diag.AddError("unknown endpoint settings", "would you mind to specify one of endpoint settings")
+	return nil, diag
+}
+
+func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e *transfer.Endpoint) diag.Diagnostics {
+	var diag diag.Diagnostics
+	data.Name = types.StringValue(e.Name)
+	data.ProjectID = types.StringValue(e.ProjectId)
+	data.Description = types.StringValue(e.Description)
+
+	if settings := e.Settings.GetClickhouseTarget(); settings != nil {
+
+		// TODO: move parsing to clickhouse file
+		if data.Settings.ClickhouseTarget == nil {
+			data.Settings.ClickhouseTarget = &endpointClickhouseTargetSettings{}
+		}
+		data.Settings.ClickhouseTarget.ClickhouseClusterName = types.StringValue(settings.ClickhouseClusterName)
+		data.Settings.ClickhouseTarget.ClickhouseCleanupPolicy = types.StringValue(endpoint.CleanupPolicy_name[int32(settings.CleanupPolicy.Number())])
+
+		if settings.AltNames != nil {
+			data.Settings.ClickhouseTarget.AltNames = make([]altName, len(settings.AltNames))
+			for i := 0; i < len(settings.AltNames); i++ {
+				data.Settings.ClickhouseTarget.AltNames[i] = altName{
+					FromName: types.StringValue(settings.AltNames[i].FromName),
+					ToName:   types.StringValue(settings.AltNames[i].ToName),
+				}
+			}
+		}
+		diag.Append(parseTransferEndpointClickhouseConnection(ctx, settings.Connection, data.Settings.ClickhouseTarget.Connection)...)
+
+	}
+	if settings := e.Settings.GetClickhouseSource(); settings != nil {
+		if data.Settings.ClickhouseSource == nil {
+			data.Settings.ClickhouseSource = &endpointClickhouseSourceSettings{}
+		}
+		diag.Append(parseTransferEndpointClickhouseConnection(ctx, settings.Connection, data.Settings.ClickhouseSource.Connection)...)
+		data.Settings.ClickhouseSource.IncludeTables = convertSliceToTFStrings(settings.IncludeTables)
+		data.Settings.ClickhouseSource.ExcludeTables = convertSliceToTFStrings(settings.ExcludeTables)
+	}
+	if settings := e.Settings.GetKafkaSource(); settings != nil {
+		if data.Settings.KafkaSource == nil {
+			data.Settings.KafkaSource = &endpointKafkaSourceSettings{}
+		}
+		diag.Append(parseTransferEndpointKafkaSource(ctx, settings, data.Settings.KafkaSource)...)
+	}
+	if settings := e.Settings.GetKafkaTarget(); settings != nil {
+		if data.Settings.KafkaTarget == nil {
+			data.Settings.KafkaTarget = &endpointKafkaTargetSettings{}
+		}
+		diag.Append(parseTransferEndpointKafkaTarget(ctx, settings, data.Settings.KafkaTarget)...)
+	}
+	if settings := e.Settings.GetPostgresSource(); settings != nil {
+		if data.Settings.PostgresSource == nil {
+			data.Settings.PostgresSource = &endpointPostgresSourceSettings{}
+		}
+		diag.Append(parseTransferEndpointPostgresSource(ctx, settings, data.Settings.PostgresSource)...)
+	}
+	if settings := e.Settings.GetPostgresTarget(); settings != nil {
+		if data.Settings.PostgresTarget == nil {
+			data.Settings.PostgresTarget = &endpointPostgresTargetSettings{}
+		}
+		diag.Append(parseTransferEndpointPostgresTarget(ctx, settings, data.Settings.PostgresTarget)...)
+	}
+	if settings := e.Settings.GetMysqlSource(); settings != nil {
+		if data.Settings.MysqlSource == nil {
+			data.Settings.MysqlSource = &endpointMysqlSourceSettings{}
+		}
+		diag.Append(data.Settings.MysqlSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetMysqlTarget(); settings != nil {
+		if data.Settings.MysqlTarget == nil {
+			data.Settings.MysqlTarget = &endpointMysqlTargetSettings{}
+		}
+		diag.Append(data.Settings.MysqlTarget.parse(settings)...)
+	}
+	if settings := e.Settings.GetMongoSource(); settings != nil {
+		if data.Settings.MongoSource == nil {
+			data.Settings.MongoSource = &endpointMongoSourceSettings{}
+		}
+		diag.Append(data.Settings.MongoSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetMongoTarget(); settings != nil {
+		if data.Settings.MongoTarget == nil {
+			data.Settings.MongoTarget = &endpointMongoTargetSettings{}
+		}
+		diag.Append(data.Settings.MongoTarget.parse(settings)...)
+	}
+	if settings := e.Settings.GetS3Source(); settings != nil {
+		if data.Settings.S3Source == nil {
+			data.Settings.S3Source = &endpointS3SourceSettings{}
+		}
+		diag.Append(data.Settings.S3Source.parse(settings)...)
+	}
+
+	if data.Settings == nil {
+		diag.AddError("failed to parse", "unknown settings type")
+	}
+
+	return diag
+}
