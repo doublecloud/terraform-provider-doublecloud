@@ -35,7 +35,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "hashicorp.com/doublecloud/doublecloud",
+		Address: "registry.terraform.io/doublecloud/doublecloud",
 		Debug:   debug,
 	}
 

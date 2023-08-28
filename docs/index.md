@@ -16,7 +16,7 @@ description: |-
 terraform {
   required_providers {
     doublecloud = {
-      source = "hashicorp.com/doublecloud/doublecloud"
+      source = "registry.terraform.io/doublecloud/doublecloud"
     }
   }
 }
