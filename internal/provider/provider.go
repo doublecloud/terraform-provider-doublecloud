@@ -28,11 +28,13 @@ type DoubleCloudProvider struct {
 // DoubleCloudProviderModel describes the provider data model.
 type DoubleCloudProviderModel struct {
 	AuthorizedKey types.String `tfsdk:"authorized_key"`
+	Endpoint      types.String `tfsdk:"endpoint"`
 }
 
 type Config struct {
 	Credentials *dc.Credentials
 	ProjectId   string
+	Endpoint    string
 
 	ctx context.Context
 
@@ -42,6 +44,7 @@ type Config struct {
 func (c *Config) init(ctx context.Context) error {
 	sdk, err := dc.Build(ctx, dc.Config{
 		Credentials: *c.Credentials,
+		Endpoint:    c.Endpoint,
 	})
 	if err != nil {
 		return err
@@ -101,7 +104,10 @@ func (p *DoubleCloudProvider) Configure(ctx context.Context, req provider.Config
 		resp.Diagnostics.AddError("failed to use credentials", err.Error())
 		return
 	}
-	conf := &Config{Credentials: &creds}
+	conf := &Config{
+		Credentials: &creds,
+		Endpoint:    data.Endpoint.ValueString(),
+	}
 	err = conf.init(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to init client", err.Error())
