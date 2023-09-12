@@ -16,6 +16,7 @@ import (
 
 	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1"
 	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint"
+	endpoint_airbyte "github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint/airbyte"
 	dcsdk "github.com/doublecloud/go-sdk"
 	dcgentf "github.com/doublecloud/go-sdk/gen/transfer"
 )
@@ -42,12 +43,13 @@ type TransferEndpointModel struct {
 }
 
 type endpointSettings struct {
-	ClickhouseSource *endpointClickhouseSourceSettings `tfsdk:"clickhouse_source"`
-	KafkaSource      *endpointKafkaSourceSettings      `tfsdk:"kafka_source"`
-	PostgresSource   *endpointPostgresSourceSettings   `tfsdk:"postgres_source"`
-	MysqlSource      *endpointMysqlSourceSettings      `tfsdk:"mysql_source"`
-	MongoSource      *endpointMongoSourceSettings      `tfsdk:"mongo_source"`
-	S3Source         *endpointS3SourceSettings         `tfsdk:"s3_source"`
+	ClickhouseSource  *endpointClickhouseSourceSettings  `tfsdk:"clickhouse_source"`
+	KafkaSource       *endpointKafkaSourceSettings       `tfsdk:"kafka_source"`
+	PostgresSource    *endpointPostgresSourceSettings    `tfsdk:"postgres_source"`
+	MysqlSource       *endpointMysqlSourceSettings       `tfsdk:"mysql_source"`
+	MongoSource       *endpointMongoSourceSettings       `tfsdk:"mongo_source"`
+	S3Source          *endpointS3SourceSettings          `tfsdk:"s3_source"`
+	LinkedinAdsSource *endpointLinkedinAdsSourceSettings `tfsdk:"linkedinads_source"`
 
 	ClickhouseTarget *endpointClickhouseTargetSettings `tfsdk:"clickhouse_target"`
 	KafkaTarget      *endpointKafkaTargetSettings      `tfsdk:"kafka_target"`
@@ -98,12 +100,13 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 			"settings": schema.SingleNestedBlock{
 				Description: "Settings",
 				Blocks: map[string]schema.Block{
-					"clickhouse_source": transferEndpointChSourceSchema(),
-					"kafka_source":      transferEndpointKafkaSourceSchema(),
-					"postgres_source":   transferEndpointPostgresSourceSchema(),
-					"mysql_source":      transferEndpointMysqlSourceSchema(),
-					"mongo_source":      transferEndpointMongoSourceSchema(),
-					"s3_source":         transferEndpointS3SourceSchema(),
+					"clickhouse_source":  transferEndpointChSourceSchema(),
+					"kafka_source":       transferEndpointKafkaSourceSchema(),
+					"postgres_source":    transferEndpointPostgresSourceSchema(),
+					"mysql_source":       transferEndpointMysqlSourceSchema(),
+					"mongo_source":       transferEndpointMongoSourceSchema(),
+					"s3_source":          transferEndpointS3SourceSchema(),
+					"linkedinads_source": endpointLinkedinAdsSourceSettingsSchema(),
 
 					"clickhouse_target": transferEndpointChTargetSchema(),
 					"kafka_target":      transferEndpointKafkaTargetSchema(),
@@ -360,6 +363,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
+	if m.Settings.LinkedinAdsSource != nil {
+		result := new(endpoint_airbyte.LinkedinAdsSource)
+		diag.Append(m.Settings.LinkedinAdsSource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_LinkedinAdsSource{LinkedinAdsSource: result},
+		}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -491,6 +501,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.S3Source = &endpointS3SourceSettings{}
 		}
 		diag.Append(data.Settings.S3Source.parse(settings)...)
+	}
+	if settings := e.Settings.GetLinkedinAdsSource(); settings != nil {
+		if data.Settings.LinkedinAdsSource == nil {
+			data.Settings.LinkedinAdsSource = &endpointLinkedinAdsSourceSettings{}
+		}
+		diag.Append(data.Settings.LinkedinAdsSource.parse(settings)...)
 	}
 
 	if data.Settings == nil {
