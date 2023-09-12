@@ -24,8 +24,8 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TransferEndpointResource{}
-var _ resource.ResourceWithImportState = &TransferEndpointResource{}
+var _ resource.Resource = &TransferResource{}
+var _ resource.ResourceWithImportState = &TransferResource{}
 
 func NewTransferResource() resource.Resource {
 	return &TransferResource{}
@@ -316,6 +316,10 @@ func (r *TransferResource) Delete(ctx context.Context, req resource.DeleteReques
 		resp.Diagnostics.AddError("failed to delete", err.Error())
 	}
 	err = op.Wait(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to wait for delete completion", err.Error())
+		return
+	}
 
 	tflog.Trace(ctx, fmt.Sprintf("deleted endpoint: %s", data.Id))
 }

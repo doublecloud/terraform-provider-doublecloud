@@ -37,8 +37,8 @@ type clickhouseClusterModel struct {
 	// Access            *clickhouseAccess           `tfsdk:"resources"`
 	// Hide encryption due to deprecation
 	// Encryption *DataEncryptionModel `tfsdk:"encryption"`
-	NetworkId  types.String         `tfsdk:"network_id"`
-	Config     *clickhouseConfig    `tfsdk:"config"`
+	NetworkId types.String      `tfsdk:"network_id"`
+	Config    *clickhouseConfig `tfsdk:"config"`
 
 	// TODO: support mw
 	// https://github.com/doublecloud/api/blob/main/doublecloud/v1/maintenance.proto
@@ -232,8 +232,8 @@ func clickhouseConfigCompressionMethodValidator() validator.String {
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TransferEndpointResource{}
-var _ resource.ResourceWithImportState = &TransferEndpointResource{}
+var _ resource.Resource = &ClickhouseClusterResource{}
+var _ resource.ResourceWithImportState = &ClickhouseClusterResource{}
 
 func NewClickhouseClusterResource() resource.Resource {
 	return &ClickhouseClusterResource{}

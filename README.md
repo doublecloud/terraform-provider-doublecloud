@@ -14,15 +14,15 @@ Building The Provider
 Clone repository to: `$GOPATH/src/github.com/doublecloud/terraform-provider-doublecloud`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/doublecloud; cd $GOPATH/src/github.com/doublecloud
-$ git clone git@github.com:doublecloud/terraform-provider-doublecloud`
+mkdir -p $GOPATH/src/github.com/doublecloud; cd $GOPATH/src/github.com/doublecloud
+git clone git@github.com:doublecloud/terraform-provider-doublecloud`
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/doublecloud/terraform-provider-doublecloud`
-$ make build
+cd $GOPATH/src/github.com/doublecloud/terraform-provider-doublecloud`
+make build
 ```
 
 Using the provider
@@ -31,14 +31,14 @@ If you're building the provider, follow the instructions to [install it as a plu
 An example of using an installed provider from local directory: 
 
 Write following config into  `~/.terraformrc`
-```
+```ini
 provider_installation {
    dev_overrides {
     "doublecloud/doublecloud" = "/path/to/local/provider"
   }
 
    direct {}
- }
+}
 ```
 
 Developing the Provider
@@ -49,16 +49,16 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
 ```sh
-$ make build
+make build
 ...
-$ $GOPATH/bin/terraform-provider-doublecloud
+$GOPATH/bin/terraform-provider-doublecloud
 ...
 ```
 
 In order to test the provider, you can simply run `make test`.
 
 ```sh
-$ make test
+make test
 ```
 
 In order to run the full suite of [Acceptance tests](https://www.terraform.io/docs/extend/testing/acceptance-tests/index.html), run `make testacc`.
@@ -66,5 +66,5 @@ In order to run the full suite of [Acceptance tests](https://www.terraform.io/do
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
 ```sh
-$ make testacc
+make testacc
 ```
