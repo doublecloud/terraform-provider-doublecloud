@@ -67,6 +67,10 @@ func (p *DoubleCloudProvider) Schema(ctx context.Context, req provider.SchemaReq
 				Optional:            true,
 				Sensitive:           true,
 			},
+			"endpoint": schema.StringAttribute{
+				MarkdownDescription: "API endpoint",
+				Optional:            true,
+			},
 		},
 	}
 }
