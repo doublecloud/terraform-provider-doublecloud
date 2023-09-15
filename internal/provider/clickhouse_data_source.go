@@ -33,11 +33,11 @@ type ClickhouseDataSourceModel struct {
 	RegionID              types.String              `tfsdk:"region_id"`
 	CloudType             types.String              `tfsdk:"cloud_type"`
 	Version               types.String              `tfsdk:"version"`
-	ConnectionInfo        *ClickhoiseConnectionInfo `tfsdk:"connection_info"`
-	PrivateConnectionInfo *ClickhoiseConnectionInfo `tfsdk:"private_connection_info"`
+	ConnectionInfo        *ClickhouseConnectionInfo `tfsdk:"connection_info"`
+	PrivateConnectionInfo *ClickhouseConnectionInfo `tfsdk:"private_connection_info"`
 }
 
-type ClickhoiseConnectionInfo struct {
+type ClickhouseConnectionInfo struct {
 	Host           types.String `tfsdk:"host"`
 	User           types.String `tfsdk:"user"`
 	Password       types.String `tfsdk:"password"`
@@ -159,11 +159,11 @@ func (d *ClickhouseDataSource) Configure(ctx context.Context, req datasource.Con
 	d.svc = d.sdk.ClickHouse().Cluster()
 }
 
-func parseClickhouseConnectionInfo(r *clickhouse.ConnectionInfo) *ClickhoiseConnectionInfo {
+func parseClickhouseConnectionInfo(r *clickhouse.ConnectionInfo) *ClickhouseConnectionInfo {
 	if r == nil {
 		return nil
 	}
-	c := &ClickhoiseConnectionInfo{}
+	c := &ClickhouseConnectionInfo{}
 	c.Host = types.StringValue(r.Host)
 	c.User = types.StringValue(r.User)
 	c.Password = types.StringValue(r.Password)
@@ -176,11 +176,11 @@ func parseClickhouseConnectionInfo(r *clickhouse.ConnectionInfo) *ClickhoiseConn
 	return c
 }
 
-func parseClickhousePrivateConnectionInfo(r *clickhouse.PrivateConnectionInfo) *ClickhoiseConnectionInfo {
+func parseClickhousePrivateConnectionInfo(r *clickhouse.PrivateConnectionInfo) *ClickhouseConnectionInfo {
 	if r == nil {
 		return nil
 	}
-	c := &ClickhoiseConnectionInfo{}
+	c := &ClickhouseConnectionInfo{}
 	c.Host = types.StringValue(r.Host)
 	c.User = types.StringValue(r.User)
 	c.Password = types.StringValue(r.Password)
@@ -223,7 +223,10 @@ func (d *ClickhouseDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		}
 	}
 
-	response, err := d.svc.Get(ctx, &clickhouse.GetClusterRequest{ClusterId: data.Id.ValueString()})
+	response, err := d.svc.Get(ctx, &clickhouse.GetClusterRequest{
+		ClusterId: data.Id.ValueString(),
+		Sensitive: true,
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get", err.Error())
 		return

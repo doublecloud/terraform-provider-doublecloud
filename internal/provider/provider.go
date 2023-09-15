@@ -75,13 +75,18 @@ func (p *DoubleCloudProvider) Schema(ctx context.Context, req provider.SchemaReq
 	}
 }
 func configureCredentials(data *DoubleCloudProviderModel) (dc.Credentials, error) {
+	envToken := os.Getenv("DC_TOKEN")
+	if envToken != "" {
+		return dc.NewIAMTokenCredentials(envToken), nil
+	}
+
 	var key *iamkey.Key
 	var err error
 
 	envKey := os.Getenv("DC_AUTHKEY")
 
 	if data.AuthorizedKey.IsNull() && envKey == "" {
-		return nil, errors.New("Please specify one of auth methods for Double.Cloud")
+		return nil, errors.New("please specify one of auth methods for Double.Cloud")
 	}
 	if envKey != "" {
 		key, err = iamkey.ReadFromJSONFile(envKey)
