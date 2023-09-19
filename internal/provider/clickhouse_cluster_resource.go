@@ -578,6 +578,10 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	var diags diag.Diagnostics
 	config := &clickhouse.ClickhouseConfig{}
 
+	if m == nil {
+		return config, diags
+	}
+
 	if v := m.LogLevel; !v.IsUnknown() {
 		config.LogLevel = clickhouse.ClickhouseConfig_LogLevel(clickhouse.ClickhouseConfig_LogLevel_value[v.ValueString()])
 	}
