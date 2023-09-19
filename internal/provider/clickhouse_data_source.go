@@ -56,39 +56,39 @@ func (d *ClickhouseDataSource) Metadata(ctx context.Context, req datasource.Meta
 func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"host": schema.StringAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "Host to connect",
 		},
 		"user": schema.StringAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "ClickHouse user",
 		},
 		"password": schema.StringAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "Password for ClickHouse user",
 		},
 		"https_port": schema.Int64Attribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "Port to connect using HTTPS protocol",
 		},
 		"tcp_port_secure": schema.Int64Attribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "Port to connect using TCP/native protocol",
 		},
 		"native_protocol": schema.StringAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "Connection string for ClickHouse native protocol",
 		},
 		"https_uri": schema.StringAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "URI to connect using HTTPS protocol",
 		},
 		"jdbc_uri": schema.StringAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "URI to connect using JDBC protocol",
 		},
 		"odbc_uri": schema.StringAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "URI to connect using ODBC protocol",
 		},
 	}
@@ -109,30 +109,31 @@ func (d *ClickhouseDataSource) Schema(ctx context.Context, req datasource.Schema
 			},
 			"name": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Name of cluster",
 			},
 			"description": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Description of cluster",
 			},
 			"region_id": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Region of cluster",
 			},
 			"cloud_type": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Cloud type (aws, gcp, azure)",
 			},
 			"version": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Version of ClickHouse DBMS",
 			},
 			"connection_info": schema.SingleNestedAttribute{
-				Optional:   true,
+				Computed:   true,
 				Attributes: clickhouseConenctionInfoSchema(),
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
-				Optional:   true,
+				Computed:   true,
 				Attributes: clickhouseConenctionInfoSchema(),
 			},
 		},

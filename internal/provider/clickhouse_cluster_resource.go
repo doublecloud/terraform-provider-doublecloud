@@ -550,7 +550,13 @@ func (m *clickhouseClusterModel) parse(rs *clickhouse.Cluster) diag.Diagnostics 
 	m.Version = types.StringValue(rs.Version)
 	m.NetworkId = types.StringValue(rs.NetworkId)
 
+	if m.Resources == nil {
+		m.Resources = &clickhouseClusterResources{}
+	}
 	diags.Append(m.Resources.parse(rs.Resources)...)
+	if m.Config == nil {
+		m.Config = &clickhouseConfig{}
+	}
 	diags.Append(m.Config.parse(rs.ClickhouseConfig)...)
 	// parse access
 
