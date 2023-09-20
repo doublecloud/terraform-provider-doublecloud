@@ -21,11 +21,14 @@ Clickhouse data soruce
 
 ### Optional
 
+- `id` (String) Cluster identifier
+- `name` (String) Name of cluster
+
+### Read-Only
+
 - `cloud_type` (String) Cloud type (aws, gcp, azure)
 - `connection_info` (Attributes) (see [below for nested schema](#nestedatt--connection_info))
 - `description` (String) Description of cluster
-- `id` (String) Cluster identifier
-- `name` (String) Name of cluster
 - `private_connection_info` (Attributes) (see [below for nested schema](#nestedatt--private_connection_info))
 - `region_id` (String) Region of cluster
 - `version` (String) Version of ClickHouse DBMS
@@ -33,7 +36,7 @@ Clickhouse data soruce
 <a id="nestedatt--connection_info"></a>
 ### Nested Schema for `connection_info`
 
-Optional:
+Read-Only:
 
 - `host` (String) Host to connect
 - `https_port` (Number) Port to connect using HTTPS protocol
@@ -49,7 +52,7 @@ Optional:
 <a id="nestedatt--private_connection_info"></a>
 ### Nested Schema for `private_connection_info`
 
-Optional:
+Read-Only:
 
 - `host` (String) Host to connect
 - `https_port` (Number) Port to connect using HTTPS protocol

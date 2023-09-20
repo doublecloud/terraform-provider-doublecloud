@@ -13,24 +13,23 @@ Clickhouse Cluster resource
 ## Example Usage
 
 ```terraform
-resource "doublecloud_clickhouse_cluster" "example" {
-  project_id = "default"
-  name       = "example"
-  region_id  = "eu-central1-a"
+resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
+  project_id = var.project_id
+  name = "example-clickhouse"
+  region_id = "eu-central-1"
   cloud_type = "aws"
   network_id = data.doublecloud_network.default.id
 
   resources {
     clickhouse {
       resource_preset_id = "s1-c2-m4"
-      disk_size          = 51539607552
-      replica_count      = 1
-      shard_count        = 1
+      disk_size = 34359738368
+      replica_count = 1
     }
   }
 
   config {
-    log_level       = "LOG_LEVEL_INFORMATION"
+    log_level = "LOG_LEVEL_TRACE"
     max_connections = 120
   }
 }
