@@ -22,7 +22,7 @@ terraform {
 }
 
 provider "doublecloud" {
-  authorized_key = file("authorized_key.json")
+  authorized_key = file("authorized_key.json") # See https://double.cloud/docs/en/public-api/tutorials/transfer-api-quickstart on how to obtain this file
 }
 ```
 
@@ -32,3 +32,4 @@ provider "doublecloud" {
 ### Optional
 
 - `authorized_key` (String, Sensitive) Path to authorized key
+- `endpoint` (String) API endpoint
