@@ -130,5 +130,3 @@ Optional:
 - `replica_count` (Number) Number of hosts per shard.
 - `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
 - `shard_count` (Number) Number of shards in the cluster.
-
-

@@ -48,5 +48,3 @@ Optional:
 - `connection_string` (String) String to use in clients
 - `password` (String) Password for Apache Kafka® user
 - `user` (String) Apache Kafka® user
-
-

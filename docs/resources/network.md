@@ -40,5 +40,4 @@ resource "doublecloud_network" "example-network" {
 ### Read-Only
 
 - `id` (String) Network identifier
-
-
+- `ipv6_cidr_block` (String) The IPv6 network range for the subnet, it is known only after creation.

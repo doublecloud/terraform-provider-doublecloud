@@ -38,6 +38,7 @@ func TestAccNetworkResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccNetworkId, "region_id", m.RegionID.ValueString()),
 					resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", m.Ipv4CidrBlock.ValueString()),
 					resource.TestCheckResourceAttr(testAccNetworkId, "cloud_type", m.CloudType.ValueString()),
+					resource.TestCheckResourceAttrSet(testAccNetworkId, "ipv6_cidr_block"),
 				),
 			},
 			// Update not supported

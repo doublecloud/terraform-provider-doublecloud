@@ -41,6 +41,7 @@ type NetworkResourceModel struct {
 	RegionID      types.String `tfsdk:"region_id"`
 	CloudType     types.String `tfsdk:"cloud_type"`
 	Ipv4CidrBlock types.String `tfsdk:"ipv4_cidr_block"`
+	Ipv6CidrBlock types.String `tfsdk:"ipv6_cidr_block"`
 }
 
 func (r *NetworkResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -99,12 +100,15 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 			},
 			"ipv4_cidr_block": schema.StringAttribute{
-				Required: true,
-				// Optional: true,
+				Required:            true,
 				MarkdownDescription: "The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+			},
+			"ipv6_cidr_block": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The IPv6 network range for the subnet, it is known only after creation.",
 			},
 		},
 	}
@@ -156,7 +160,7 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	net, err := r.networkService.Create(ctx, &network.CreateNetworkRequest{
+	opObj, err := r.networkService.Create(ctx, &network.CreateNetworkRequest{
 		Name:          data.Name.ValueString(),
 		CloudType:     data.CloudType.ValueString(),
 		ProjectId:     data.ProjectID.ValueString(),
@@ -168,7 +172,7 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("failed to create", err.Error())
 		return
 	}
-	op, err := r.sdk.WrapOperation(net, err)
+	op, err := r.sdk.WrapOperation(opObj, err)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create", err.Error())
 	}
@@ -178,6 +182,13 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	data.Id = types.StringValue(op.ResourceId())
+
+	net, err := r.networkService.Get(ctx, &network.GetNetworkRequest{NetworkId: op.ResourceId()})
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get network", fmt.Sprintf("failed request, error: %v", err))
+		return
+	}
+	data.Ipv6CidrBlock = types.StringValue(net.Ipv6CidrBlock)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -212,6 +223,7 @@ func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	data.CloudType = types.StringValue(net.CloudType)
 	data.RegionID = types.StringValue(net.RegionId)
 	data.Ipv4CidrBlock = types.StringValue(net.Ipv4CidrBlock)
+	data.Ipv6CidrBlock = types.StringValue(net.Ipv6CidrBlock)
 	tflog.Info(ctx, fmt.Sprintf("read#5 %v", data.Id))
 
 	// Save updated data into Terraform state

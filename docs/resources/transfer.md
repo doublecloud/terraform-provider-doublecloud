@@ -42,5 +42,3 @@ resource "doublecloud_transfer" "sample-pg2ch" {
 ### Read-Only
 
 - `id` (String) Transfer id
-
-
