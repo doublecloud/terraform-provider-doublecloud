@@ -24,8 +24,8 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &NetworkResource{}
-var _ resource.ResourceWithImportState = &NetworkResource{}
+var _ resource.Resource = &KafkaClusterResource{}
+var _ resource.ResourceWithImportState = &KafkaClusterResource{}
 
 func NewKafkaClusterResource() resource.Resource {
 	return &KafkaClusterResource{}
@@ -39,15 +39,15 @@ type KafkaClusterResource struct {
 }
 
 type KafkaClusterModel struct {
-	Id             types.String         `tfsdk:"id"`
-	ProjectID      types.String         `tfsdk:"project_id"`
-	CloudType      types.String         `tfsdk:"cloud_type"`
-	RegionID       types.String         `tfsdk:"region_id"`
-	Name           types.String         `tfsdk:"name"`
-	Description    types.String         `tfsdk:"description"`
-	Version        types.String         `tfsdk:"version"`
-	Resources      KafkaResourcesModel  `tfsdk:"resources"`
-	NetworkId      types.String         `tfsdk:"network_id"`
+	Id          types.String        `tfsdk:"id"`
+	ProjectID   types.String        `tfsdk:"project_id"`
+	CloudType   types.String        `tfsdk:"cloud_type"`
+	RegionID    types.String        `tfsdk:"region_id"`
+	Name        types.String        `tfsdk:"name"`
+	Description types.String        `tfsdk:"description"`
+	Version     types.String        `tfsdk:"version"`
+	Resources   KafkaResourcesModel `tfsdk:"resources"`
+	NetworkId   types.String        `tfsdk:"network_id"`
 	// Hide encryption due to deprecation
 	// Encryption     *DataEncryptionModel `tfsdk:"encryption"`
 	SchemaRegistry *schemaRegistryModel `tfsdk:"schema_registry"`
