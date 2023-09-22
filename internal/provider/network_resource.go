@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -134,22 +133,6 @@ func (r *NetworkResource) Configure(ctx context.Context, req resource.ConfigureR
 	r.networkService = r.sdk.Network().Network()
 }
 
-func createNetworkRequest(m *NetworkResourceModel) (*network.CreateNetworkRequest, diag.Diagnostics) {
-	rq := &network.CreateNetworkRequest{}
-	rq.Name = m.Name.ValueString()
-	rq.CloudType = m.CloudType.ValueString()
-	rq.ProjectId = m.ProjectID.ValueString()
-	rq.Description = m.Description.ValueString()
-	rq.RegionId = m.RegionID.ValueString()
-	rq.Ipv4CidrBlock = m.Ipv4CidrBlock.ValueString()
-	return rq, nil
-}
-
-func deleteNetworkRequest(m *NetworkResourceModel) (*network.DeleteNetworkRequest, diag.Diagnostics) {
-	rq := &network.DeleteNetworkRequest{NetworkId: m.Id.ValueString()}
-	return rq, nil
-}
-
 func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *NetworkResourceModel
 
@@ -194,13 +177,6 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func getNetworkResourceRequest(m *NetworkResourceModel) (*network.GetNetworkRequest, diag.Diagnostics) {
-	if m.Id == types.StringNull() {
-		return nil, diag.Diagnostics{diag.NewErrorDiagnostic("Unknown network identifier", "missed one of required fields: network_id or name")}
-	}
-	return &network.GetNetworkRequest{NetworkId: m.Id.ValueString()}, nil
-}
-
 func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data *NetworkResourceModel
 
@@ -231,18 +207,7 @@ func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *NetworkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *NetworkResourceModel
-
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	resp.Diagnostics.AddError("Failed to update network", "networks doesn't support updates")
-
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

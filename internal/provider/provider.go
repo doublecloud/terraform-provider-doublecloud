@@ -130,6 +130,7 @@ func (p *DoubleCloudProvider) Configure(ctx context.Context, req provider.Config
 func (p *DoubleCloudProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewNetworkResource,
+		NewExternalNetworkResource,
 		NewWorkbookResource,
 		NewKafkaClusterResource,
 		NewTransferResource,
