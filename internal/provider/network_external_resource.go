@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -283,9 +282,9 @@ func (r *ExternalNetworkResource) Read(ctx context.Context, req resource.ReadReq
 			//ProjectName: types.StringValue(),
 			//SAEmail:     types.StringValue(),
 		}
+	default:
+		resp.Diagnostics.AddError("Failed parse Network External Resource.", fmt.Sprintf("Expected either Google or AWS, got: %v.", er))
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("read#5 %v", data.ID))
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -19,7 +19,7 @@ var (
 	testAccExternalNetworkId string = fmt.Sprintf("doublecloud_external_network.%v", testAccNetworkName)
 )
 
-func TestAccExternalNetworkResource(t *testing.T) {
+func TestExternalNetworkResource(t *testing.T) {
 	t.Parallel()
 	const (
 		vpcID     = "vpcID"
@@ -95,6 +95,7 @@ func TestAccExternalNetworkResource(t *testing.T) {
 	require.NoError(t, err)
 
 	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest:               true,
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
 		Steps: []resource.TestStep{
@@ -116,6 +117,24 @@ func TestAccExternalNetworkResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccExternalNetworkId, "ipv4_cidr_block", ipv4),
 					resource.TestCheckResourceAttr(testAccExternalNetworkId, "ipv6_cidr_block", ipv6),
 				),
+			},
+			{
+				PreConfig: func() {
+					f.getMock = func(ctx context.Context, req *network.GetNetworkRequest) (*network.Network, error) {
+						return &network.Network{
+							Id:            networkID,
+							ProjectId:     testProjectId,
+							CloudType:     "aws",
+							RegionId:      regionID,
+							Name:          testAccNetworkName,
+							Ipv4CidrBlock: ipv4,
+							Ipv6CidrBlock: ipv6,
+							Status:        network.Network_NETWORK_STATUS_ACTIVE,
+						}, nil
+					}
+				},
+				Config:      testAccExternalNetworkResourceConfig(&m),
+				ExpectError: regexp.MustCompile(`Failed parse Network External Resource`),
 			},
 			// Update not supported
 			// Delete testing automatically occurs in TestCase
