@@ -5,14 +5,13 @@ import (
 	"errors"
 	"os"
 
+	dc "github.com/doublecloud/go-sdk"
 	"github.com/doublecloud/go-sdk/iamkey"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	dc "github.com/doublecloud/go-sdk"
 )
 
 var _ provider.Provider = &DoubleCloudProvider{}
@@ -23,6 +22,8 @@ type DoubleCloudProvider struct {
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
+
+	overrideEndpoint string
 }
 
 // DoubleCloudProviderModel describes the provider data model.
@@ -36,16 +37,26 @@ type Config struct {
 	ProjectId   string
 	Endpoint    string
 
+	overrideEndpoint string
+
 	ctx context.Context
 
 	sdk *dc.SDK
 }
 
 func (c *Config) init(ctx context.Context) error {
-	sdk, err := dc.Build(ctx, dc.Config{
+	cfg := dc.Config{
 		Credentials: *c.Credentials,
 		Endpoint:    c.Endpoint,
-	})
+	}
+
+	if c.overrideEndpoint != "" {
+		cfg.Endpoint = c.overrideEndpoint
+		cfg.OverrideEndpoint = true
+		cfg.Plaintext = true
+	}
+	
+	sdk, err := dc.Build(ctx, cfg)
 	if err != nil {
 		return err
 	}
@@ -116,6 +127,8 @@ func (p *DoubleCloudProvider) Configure(ctx context.Context, req provider.Config
 	conf := &Config{
 		Credentials: &creds,
 		Endpoint:    data.Endpoint.ValueString(),
+
+		overrideEndpoint: p.overrideEndpoint,
 	}
 	err = conf.init(ctx)
 	if err != nil {

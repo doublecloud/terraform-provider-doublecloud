@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgennet "github.com/doublecloud/go-sdk/gen/network"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,10 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-
-	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgennet "github.com/doublecloud/go-sdk/gen/network"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.

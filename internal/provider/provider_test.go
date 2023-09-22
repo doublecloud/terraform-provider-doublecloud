@@ -8,6 +8,7 @@ import (
 
 	dc "github.com/doublecloud/go-sdk"
 	"github.com/doublecloud/go-sdk/iamkey"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
@@ -24,14 +25,27 @@ const envTransferName = "DC_TRANSFER_NAME"
 
 const testPrefix = "tf-acc"
 
-// testAccProtoV6ProviderFactories are used to instantiate a provider during
-// acceptance testing. The factory function will be invoked for every Terraform
-// CLI command executed to create a provider server to which the CLI can
-// reattach.
-var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-	"doublecloud": providerserver.NewProtocol6WithError(New("test")()),
-	"dc":          providerserver.NewProtocol6WithError(New("test")()),
-}
+var (
+	// testAccProtoV6ProviderFactories are used to instantiate a provider during
+	// acceptance testing. The factory function will be invoked for every Terraform
+	// CLI command executed to create a provider server to which the CLI can
+	// reattach.
+	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
+		"doublecloud": providerserver.NewProtocol6WithError(New("test")()),
+		"dc":          providerserver.NewProtocol6WithError(New("test")()),
+	}
+
+	// testFakeProtoV6ProviderFactories are used to instantiate a provider with
+	// local faked API. The factory function will be invoked for every Terraform
+	//	// CLI command executed to create a provider server to which the CLI can
+	//	// reattach.
+	testFakeProtoV6ProviderFactories = func(endpoint string) map[string]func() (tfprotov6.ProviderServer, error) {
+		return map[string]func() (tfprotov6.ProviderServer, error){
+			"doublecloud": providerserver.NewProtocol6WithError(NewOverriddenEndpoint(endpoint)()),
+			"dc":          providerserver.NewProtocol6WithError(NewOverriddenEndpoint(endpoint)()),
+		}
+	}
+)
 
 var testProjectId = os.Getenv(envProjectId)
 var testNetworkId = os.Getenv(envNetworkId)
@@ -75,4 +89,13 @@ func configForSweepers() (*Config, error) {
 
 	err := config.init(context.Background())
 	return config, err
+}
+
+func NewOverriddenEndpoint(endpoint string) func() provider.Provider {
+	return func() provider.Provider {
+		return &DoubleCloudProvider{
+			version:          "test",
+			overrideEndpoint: endpoint,
+		}
+	}
 }

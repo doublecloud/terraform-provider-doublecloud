@@ -222,6 +222,7 @@ func (r *ExternalNetworkResource) Create(ctx context.Context, req resource.Creat
 	op, err := r.sdk.WrapOperation(opObj, err)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create", err.Error())
+		return
 	}
 	err = op.Wait(ctx)
 	if err != nil {

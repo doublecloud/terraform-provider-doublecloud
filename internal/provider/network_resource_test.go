@@ -6,10 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
-	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
 )
 
 var (
