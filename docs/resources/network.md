@@ -28,16 +28,45 @@ resource "doublecloud_network" "example-network" {
 ### Required
 
 - `cloud_type` (String) Cloud type (aws, gcp, azure)
-- `ipv4_cidr_block` (String) The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.
 - `name` (String) Name of network
 - `project_id` (String) Project identifier
 - `region_id` (String) Region of network
 
 ### Optional
 
+- `aws` (Attributes) (see [below for nested schema](#nestedatt--aws))
 - `description` (String) Description of network
+- `gcp` (Attributes) BYOC parameters for GCP. (see [below for nested schema](#nestedatt--gcp))
+- `ipv4_cidr_block` (String) The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.
+Required for non BYOC networks.
+For BYOC it will be read from provided VPC (AWS) or Subnetwork (GCP).
 
 ### Read-Only
 
 - `id` (String) Network identifier
 - `ipv6_cidr_block` (String) The IPv6 network range for the subnet, it is known only after creation.
+- `is_external` (Boolean) True if network was imported using BYOC.
+
+<a id="nestedatt--aws"></a>
+### Nested Schema for `aws`
+
+Required:
+
+- `account_id` (String) ID of the VPC owner account
+- `iam_role_arn` (String) IAM role ARN to use for resource creations
+- `vpc_id` (String) ID of the VPC
+
+Optional:
+
+- `private_subnets` (Boolean) Create private subnets instead of default public
+
+
+<a id="nestedatt--gcp"></a>
+### Nested Schema for `gcp`
+
+Required:
+
+- `network_name` (String) Name of a network to import
+- `project_name` (String) Name of a project where is an imported network is located
+- `service_account_email` (String) Service account email
+- `subnetwork_name` (String) Name of a subnetwork to import

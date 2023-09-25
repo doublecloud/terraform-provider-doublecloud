@@ -149,6 +149,11 @@ func TestBYOCNetworkResource(t *testing.T) {
 			config: cloudTypeMismatchNetworkConfig,
 			err:    regexp.MustCompile(`Provided BYOC AWS configuration, but "cloud_type" is set to "gcp".`),
 		},
+		{
+			name:   "ipv4MissedNetworkConfig",
+			config: ipv4MissedNetworkConfig,
+			err:    regexp.MustCompile(`IPv4 CIDR block is required for non BYOC networks`),
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			resource.UnitTest(t, resource.TestCase{
@@ -350,6 +355,14 @@ resource "doublecloud_network" "cloudTypeMismatchNetworkConfig" {
     account_id = "a"
     iam_role_arn = "i"
   }
+}
+`
+	ipv4MissedNetworkConfig = `
+resource "doublecloud_network" "ipv4MissedNetworkConfig" {
+  project_id = "p"
+  name = "n"
+  region_id = "r"
+  cloud_type = "aws"
 }
 `
 )

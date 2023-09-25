@@ -122,6 +122,7 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Optional: true,
 				Computed: true,
 				MarkdownDescription: "The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.\n" +
+					"Required for non BYOC networks.\n" +
 					"For BYOC it will be read from provided VPC (AWS) or Subnetwork (GCP).",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -408,6 +409,13 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 
 		// TODO add GCP BYOC to public API
 		resp.Diagnostics.AddError("GCP BYOC is not supported yet", "")
-		return
+	}
+
+	if data.AWS == nil && data.GCP == nil && data.Ipv4CidrBlock.IsNull() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ipv4_cidr_block"),
+			"ipv4_cidr_block must be specified.",
+			"IPv4 CIDR block is required for non BYOC networks.",
+		)
 	}
 }
