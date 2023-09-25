@@ -4,20 +4,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
+	"github.com/doublecloud/go-genproto/doublecloud/v1"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgennet "github.com/doublecloud/go-sdk/gen/network"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-
-	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgennet "github.com/doublecloud/go-sdk/gen/network"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -41,6 +42,25 @@ type NetworkResourceModel struct {
 	RegionID      types.String `tfsdk:"region_id"`
 	CloudType     types.String `tfsdk:"cloud_type"`
 	Ipv4CidrBlock types.String `tfsdk:"ipv4_cidr_block"`
+	Ipv6CidrBlock types.String `tfsdk:"ipv6_cidr_block"`
+	IsExternal    types.Bool   `tfsdk:"is_external"`
+
+	AWS *awsExternalNetworkResourceModel    `tfsdk:"aws"`
+	GCP *googleExternalNetworkResourceModel `tfsdk:"gcp"`
+}
+
+type awsExternalNetworkResourceModel struct {
+	VPCID          types.String `tfsdk:"vpc_id"`
+	AccountID      types.String `tfsdk:"account_id"`
+	IAMRoleARN     types.String `tfsdk:"iam_role_arn"`
+	PrivateSubnets types.Bool   `tfsdk:"private_subnets"`
+}
+
+type googleExternalNetworkResourceModel struct {
+	NetworkName    types.String `tfsdk:"network_name"`
+	SubnetworkName types.String `tfsdk:"subnetwork_name"`
+	ProjectName    types.String `tfsdk:"project_name"`
+	SAEmail        types.String `tfsdk:"service_account_email"`
 }
 
 func (r *NetworkResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -99,11 +119,106 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 			},
 			"ipv4_cidr_block": schema.StringAttribute{
-				Required: true,
-				// Optional: true,
-				MarkdownDescription: "The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.",
+				Optional: true,
+				Computed: true,
+				MarkdownDescription: "The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.\n" +
+					"Required for non BYOC networks.\n" +
+					"For BYOC it will be read from provided VPC (AWS) or Subnetwork (GCP).",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("aws"),
+						path.MatchRoot("gcp"),
+					}...),
+				},
+			},
+			"ipv6_cidr_block": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "The IPv6 network range for the subnet, it is known only after creation.",
+			},
+			"is_external": schema.BoolAttribute{
+				Computed:            true,
+				MarkdownDescription: "True if network was imported using BYOC.",
+			},
+			"aws": schema.SingleNestedAttribute{
+				Optional: true,
+				Attributes: map[string]schema.Attribute{
+					"vpc_id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "ID of the VPC",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"account_id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "ID of the VPC owner account",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"iam_role_arn": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "IAM role ARN to use for resource creations",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"private_subnets": schema.BoolAttribute{
+						Optional:            true,
+						MarkdownDescription: "Create private subnets instead of default public",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.RequiresReplace(),
+						},
+					},
+				},
+				Validators: []validator.Object{
+					objectvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("ipv4_cidr_block"),
+						path.MatchRoot("gcp"),
+					}...),
+				},
+			},
+			"gcp": schema.SingleNestedAttribute{
+				Optional:            true,
+				MarkdownDescription: "BYOC parameters for GCP.",
+				Attributes: map[string]schema.Attribute{
+					"network_name": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Name of a network to import",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"subnetwork_name": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Name of a subnetwork to import",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"project_name": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Name of a project where is an imported network is located",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"service_account_email": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Service account email",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+				},
+				Validators: []validator.Object{
+					objectvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("ipv4_cidr_block"),
+						path.MatchRoot("aws"),
+					}...),
 				},
 			},
 		},
@@ -130,22 +245,6 @@ func (r *NetworkResource) Configure(ctx context.Context, req resource.ConfigureR
 	r.networkService = r.sdk.Network().Network()
 }
 
-func createNetworkRequest(m *NetworkResourceModel) (*network.CreateNetworkRequest, diag.Diagnostics) {
-	rq := &network.CreateNetworkRequest{}
-	rq.Name = m.Name.ValueString()
-	rq.CloudType = m.CloudType.ValueString()
-	rq.ProjectId = m.ProjectID.ValueString()
-	rq.Description = m.Description.ValueString()
-	rq.RegionId = m.RegionID.ValueString()
-	rq.Ipv4CidrBlock = m.Ipv4CidrBlock.ValueString()
-	return rq, nil
-}
-
-func deleteNetworkRequest(m *NetworkResourceModel) (*network.DeleteNetworkRequest, diag.Diagnostics) {
-	rq := &network.DeleteNetworkRequest{NetworkId: m.Id.ValueString()}
-	return rq, nil
-}
-
 func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *NetworkResourceModel
 
@@ -156,19 +255,48 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	net, err := r.networkService.Create(ctx, &network.CreateNetworkRequest{
-		Name:          data.Name.ValueString(),
-		CloudType:     data.CloudType.ValueString(),
-		ProjectId:     data.ProjectID.ValueString(),
-		Description:   data.Description.ValueString(),
-		RegionId:      data.RegionID.ValueString(),
-		Ipv4CidrBlock: data.Ipv4CidrBlock.ValueString(),
-	})
+	var opObj *doublecloud.Operation
+	var err error
+	isExternal := data.AWS != nil || data.GCP != nil
+	if isExternal {
+		importReq := &network.ImportNetworkRequest{
+			Name:        data.Name.ValueString(),
+			ProjectId:   data.ProjectID.ValueString(),
+			Description: data.Description.ValueString(),
+		}
+
+		switch {
+		case data.AWS != nil:
+			importReq.Params = &network.ImportNetworkRequest_Aws{
+				Aws: &network.ImportAWSVPCRequest{
+					RegionId:       data.RegionID.ValueString(),
+					VpcId:          data.AWS.VPCID.ValueString(),
+					AccountId:      data.AWS.AccountID.ValueString(),
+					IamRoleArn:     data.AWS.IAMRoleARN.ValueString(),
+					PrivateSubnets: data.AWS.PrivateSubnets.ValueBool(),
+				},
+			}
+		case data.GCP != nil:
+			// TODO export google to public API
+		}
+
+		opObj, err = r.networkService.Import(ctx, importReq)
+	} else {
+		opObj, err = r.networkService.Create(ctx, &network.CreateNetworkRequest{
+			Name:          data.Name.ValueString(),
+			CloudType:     data.CloudType.ValueString(),
+			ProjectId:     data.ProjectID.ValueString(),
+			Description:   data.Description.ValueString(),
+			RegionId:      data.RegionID.ValueString(),
+			Ipv4CidrBlock: data.Ipv4CidrBlock.ValueString(),
+		})
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create", err.Error())
 		return
 	}
-	op, err := r.sdk.WrapOperation(net, err)
+	op, err := r.sdk.WrapOperation(opObj, err)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create", err.Error())
 	}
@@ -179,15 +307,19 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 
 	data.Id = types.StringValue(op.ResourceId())
 
+	net, err := r.networkService.Get(ctx, &network.GetNetworkRequest{NetworkId: op.ResourceId()})
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get network", fmt.Sprintf("failed request, error: %v", err))
+		return
+	}
+	data.Ipv6CidrBlock = types.StringValue(net.Ipv6CidrBlock)
+	data.IsExternal = types.BoolValue(isExternal)
+	if isExternal {
+		data.Ipv4CidrBlock = types.StringValue(net.Ipv4CidrBlock)
+	}
+
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func getNetworkResourceRequest(m *NetworkResourceModel) (*network.GetNetworkRequest, diag.Diagnostics) {
-	if m.Id == types.StringNull() {
-		return nil, diag.Diagnostics{diag.NewErrorDiagnostic("Unknown network identifier", "missed one of required fields: network_id or name")}
-	}
-	return &network.GetNetworkRequest{NetworkId: m.Id.ValueString()}, nil
 }
 
 func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -212,25 +344,15 @@ func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	data.CloudType = types.StringValue(net.CloudType)
 	data.RegionID = types.StringValue(net.RegionId)
 	data.Ipv4CidrBlock = types.StringValue(net.Ipv4CidrBlock)
-	tflog.Info(ctx, fmt.Sprintf("read#5 %v", data.Id))
+	data.Ipv6CidrBlock = types.StringValue(net.Ipv6CidrBlock)
+	data.IsExternal = types.BoolValue(net.IsExternal)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *NetworkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *NetworkResourceModel
-
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	resp.Diagnostics.AddError("Failed to update network", "networks doesn't support updates")
-
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -257,4 +379,43 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 func (r *NetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data *NetworkResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.AWS != nil {
+		if data.CloudType.ValueString() != "aws" && data.CloudType.ValueString() != "AWS" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("cloud_type"),
+				"BYOC and \"cloud_type\" mismatch",
+				fmt.Sprintf("Provided BYOC AWS configuration, but \"cloud_type\" is set to %q.", data.CloudType.ValueString()),
+			)
+		}
+	}
+
+	if data.GCP != nil {
+		if data.CloudType.ValueString() != "gcp" && data.CloudType.ValueString() != "GCP" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("cloud_type"),
+				"BYOC and \"cloud_type\" mismatch",
+				fmt.Sprintf("Provided BYOC GCP configuration, but \"cloud_type\" is set to %q.", data.CloudType.ValueString()),
+			)
+		}
+
+		// TODO add GCP BYOC to public API
+		resp.Diagnostics.AddError("GCP BYOC is not supported yet", "")
+	}
+
+	if data.AWS == nil && data.GCP == nil && data.Ipv4CidrBlock.IsNull() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ipv4_cidr_block"),
+			"ipv4_cidr_block must be specified.",
+			"IPv4 CIDR block is required for non BYOC networks.",
+		)
+	}
 }

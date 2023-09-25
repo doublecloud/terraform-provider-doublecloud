@@ -82,5 +82,3 @@ Required:
 Optional:
 
 - `enabled` (Boolean)
-
-

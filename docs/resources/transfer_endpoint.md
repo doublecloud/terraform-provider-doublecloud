@@ -757,5 +757,3 @@ Optional:
 - `path_prefix` (String)
 - `use_ssl` (Boolean)
 - `verify_ssl_cert` (Boolean)
-
-

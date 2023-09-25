@@ -1,15 +1,20 @@
 package provider
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
+	"github.com/doublecloud/go-genproto/doublecloud/v1"
+	"github.com/golang/protobuf/ptypes/wrappers"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
-	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -38,12 +43,216 @@ func TestAccNetworkResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccNetworkId, "region_id", m.RegionID.ValueString()),
 					resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", m.Ipv4CidrBlock.ValueString()),
 					resource.TestCheckResourceAttr(testAccNetworkId, "cloud_type", m.CloudType.ValueString()),
+					resource.TestCheckResourceAttrSet(testAccNetworkId, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttr(testAccNetworkId, "is_external", "false"),
 				),
 			},
 			// Update not supported
 			// Delete testing automatically occurs in TestCase
 		},
 	})
+}
+
+func TestBYOCNetworkResource(t *testing.T) {
+	t.Parallel()
+	const (
+		vpcID     = "vpcID"
+		regionID  = "regionID"
+		accountID = "accountID"
+		roleARN   = "roleARN"
+		networkID = "networkID"
+		ipv4      = "IPv4"
+		ipv6      = "IPv6"
+	)
+
+	m := NetworkResourceModel{
+		ProjectID: types.StringValue(testProjectId),
+		Name:      types.StringValue(testAccNetworkName),
+		RegionID:  types.StringValue(regionID),
+		CloudType: types.StringValue("aws"),
+		AWS: &awsExternalNetworkResourceModel{
+			VPCID:          types.StringValue(vpcID),
+			AccountID:      types.StringValue(accountID),
+			IAMRoleARN:     types.StringValue(roleARN),
+			PrivateSubnets: types.BoolValue(true),
+		},
+	}
+
+	f := &fakeNetworkServiceServer{
+		importMock: func(ctx context.Context, req *network.ImportNetworkRequest) (*doublecloud.Operation, error) {
+			require.Equal(t, testAccNetworkName, req.Name)
+			require.Equal(t, testProjectId, req.ProjectId)
+			awsParams, ok := req.Params.(*network.ImportNetworkRequest_Aws)
+			require.True(t, ok)
+			require.Equal(t, vpcID, awsParams.Aws.VpcId)
+			require.Equal(t, regionID, awsParams.Aws.RegionId)
+			require.Equal(t, accountID, awsParams.Aws.AccountId)
+			require.Equal(t, roleARN, awsParams.Aws.IamRoleArn)
+			return &doublecloud.Operation{
+				Id:         uuid.NewString(),
+				ProjectId:  testProjectId,
+				Status:     doublecloud.Operation_STATUS_DONE,
+				ResourceId: networkID,
+			}, nil
+		},
+		getMock: func(ctx context.Context, req *network.GetNetworkRequest) (*network.Network, error) {
+			require.Equal(t, networkID, req.NetworkId)
+			return &network.Network{
+				Id:            networkID,
+				ProjectId:     testProjectId,
+				CloudType:     "aws",
+				RegionId:      regionID,
+				Name:          testAccNetworkName,
+				Ipv4CidrBlock: ipv4,
+				Ipv6CidrBlock: ipv6,
+				Status:        network.Network_NETWORK_STATUS_ACTIVE,
+				ExternalResources: &network.Network_Aws{
+					Aws: &network.AwsExternalResources{
+						VpcId:      vpcID,
+						AccountId:  &wrappers.StringValue{Value: accountID},
+						IamRoleArn: &wrappers.StringValue{Value: roleARN},
+					},
+				},
+				IsExternal: true,
+			}, nil
+		},
+		deleteMock: func(ctx context.Context, req *network.DeleteNetworkRequest) (*doublecloud.Operation, error) {
+			require.Equal(t, networkID, req.NetworkId)
+			return &doublecloud.Operation{
+				Id:         uuid.NewString(),
+				ProjectId:  testProjectId,
+				Status:     doublecloud.Operation_STATUS_DONE,
+				ResourceId: networkID,
+			}, nil
+		},
+	}
+	endpoint, err := startNetworkServiceMock(f)
+	require.NoError(t, err)
+
+	for _, tc := range []struct {
+		name   string
+		config string
+		err    *regexp.Regexp
+	}{
+		{
+			name:   "bothExternalAndCidrNetworkConfig",
+			config: bothExternalAndCidrNetworkConfig,
+			err:    regexp.MustCompile(`Attribute "aws" cannot be specified when "ipv4_cidr_block" is specified`),
+		},
+		{
+			name:   "bothExternalProvidersNetworkConfig",
+			config: bothExternalProvidersNetworkConfig,
+			err:    regexp.MustCompile(`Attribute "gcp" cannot be specified when "aws" is specified`),
+		},
+		{
+			name:   "cloudTypeMismatchNetworkConfig",
+			config: cloudTypeMismatchNetworkConfig,
+			err:    regexp.MustCompile(`Provided BYOC AWS configuration, but "cloud_type" is set to "gcp".`),
+		},
+		{
+			name:   "ipv4MissedNetworkConfig",
+			config: ipv4MissedNetworkConfig,
+			err:    regexp.MustCompile(`IPv4 CIDR block is required for non BYOC networks`),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			resource.UnitTest(t, resource.TestCase{
+				IsUnitTest:               true,
+				ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
+				Steps: []resource.TestStep{
+					{
+						Config:      tc.config,
+						ExpectError: tc.err,
+					},
+				},
+			})
+		})
+	}
+
+	t.Run("create external network with mocks", func(t *testing.T) {
+		resource.UnitTest(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
+			Steps: []resource.TestStep{
+				{
+					Config: testExternalNetworkResourceConfig(&m),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr(testAccNetworkId, "id", networkID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "name", testAccNetworkName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "project_id", testProjectId),
+						resource.TestCheckResourceAttr(testAccNetworkId, "description", ""),
+						resource.TestCheckResourceAttr(testAccNetworkId, "region_id", regionID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "cloud_type", "aws"),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.vpc_id", vpcID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.account_id", accountID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.iam_role_arn", roleARN),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.private_subnets", "true"),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", ipv4),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv6_cidr_block", ipv6),
+						resource.TestCheckResourceAttr(testAccNetworkId, "is_external", "true"),
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("import external network with mocks", func(t *testing.T) {
+		mock := f.importMock
+		f.importMock = nil // check that /Import method will not be called
+		defer func() { f.importMock = mock }()
+
+		resource.UnitTest(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
+			Steps: []resource.TestStep{
+				{
+					ImportState:   true,
+					ResourceName:  testAccNetworkId,
+					ImportStateId: networkID,
+					Config:        testExternalNetworkResourceConfig(&m),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr(testAccNetworkId, "id", networkID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "name", testAccNetworkName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "project_id", testProjectId),
+						resource.TestCheckResourceAttr(testAccNetworkId, "description", ""),
+						resource.TestCheckResourceAttr(testAccNetworkId, "region_id", regionID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "cloud_type", "aws"),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.vpc_id", vpcID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.account_id", accountID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.iam_role_arn", roleARN),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.private_subnets", "true"),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", ipv4),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv6_cidr_block", ipv6),
+						resource.TestCheckResourceAttr(testAccNetworkId, "is_external", "true"),
+					),
+				},
+			},
+		})
+	})
+}
+
+func testExternalNetworkResourceConfig(m *NetworkResourceModel) string {
+	return fmt.Sprintf(`
+resource "doublecloud_network" %[2]q {
+  project_id = %[1]q
+  name = %[2]q
+  region_id = %[6]q
+  cloud_type = "aws"
+  aws = {
+    vpc_id = %[3]q
+    account_id = %[4]q
+    iam_role_arn = %[5]q
+	private_subnets = %[7]v
+  }
+}
+`, m.ProjectID.ValueString(),
+		m.Name.ValueString(),
+		m.AWS.VPCID.ValueString(),
+		m.AWS.AccountID.ValueString(),
+		m.AWS.IAMRoleARN.ValueString(),
+		m.RegionID.ValueString(),
+		m.AWS.PrivateSubnets,
+	)
 }
 
 func testAccNetworkResourceConfig(m *NetworkResourceModel) string {
@@ -100,3 +309,60 @@ func sweepNetwork(conf *Config, t *network.Network) error {
 	}
 	return op.Wait(conf.ctx)
 }
+
+const (
+	bothExternalAndCidrNetworkConfig = `
+resource "doublecloud_network" "bothExternalAndCidrNetworkConfig" {
+  project_id = "p"
+  name = "n"
+  region_id = "r"
+  cloud_type = "aws"
+  ipv4_cidr_block = "10.0.0.0/16"
+  aws = {
+    vpc_id = "v"
+    account_id = "a"
+    iam_role_arn = "i"
+  }
+}
+`
+	bothExternalProvidersNetworkConfig = `
+resource "doublecloud_network" "bothExternalAndCidrNetworkConfig" {
+  project_id = "p"
+  name = "n"
+  region_id = "r"
+  cloud_type = "aws"
+  aws = {
+    vpc_id = "v"
+    account_id = "a"
+    iam_role_arn = "i"
+  }
+  gcp = {
+    network_name = "n"
+    subnetwork_name = "s"
+    project_name = "p"
+	service_account_email = "sa"
+  }
+}
+`
+	cloudTypeMismatchNetworkConfig = `
+resource "doublecloud_network" "cloudTypeMismatchNetworkConfig" {
+  project_id = "p"
+  name = "n"
+  region_id = "r"
+  cloud_type = "gcp"
+  aws = {
+    vpc_id = "v"
+    account_id = "a"
+    iam_role_arn = "i"
+  }
+}
+`
+	ipv4MissedNetworkConfig = `
+resource "doublecloud_network" "ipv4MissedNetworkConfig" {
+  project_id = "p"
+  name = "n"
+  region_id = "r"
+  cloud_type = "aws"
+}
+`
+)
