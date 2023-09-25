@@ -55,7 +55,7 @@ func (c *Config) init(ctx context.Context) error {
 		cfg.OverrideEndpoint = true
 		cfg.Plaintext = true
 	}
-	
+
 	sdk, err := dc.Build(ctx, cfg)
 	if err != nil {
 		return err
@@ -143,7 +143,6 @@ func (p *DoubleCloudProvider) Configure(ctx context.Context, req provider.Config
 func (p *DoubleCloudProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewNetworkResource,
-		NewExternalNetworkResource,
 		NewWorkbookResource,
 		NewKafkaClusterResource,
 		NewTransferResource,
