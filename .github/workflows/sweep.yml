@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-acc-tests
   cancel-in-progress: false
 
 jobs:
@@ -31,9 +31,7 @@ jobs:
       - name: sweep
         run: |
             echo $DC_KEY > authorized_key.json
-            ls -lah authorized_key.json
             export DC_AUTHKEY=$(pwd)/authorized_key.json
-            echo $DC_AUTHKEY
             make sweep
         env:
           DC_KEY: ${{ secrets.TF_ACC_AUTHKEY }}

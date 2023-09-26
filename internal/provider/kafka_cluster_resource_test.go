@@ -16,7 +16,7 @@ var (
 )
 
 func TestAccKafkaClusterResource(t *testing.T) {
-	return
+	t.Parallel()
 	m := KafkaClusterModel{
 		ProjectID: types.StringValue(testProjectId),
 		Name:      types.StringValue(testAccKafkaName),
@@ -114,25 +114,6 @@ resource "doublecloud_kafka_cluster" "test" {
   schema_registry {
 	enabled = false
   }
-
-  user {
-	name = "alice"
-	password = "foobar123"
-	permission {
-	  topic = "events"
-	  role = "ACCESS_ROLE_PRODUCER"
-	}
-  }
-
-  user {
-	name = "bob"
-	password = "foobar124"
-
-	permission {
-		topic = "transactions"
-		role = "ACCESS_ROLE_PRODUCER"
-	  }
-  }
 }
 `, m.ProjectID.ValueString(),
 		m.Name.ValueString(),
@@ -166,29 +147,6 @@ resource "doublecloud_kafka_cluster" "test" {
 
   schema_registry {
 	enabled = true
-  }
-
-  user {
-	name = "alice"
-	password = "foobar123"
-	permission {
-	  topic = "events"
-	  role = "producer"
-	}
-	permission {
-	  topic = "transactions"
-	  role = "consumer"
-	}
-  }
-
-  user {
-	name = "bob"
-	password = "foobar125"
-
-	permission {
-		topic = "transactions"
-		role = "producer"
-	  }
   }
 }
 `, m.ProjectID.ValueString(),

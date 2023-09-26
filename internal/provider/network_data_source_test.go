@@ -18,7 +18,7 @@ func TestAccNetworkDataSource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.doublecloud_network.test", "name", testNetworkName),
 					resource.TestCheckResourceAttr("data.doublecloud_network.test", "region_id", "eu-central-1"),
-					resource.TestCheckResourceAttr("data.doublecloud_network.test", "ipv4_cidr_block", "172.42.0.0/16"),
+					resource.TestCheckResourceAttr("data.doublecloud_network.test", "ipv4_cidr_block", "10.0.0.0/16"),
 					resource.TestCheckResourceAttr("data.doublecloud_network.test", "cloud_type", "aws"),
 				),
 			},

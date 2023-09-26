@@ -1,0 +1,34 @@
+name: Tests
+
+on: [pull_request]
+
+concurrency:
+  group: ci-acc-tests
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+      - run: go build -v ./...
+      - name: run acceptance tests
+        run: |
+          echo $DC_KEY > authorized_key.json
+          export DC_AUTHKEY=$(pwd)/authorized_key.json
+          go test ./... -v -timeout 120m
+        env:
+          TF_ACC: 1
+          DC_KEY: ${{ secrets.TF_ACC_AUTHKEY }}
+          DC_PROJECT_ID: ${{ secrets.TF_ACC_PROJECT_ID }}
+          DC_NETWORK_ID: ${{ secrets.TF_ACC_NETWORK_ID }}
+          DC_CLICKHOUSE_NAME: ${{ secrets.TF_ACC_CLICKHOUSE_NAME }}
+          DC_KAFKA_NAME: ${{ secrets.TF_ACC_KAFKA_NAME }}
+          DC_NETWORK_NAME: ${{ secrets.TF_ACC_NETWORK_NAME }}
+          DC_TRANSFER_NAME:  ${{ secrets.TF_ACC_TRANSFER_NAME }}
