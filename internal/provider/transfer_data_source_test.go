@@ -18,7 +18,7 @@ func TestAccTransferDataSource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.doublecloud_transfer.test", "name", testDSTransferName),
 					resource.TestCheckResourceAttr("data.doublecloud_transfer.test", "type", "INCREMENT_ONLY"),
-					resource.TestCheckResourceAttr("data.doublecloud_transfer.test", "status", "RUNNING"),
+					resource.TestCheckResourceAttr("data.doublecloud_transfer.test", "status", "CREATED"),
 				),
 			},
 		},

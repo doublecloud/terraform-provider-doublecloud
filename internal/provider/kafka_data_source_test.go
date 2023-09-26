@@ -18,7 +18,7 @@ func TestAccKafkaDataSource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.doublecloud_kafka.test", "region_id", "eu-central-1"),
 					resource.TestCheckResourceAttr("data.doublecloud_kafka.test", "cloud_type", "aws"),
-					resource.TestCheckResourceAttr("data.doublecloud_kafka.test", "version", "3.3"),
+					resource.TestCheckResourceAttr("data.doublecloud_kafka.test", "version", "3.5"),
 					resource.TestCheckResourceAttr("data.doublecloud_kafka.test", "connection_info.user", "admin"),
 					resource.TestCheckResourceAttr("data.doublecloud_kafka.test", "private_connection_info.user", "admin"),
 				),

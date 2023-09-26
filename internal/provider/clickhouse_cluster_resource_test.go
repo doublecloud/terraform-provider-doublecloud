@@ -17,6 +17,7 @@ var (
 )
 
 func TestAccClickhouseClusterResource(t *testing.T) {
+	t.Parallel()
 	m := clickhouseClusterModel{
 		ProjectId: types.StringValue(testProjectId),
 		Name:      types.StringValue(testAccClickhouseName),
