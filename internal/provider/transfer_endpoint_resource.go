@@ -43,13 +43,14 @@ type TransferEndpointModel struct {
 }
 
 type endpointSettings struct {
-	ClickhouseSource  *endpointClickhouseSourceSettings  `tfsdk:"clickhouse_source"`
-	KafkaSource       *endpointKafkaSourceSettings       `tfsdk:"kafka_source"`
-	PostgresSource    *endpointPostgresSourceSettings    `tfsdk:"postgres_source"`
-	MysqlSource       *endpointMysqlSourceSettings       `tfsdk:"mysql_source"`
-	MongoSource       *endpointMongoSourceSettings       `tfsdk:"mongo_source"`
-	S3Source          *endpointS3SourceSettings          `tfsdk:"s3_source"`
-	LinkedinAdsSource *endpointLinkedinAdsSourceSettings `tfsdk:"linkedinads_source"`
+	ClickhouseSource    *endpointClickhouseSourceSettings    `tfsdk:"clickhouse_source"`
+	KafkaSource         *endpointKafkaSourceSettings         `tfsdk:"kafka_source"`
+	PostgresSource      *endpointPostgresSourceSettings      `tfsdk:"postgres_source"`
+	MysqlSource         *endpointMysqlSourceSettings         `tfsdk:"mysql_source"`
+	MongoSource         *endpointMongoSourceSettings         `tfsdk:"mongo_source"`
+	S3Source            *endpointS3SourceSettings            `tfsdk:"s3_source"`
+	LinkedinAdsSource   *endpointLinkedinAdsSourceSettings   `tfsdk:"linkedinads_source"`
+	AWSCloudTrailSource *endpointAWSCloudTrailSourceSettings `tfsdk:"aws_cloudtrail_source"`
 
 	ClickhouseTarget *endpointClickhouseTargetSettings `tfsdk:"clickhouse_target"`
 	KafkaTarget      *endpointKafkaTargetSettings      `tfsdk:"kafka_target"`
@@ -100,13 +101,14 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 			"settings": schema.SingleNestedBlock{
 				Description: "Settings",
 				Blocks: map[string]schema.Block{
-					"clickhouse_source":  transferEndpointChSourceSchema(),
-					"kafka_source":       transferEndpointKafkaSourceSchema(),
-					"postgres_source":    transferEndpointPostgresSourceSchema(),
-					"mysql_source":       transferEndpointMysqlSourceSchema(),
-					"mongo_source":       transferEndpointMongoSourceSchema(),
-					"s3_source":          transferEndpointS3SourceSchema(),
-					"linkedinads_source": endpointLinkedinAdsSourceSettingsSchema(),
+					"clickhouse_source":     transferEndpointChSourceSchema(),
+					"kafka_source":          transferEndpointKafkaSourceSchema(),
+					"postgres_source":       transferEndpointPostgresSourceSchema(),
+					"mysql_source":          transferEndpointMysqlSourceSchema(),
+					"mongo_source":          transferEndpointMongoSourceSchema(),
+					"s3_source":             transferEndpointS3SourceSchema(),
+					"linkedinads_source":    endpointLinkedinAdsSourceSettingsSchema(),
+					"aws_cloudtrail_source": endpointAWSCloudTrailSourceSettingsSchema(),
 
 					"clickhouse_target": transferEndpointChTargetSchema(),
 					"kafka_target":      transferEndpointKafkaTargetSchema(),
@@ -370,6 +372,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 			Settings: &transfer.EndpointSettings_LinkedinAdsSource{LinkedinAdsSource: result},
 		}, diag
 	}
+	if m.Settings.AWSCloudTrailSource != nil {
+		result := new(endpoint_airbyte.AWSCloudTrailSource)
+		diag.Append(m.Settings.AWSCloudTrailSource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_AwsCloudtrailSource{AwsCloudtrailSource: result},
+		}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -378,7 +387,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
-
 	if m.Settings.KafkaTarget != nil {
 		s, d := kafkaTargetEndpointSettings(m.Settings.KafkaTarget)
 		if d.HasError() {
@@ -507,6 +515,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.LinkedinAdsSource = &endpointLinkedinAdsSourceSettings{}
 		}
 		diag.Append(data.Settings.LinkedinAdsSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetAwsCloudtrailSource(); settings != nil {
+		if data.Settings.AWSCloudTrailSource == nil {
+			data.Settings.AWSCloudTrailSource = &endpointAWSCloudTrailSourceSettings{}
+		}
+		diag.Append(data.Settings.AWSCloudTrailSource.parse(settings)...)
 	}
 
 	if data.Settings == nil {
