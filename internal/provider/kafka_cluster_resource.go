@@ -18,7 +18,6 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
-	"github.com/doublecloud/go-genproto/doublecloud/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
 	dcgen "github.com/doublecloud/go-sdk/gen/kafka"
 )
@@ -39,32 +38,16 @@ type KafkaClusterResource struct {
 }
 
 type KafkaClusterModel struct {
-	Id          types.String        `tfsdk:"id"`
-	ProjectID   types.String        `tfsdk:"project_id"`
-	CloudType   types.String        `tfsdk:"cloud_type"`
-	RegionID    types.String        `tfsdk:"region_id"`
-	Name        types.String        `tfsdk:"name"`
-	Description types.String        `tfsdk:"description"`
-	Version     types.String        `tfsdk:"version"`
-	Resources   KafkaResourcesModel `tfsdk:"resources"`
-	NetworkId   types.String        `tfsdk:"network_id"`
-	// Hide encryption due to deprecation
-	// Encryption     *DataEncryptionModel `tfsdk:"encryption"`
+	Id             types.String         `tfsdk:"id"`
+	ProjectID      types.String         `tfsdk:"project_id"`
+	CloudType      types.String         `tfsdk:"cloud_type"`
+	RegionID       types.String         `tfsdk:"region_id"`
+	Name           types.String         `tfsdk:"name"`
+	Description    types.String         `tfsdk:"description"`
+	Version        types.String         `tfsdk:"version"`
+	Resources      KafkaResourcesModel  `tfsdk:"resources"`
+	NetworkId      types.String         `tfsdk:"network_id"`
 	SchemaRegistry *schemaRegistryModel `tfsdk:"schema_registry"`
-}
-
-type DataEncryptionModel struct {
-	Enabled types.Bool `tfsdk:"enabled"`
-}
-
-func (m *DataEncryptionModel) convert() *doublecloud.DataEncryption {
-	return &doublecloud.DataEncryption{Enabled: wrapperspb.Bool(m.Enabled.ValueBool())}
-}
-
-func (m *DataEncryptionModel) parse(rs *doublecloud.DataEncryption) {
-	if v := rs.GetEnabled(); v != nil {
-		m.Enabled = types.BoolValue(v.GetValue())
-	}
 }
 
 type schemaRegistryModel struct {
@@ -154,19 +137,6 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 					},
 				},
 			},
-			// Hide encryption due to deprecation
-			// "encryption": schema.SingleNestedBlock{
-			// 	Description: "Encryption configuration",
-			// 	Attributes: map[string]schema.Attribute{
-			// 		"enabled": schema.BoolAttribute{
-			// 			Computed: true,
-			// 			Optional: true,
-			// 			PlanModifiers: []planmodifier.Bool{
-			// 				boolplanmodifier.RequiresReplace(),
-			// 			},
-			// 		},
-			// 	},
-			// },
 			"schema_registry": schema.SingleNestedBlock{
 				Description: "Schema Registry configuration",
 				Attributes: map[string]schema.Attribute{
@@ -220,14 +190,6 @@ func createKafkaClusterRequest(m *KafkaClusterModel) (*kafka.CreateClusterReques
 		},
 	}
 
-	// Hide encryption due to deprecation
-	// if m.Encryption != nil {
-	// 	enabled := m.Encryption.Enabled.ValueBool()
-	// 	rq.Encryption = &doublecloud.DataEncryption{
-	// 		Enabled: wrapperspb.Bool(enabled),
-	// 	}
-	// }
-
 	if m.SchemaRegistry != nil {
 		enabled := m.SchemaRegistry.Enabled.ValueBool()
 		rq.SchemaRegistryConfig = &kafka.SchemaRegistryConfig{
@@ -243,6 +205,7 @@ func deleteKafkaClusterRequest(m *KafkaClusterModel) (*kafka.DeleteClusterReques
 	return rq, nil
 }
 
+//nolint:unused
 func kafkaAccessRoleValidator() validator.String {
 	names := make([]string, len(kafka.Permission_AccessRole_name))
 	for i, v := range kafka.Permission_AccessRole_name {
@@ -342,11 +305,6 @@ func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadReques
 	data.RegionID = types.StringValue(rs.RegionId)
 	data.Version = types.StringValue(rs.Version)
 
-	// Hide encryption due to deprecation
-	// if rs.Encryption != nil {
-	// 	data.Encryption = &DataEncryptionModel{Enabled: types.BoolValue(rs.Encryption.Enabled.Value)}
-	// }
-
 	if rs.SchemaRegistryConfig != nil {
 		data.SchemaRegistry = &schemaRegistryModel{Enabled: types.BoolValue(rs.SchemaRegistryConfig.Enabled)}
 	}
@@ -438,6 +396,9 @@ func (r *KafkaClusterResource) Delete(ctx context.Context, req resource.DeleteRe
 		resp.Diagnostics.AddError("failed to delete", err.Error())
 	}
 	err = op.Wait(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete", err.Error())
+	}
 }
 
 func (r *KafkaClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

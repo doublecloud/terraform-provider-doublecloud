@@ -42,6 +42,7 @@ func transferEndpointCleanupPolicyValidator() validator.String {
 	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
+//nolint:unused
 func transferEndpointParserSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Blocks: map[string]schema.Block{
@@ -72,6 +73,7 @@ func convertTLSMode(m *endpointTLSMode) *endpoint.TLSMode {
 	return &endpoint.TLSMode{TlsMode: &endpoint.TLSMode_Enabled{Enabled: &endpoint.TLSConfig{CaCertificate: m.CACertificate.ValueString()}}}
 }
 
+//nolint:unused
 func transferEndpointGenericParserSchema() schema.SingleNestedBlock {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
@@ -85,21 +87,6 @@ func transferEndpointGenericParserSchema() schema.SingleNestedBlock {
 				Optional:            true,
 			},
 		},
-	}
-}
-
-func transferEndpointDataSchema() schema.SingleNestedBlock {
-	return schema.SingleNestedBlock{
-		Attributes: map[string]schema.Attribute{
-			"json_fields": schema.StringAttribute{
-				Optional: true,
-			},
-		},
-		// Blocks: map[string]schema.Block{
-		// 	"fields": schema.SingleNestedBlock{
-		// 		"field":
-		// 	}
-		// }
 	}
 }
 

@@ -22,7 +22,6 @@ var (
 )
 
 func TestAccTransferResource(t *testing.T) {
-	return
 	t.Parallel()
 
 	m := TransferResourceModel{

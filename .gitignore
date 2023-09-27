@@ -1,6 +1,5 @@
 .secrets
 dist
 authorized_key.json
-.golangci.yml
 CHANGELOG.md
 terraform-provider-doublecloud

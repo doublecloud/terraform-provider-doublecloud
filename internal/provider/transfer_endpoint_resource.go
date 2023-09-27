@@ -303,6 +303,9 @@ func (r *TransferEndpointResource) Delete(ctx context.Context, req resource.Dele
 		resp.Diagnostics.AddError("failed to delete", err.Error())
 	}
 	err = op.Wait(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete", err.Error())
+	}
 
 	tflog.Trace(ctx, fmt.Sprintf("deleted endpoint: %s", data.Id))
 }

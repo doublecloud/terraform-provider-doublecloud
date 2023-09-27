@@ -26,12 +26,12 @@ type endpointPostgresSourceSettings struct {
 }
 
 type endpointPostgresTargetSettings struct {
-	Connection     *endpointPostgresConnection `tfsdk:"connection"`
+	Connection *endpointPostgresConnection `tfsdk:"connection"`
 	// SecurityGroups []types.String              `tfsdk:"security_groups"`
-	Database       types.String                `tfsdk:"database"`
-	User           types.String                `tfsdk:"user"`
-	Password       types.String                `tfsdk:"password"`
-	CleanupPolicy  types.String                `tfsdk:"cleanup_policy"`
+	Database      types.String `tfsdk:"database"`
+	User          types.String `tfsdk:"user"`
+	Password      types.String `tfsdk:"password"`
+	CleanupPolicy types.String `tfsdk:"cleanup_policy"`
 }
 
 type endpointPostgresConnection struct {

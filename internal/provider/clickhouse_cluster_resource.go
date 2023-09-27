@@ -149,6 +149,7 @@ type clickhouseConfig struct {
 	//     map<string,GraphiteRollup> graphite_rollup = 19;
 }
 
+//nolint:unused
 type clickhouseConfigMergeTree struct {
 	ReplicatedDeduplicationWindow                  types.Int64  `tfsdk:"replicated_deduplication_window"`
 	ReplicatedDeduplicationWindowSeconds           types.String `tfsdk:"replicated_deduplication_window_seconds"`
@@ -176,6 +177,7 @@ type clickhouseConfigMergeTree struct {
 	MergeSelectingSleepMs                          types.String `tfsdk:"merge_selecting_sleep_ms"`
 }
 
+//nolint:unused
 type clickhouseConfigCompression struct {
 	Method           types.String  `tfsdk:"method"`
 	MinPartSize      types.Int64   `tfsdk:"min_part_size"`
@@ -183,6 +185,7 @@ type clickhouseConfigCompression struct {
 	Level            types.Int64   `tfsdk:"level"`
 }
 
+//nolint:unused
 type clickhouseConfigKafka struct {
 	SecurityProtocol                 types.String `tfsdk:"security_protocol"`
 	SaslMechanism                    types.String `tfsdk:"sasl_mechanism"`
@@ -193,6 +196,7 @@ type clickhouseConfigKafka struct {
 	SessionTimeoutMs                 types.String `tfsdk:"session_timeout_ms"`
 }
 
+//nolint:unused
 type clickhouseConfigRabbitmq struct {
 	Username types.String `tfsdk:"username"`
 	Password types.String `tfsdk:"password"`
@@ -207,6 +211,7 @@ func clickhouseConfigLogLevelValidator() validator.String {
 	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
+//nolint:unused
 func clickhouseConfigKafkaSecurityProtocolValidator() validator.String {
 	names := make([]string, len(clickhouse.ClickhouseConfig_Kafka_SecurityProtocol_name))
 	for i, v := range clickhouse.ClickhouseConfig_Kafka_SecurityProtocol_name {
@@ -215,6 +220,7 @@ func clickhouseConfigKafkaSecurityProtocolValidator() validator.String {
 	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
+//nolint:unused
 func clickhouseConfigKafkaSaslMechanismValidator() validator.String {
 	names := make([]string, len(clickhouse.ClickhouseConfig_Kafka_SaslMechanism_name))
 	for i, v := range clickhouse.ClickhouseConfig_Kafka_SaslMechanism_name {
@@ -223,6 +229,7 @@ func clickhouseConfigKafkaSaslMechanismValidator() validator.String {
 	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
+//nolint:unused
 func clickhouseConfigCompressionMethodValidator() validator.String {
 	names := make([]string, len(clickhouse.ClickhouseConfig_Compression_Method_name))
 	for i, v := range clickhouse.ClickhouseConfig_Compression_Method_name {
@@ -533,6 +540,9 @@ func (r *ClickhouseClusterResource) Delete(ctx context.Context, req resource.Del
 		resp.Diagnostics.AddError("failed to delete", err.Error())
 	}
 	err = op.Wait(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete", err.Error())
+	}
 }
 
 func (r *ClickhouseClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

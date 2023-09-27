@@ -109,7 +109,7 @@ resource "doublecloud_workbook" "test" {
 }
 
 func exampleWorkbook() string {
-	return fmt.Sprintf(`
+	return `
     {
         "datasets": [
         {
@@ -263,11 +263,12 @@ func exampleWorkbook() string {
         ],
         "charts": [],
         "dashboards": []
-    }`)
+    }`
 	// an_indicator_chart(), a_donut_chart(), a_column_chart())
 	// , a_column_chart())
 }
 
+//nolint:unused
 func an_indicator_chart() string {
 	// Example of an indicator chart
 	// See https://double.cloud/docs/en/data-visualization/quickstart#create-an-indicator
@@ -289,6 +290,7 @@ func an_indicator_chart() string {
     }`
 }
 
+//nolint:unused
 func a_donut_chart() string {
 	// Example of a donut chart
 	// See https://double.cloud/docs/en/data-visualization/quickstart#create-a-donut-chart
@@ -328,6 +330,7 @@ func a_donut_chart() string {
     }`
 }
 
+//nolint:unused
 func a_column_chart() string {
 	// This is an example of a column chart
 	// See https://double.cloud/docs/en/data-visualization/quickstart#create-a-column-chart

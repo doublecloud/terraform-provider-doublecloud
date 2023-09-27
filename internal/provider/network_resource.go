@@ -375,6 +375,9 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 		resp.Diagnostics.AddError("failed to delete", err.Error())
 	}
 	err = op.Wait(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete", err.Error())
+	}
 }
 
 func (r *NetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
