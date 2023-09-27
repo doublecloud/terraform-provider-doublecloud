@@ -42,16 +42,16 @@ type endpointMysqlObjectTransferSettings struct {
 }
 
 type endpointMysqlTargetSettings struct {
-	Connection          *endpointMysqlConnection `tfsdk:"connection"`
+	Connection *endpointMysqlConnection `tfsdk:"connection"`
 	// SecurityGroups      []types.String           `tfsdk:"security_groups"`
-	Database            types.String             `tfsdk:"database"`
-	User                types.String             `tfsdk:"user"`
-	Password            types.String             `tfsdk:"password"`
-	SqlMode             types.String             `tfsdk:"sql_mode"`
-	SkipConstraintCheck types.Bool               `tfsdk:"skip_constraint_checks"`
-	Timezone            types.String             `tfsdk:"timezone"`
-	CleanupPolicy       types.String             `tfsdk:"cleanup_policy"`
-	ServiceDatabase     types.String             `tfsdk:"service_database"`
+	Database            types.String `tfsdk:"database"`
+	User                types.String `tfsdk:"user"`
+	Password            types.String `tfsdk:"password"`
+	SqlMode             types.String `tfsdk:"sql_mode"`
+	SkipConstraintCheck types.Bool   `tfsdk:"skip_constraint_checks"`
+	Timezone            types.String `tfsdk:"timezone"`
+	CleanupPolicy       types.String `tfsdk:"cleanup_policy"`
+	ServiceDatabase     types.String `tfsdk:"service_database"`
 }
 
 func transferEndpointMysqlSourceSchema() schema.Block {

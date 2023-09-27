@@ -128,6 +128,7 @@ func deleteWorkbookRequest(m *WorkbookResourceModel) (*visualization.DeleteWorkb
 }
 
 func createWorkbookConnectionRequests(m *WorkbookResourceModel) ([]*visualization.CreateWorkbookConnectionRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	if m.Connections.IsNull() {
 		return nil, nil
 	}
@@ -136,7 +137,10 @@ func createWorkbookConnectionRequests(m *WorkbookResourceModel) ([]*visualizatio
 		cnn := el.(types.Object).Attributes()
 
 		t := &visualization.Connection{Config: &structpb.Value{}}
-		t.Config.UnmarshalJSON([]byte(cnn["config"].(types.String).ValueString()))
+		err := t.Config.UnmarshalJSON([]byte(cnn["config"].(types.String).ValueString()))
+		if err != nil {
+			diags.AddError("failed to parse connection", err.Error())
+		}
 
 		ss := cnn["secret"].(types.String).ValueString()
 		s := &visualization.Secret{Secret: &visualization.Secret_PlainSecret{PlainSecret: &visualization.PlainSecret{Secret: ss}}}
@@ -147,17 +151,21 @@ func createWorkbookConnectionRequests(m *WorkbookResourceModel) ([]*visualizatio
 			Secret:         s,
 		})
 	}
-	return requests, nil
+	return requests, diags
 }
 
 func modifyWorkbookRequest(m *WorkbookResourceModel) (*visualization.UpdateWorkbookRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	workbook := &visualization.Workbook{Config: &structpb.Value{}}
-	workbook.Config.UnmarshalJSON([]byte(m.Config.ValueString()))
+	err := workbook.Config.UnmarshalJSON([]byte(m.Config.ValueString()))
+	if err != nil {
+		diags.AddError("failed to parse config", err.Error())
+	}
 
 	return &visualization.UpdateWorkbookRequest{
 		WorkbookId: m.Id.ValueString(),
 		Workbook:   workbook,
-	}, nil
+	}, diags
 }
 
 func (r *WorkbookResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -277,6 +285,7 @@ func (r *WorkbookResource) Create(ctx context.Context, req resource.CreateReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+//nolint:unused
 func compareJSONs(a string, b any) (bool, error) {
 	var astruct interface{}
 	err := json.Unmarshal([]byte(a), astruct)
@@ -314,9 +323,13 @@ func (r *WorkbookResource) Read(ctx context.Context, req resource.ReadRequest, r
 }
 
 func updateWorkbookRequest(m *WorkbookResourceModel) (*visualization.UpdateWorkbookRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	rq := &visualization.UpdateWorkbookRequest{WorkbookId: m.Id.ValueString(), Workbook: &visualization.Workbook{Config: &structpb.Value{}}}
-	rq.Workbook.Config.UnmarshalJSON([]byte(m.Config.ValueString()))
-	return rq, nil
+	err := rq.Workbook.Config.UnmarshalJSON([]byte(m.Config.ValueString()))
+	if err != nil {
+		diags.AddError("failed to parse config", err.Error())
+	}
+	return rq, diags
 }
 
 func (r *WorkbookResource) updateConnections(ctx context.Context, resp *resource.UpdateResponse, data *WorkbookResourceModel) {

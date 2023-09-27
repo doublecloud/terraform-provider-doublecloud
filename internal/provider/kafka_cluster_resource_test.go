@@ -33,7 +33,6 @@ func TestAccKafkaClusterResource(t *testing.T) {
 			},
 		},
 
-
 		SchemaRegistry: &schemaRegistryModel{
 			Enabled: types.BoolValue(false),
 		},
@@ -71,28 +70,6 @@ func TestAccKafkaClusterResource(t *testing.T) {
 	})
 }
 
-// func testAccKafkaUsersResourceConfig(m *KafkaClusterModel) string {
-// 	if m.Users.IsNull() {
-// 		return "empty"
-// 	}
-// 	var users string
-
-// 	for _, u := range m.Users.Elements() {
-// 		user := u.(types.Object)
-// 		name := user.Attributes()["name"]
-// 		password := user.Attributes()["password"]
-// 		// permissions := user.Attributes()["permissions"]
-
-// 		users = fmt.Sprintf(`
-//   user {
-// 	name = %[1]q
-// 	password = %[2]q
-//   }
-// 		`, name, password)
-// 	}
-// 	return users
-// }
-
 func testAccKafkaClusterResourceConfig(m *KafkaClusterModel) string {
 	return fmt.Sprintf(`
 resource "doublecloud_kafka_cluster" "test" {
@@ -127,6 +104,7 @@ resource "doublecloud_kafka_cluster" "test" {
 	)
 }
 
+//nolint:unused
 func testAccKafkaClusterResourceConfigUpdated(m *KafkaClusterModel) string {
 	return fmt.Sprintf(`
 resource "doublecloud_kafka_cluster" "test" {
@@ -164,7 +142,7 @@ resource "doublecloud_kafka_cluster" "test" {
 func init() {
 	resource.AddTestSweepers("kafka", &resource.Sweeper{
 		Name:         "kafka",
-		F:            sweepClickhouses,
+		F:            sweepKafkas,
 		Dependencies: []string{},
 	})
 }
