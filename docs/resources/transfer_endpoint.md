@@ -78,6 +78,7 @@ Optional:
 - `clickhouse_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
+- `linkedinads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source))
 - `mongo_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source))
 - `mongo_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target))
 - `mysql_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source))
@@ -380,6 +381,43 @@ Optional:
 
 - `save_tx_order` (Boolean) Save transactions order. Not to split events queue into separate per-table queues.
 - `topic_name` (String) Topic name
+
+
+
+
+<a id="nestedblock--settings--linkedinads_source"></a>
+### Nested Schema for `settings.linkedinads_source`
+
+Optional:
+
+- `account_ids` (List of Number) Account IDs separated by space, to pull the data from. Leave empty, if you want to pull the data from all associated accounts
+- `credentials` (Block, Optional) Authentication method (see [below for nested schema](#nestedblock--settings--linkedinads_source--credentials))
+- `start_date` (String) UTC date in the format YYYY-MM-DD. Any data before this date will not be replicated. Example: 2021-05-17
+
+<a id="nestedblock--settings--linkedinads_source--credentials"></a>
+### Nested Schema for `settings.linkedinads_source.credentials`
+
+Optional:
+
+- `access_token` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source--credentials--access_token))
+- `oauth` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source--credentials--oauth))
+
+<a id="nestedblock--settings--linkedinads_source--credentials--access_token"></a>
+### Nested Schema for `settings.linkedinads_source.credentials.access_token`
+
+Optional:
+
+- `access_token` (String, Sensitive)
+
+
+<a id="nestedblock--settings--linkedinads_source--credentials--oauth"></a>
+### Nested Schema for `settings.linkedinads_source.credentials.oauth`
+
+Optional:
+
+- `client_id` (String, Sensitive) The Client ID of the LinkedIn Ads developer application
+- `client_secret` (String, Sensitive) The Client Secret for the LinkedIn Ads developer application
+- `refresh_token` (String, Sensitive) The key to refresh the expired access token
 
 
 

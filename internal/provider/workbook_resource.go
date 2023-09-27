@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/doublecloud/go-genproto/doublecloud/visualization/v1"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgenvis "github.com/doublecloud/go-sdk/gen/visualization"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -17,10 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
-
-	"github.com/doublecloud/go-genproto/doublecloud/visualization/v1"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgenvis "github.com/doublecloud/go-sdk/gen/visualization"
 )
 
 var _ resource.Resource = &WorkbookResource{}

@@ -4,6 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1"
+	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint"
+	endpoint_airbyte "github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint/airbyte"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgentf "github.com/doublecloud/go-sdk/gen/transfer"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,12 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-
-	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1"
-	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint"
-	endpoint_airbyte "github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint/airbyte"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgentf "github.com/doublecloud/go-sdk/gen/transfer"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
