@@ -232,6 +232,7 @@ Optional:
 
 - `auth` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--auth))
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--connection))
+- `parser` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser))
 - `topic_name` (String) Full source topic name
 
 <a id="nestedblock--settings--kafka_source--auth"></a>
@@ -279,6 +280,109 @@ Optional:
 Optional:
 
 - `ca_certificate` (String) X.509 certificate of the certificate authority which issued the server's certificate, in PEM format. When CA certificate is specified TLS is used to connect to the server
+
+
+
+
+<a id="nestedblock--settings--kafka_source--parser"></a>
+### Nested Schema for `settings.kafka_source.parser`
+
+Optional:
+
+- `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json))
+- `tskv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv))
+
+<a id="nestedblock--settings--kafka_source--parser--json"></a>
+### Nested Schema for `settings.kafka_source.parser.json`
+
+Optional:
+
+- `add_rest_column` (Boolean)
+- `null_keys_allowed` (Boolean)
+- `schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json--schema))
+
+<a id="nestedblock--settings--kafka_source--parser--json--schema"></a>
+### Nested Schema for `settings.kafka_source.parser.json.schema`
+
+Optional:
+
+- `fields` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json--schema--fields))
+- `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json--schema--json))
+
+<a id="nestedblock--settings--kafka_source--parser--json--schema--fields"></a>
+### Nested Schema for `settings.kafka_source.parser.json.schema.fields`
+
+Optional:
+
+- `field` (Block List) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json--schema--fields--field))
+
+<a id="nestedblock--settings--kafka_source--parser--json--schema--fields--field"></a>
+### Nested Schema for `settings.kafka_source.parser.json.schema.fields.field`
+
+Optional:
+
+- `key` (Boolean)
+- `name` (String)
+- `path` (String)
+- `required` (Boolean)
+- `type` (String)
+
+
+
+<a id="nestedblock--settings--kafka_source--parser--json--schema--json"></a>
+### Nested Schema for `settings.kafka_source.parser.json.schema.json`
+
+Optional:
+
+- `fields` (String)
+
+
+
+
+<a id="nestedblock--settings--kafka_source--parser--tskv"></a>
+### Nested Schema for `settings.kafka_source.parser.tskv`
+
+Optional:
+
+- `add_rest_column` (Boolean)
+- `null_keys_allowed` (Boolean)
+- `schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv--schema))
+
+<a id="nestedblock--settings--kafka_source--parser--tskv--schema"></a>
+### Nested Schema for `settings.kafka_source.parser.tskv.schema`
+
+Optional:
+
+- `fields` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv--schema--fields))
+- `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv--schema--json))
+
+<a id="nestedblock--settings--kafka_source--parser--tskv--schema--fields"></a>
+### Nested Schema for `settings.kafka_source.parser.tskv.schema.fields`
+
+Optional:
+
+- `field` (Block List) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv--schema--fields--field))
+
+<a id="nestedblock--settings--kafka_source--parser--tskv--schema--fields--field"></a>
+### Nested Schema for `settings.kafka_source.parser.tskv.schema.fields.field`
+
+Optional:
+
+- `key` (Boolean)
+- `name` (String)
+- `path` (String)
+- `required` (Boolean)
+- `type` (String)
+
+
+
+<a id="nestedblock--settings--kafka_source--parser--tskv--schema--json"></a>
+### Nested Schema for `settings.kafka_source.parser.tskv.schema.json`
+
+Optional:
+
+- `fields` (String)
+
 
 
 

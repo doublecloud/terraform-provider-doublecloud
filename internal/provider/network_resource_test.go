@@ -8,13 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
-	"github.com/doublecloud/go-genproto/doublecloud/v1"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
+
+	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
+	"github.com/doublecloud/go-genproto/doublecloud/v1"
 )
 
 var (
@@ -63,6 +64,11 @@ func TestBYOCNetworkResource(t *testing.T) {
 		networkID = "networkID"
 		ipv4      = "IPv4"
 		ipv6      = "IPv6"
+
+		netName     = "name"
+		subnetName  = "snname"
+		projectName = "project"
+		saName      = "sa"
 	)
 
 	m := NetworkResourceModel{
@@ -76,46 +82,92 @@ func TestBYOCNetworkResource(t *testing.T) {
 			IAMRoleARN:     types.StringValue(roleARN),
 			PrivateSubnets: types.BoolValue(true),
 		},
+		GCP: &googleExternalNetworkResourceModel{
+			NetworkName:    types.StringValue(netName),
+			SubnetworkName: types.StringValue(subnetName),
+			ProjectName:    types.StringValue(projectName),
+			SAEmail:        types.StringValue(saName),
+		},
 	}
 
-	f := &fakeNetworkServiceServer{
-		importMock: func(ctx context.Context, req *network.ImportNetworkRequest) (*doublecloud.Operation, error) {
-			require.Equal(t, testAccNetworkName, req.Name)
-			require.Equal(t, testProjectId, req.ProjectId)
-			awsParams, ok := req.Params.(*network.ImportNetworkRequest_Aws)
-			require.True(t, ok)
-			require.Equal(t, vpcID, awsParams.Aws.VpcId)
-			require.Equal(t, regionID, awsParams.Aws.RegionId)
-			require.Equal(t, accountID, awsParams.Aws.AccountId)
-			require.Equal(t, roleARN, awsParams.Aws.IamRoleArn)
-			return &doublecloud.Operation{
-				Id:         uuid.NewString(),
-				ProjectId:  testProjectId,
-				Status:     doublecloud.Operation_STATUS_DONE,
-				ResourceId: networkID,
-			}, nil
-		},
-		getMock: func(ctx context.Context, req *network.GetNetworkRequest) (*network.Network, error) {
-			require.Equal(t, networkID, req.NetworkId)
-			return &network.Network{
-				Id:            networkID,
-				ProjectId:     testProjectId,
-				CloudType:     "aws",
-				RegionId:      regionID,
-				Name:          testAccNetworkName,
-				Ipv4CidrBlock: ipv4,
-				Ipv6CidrBlock: ipv6,
-				Status:        network.Network_NETWORK_STATUS_ACTIVE,
-				ExternalResources: &network.Network_Aws{
-					Aws: &network.AwsExternalResources{
-						VpcId:      vpcID,
-						AccountId:  &wrappers.StringValue{Value: accountID},
-						IamRoleArn: &wrappers.StringValue{Value: roleARN},
-					},
+	awsImportMock := func(ctx context.Context, req *network.ImportNetworkRequest) (*doublecloud.Operation, error) {
+		require.Equal(t, testAccNetworkName, req.Name)
+		require.Equal(t, testProjectId, req.ProjectId)
+		awsParams, ok := req.Params.(*network.ImportNetworkRequest_Aws)
+		require.True(t, ok)
+		require.Equal(t, vpcID, awsParams.Aws.VpcId)
+		require.Equal(t, regionID, awsParams.Aws.RegionId)
+		require.Equal(t, accountID, awsParams.Aws.AccountId)
+		require.Equal(t, roleARN, awsParams.Aws.IamRoleArn)
+		require.True(t, awsParams.Aws.PrivateSubnets)
+		return &doublecloud.Operation{
+			Id:         uuid.NewString(),
+			ProjectId:  testProjectId,
+			Status:     doublecloud.Operation_STATUS_DONE,
+			ResourceId: networkID,
+		}, nil
+	}
+	gcpImportMock := func(ctx context.Context, req *network.ImportNetworkRequest) (*doublecloud.Operation, error) {
+		require.Equal(t, testAccNetworkName, req.Name)
+		require.Equal(t, testProjectId, req.ProjectId)
+		gcpParams, ok := req.Params.(*network.ImportNetworkRequest_Google)
+		require.True(t, ok)
+		require.Equal(t, netName, gcpParams.Google.NetworkName)
+		require.Equal(t, subnetName, gcpParams.Google.SubnetworkName)
+		require.Equal(t, projectName, gcpParams.Google.ProjectName)
+		require.Equal(t, saName, gcpParams.Google.ServiceAccountEmail)
+		return &doublecloud.Operation{
+			Id:         uuid.NewString(),
+			ProjectId:  testProjectId,
+			Status:     doublecloud.Operation_STATUS_DONE,
+			ResourceId: networkID,
+		}, nil
+	}
+	awsGetMock := func(ctx context.Context, req *network.GetNetworkRequest) (*network.Network, error) {
+		require.Equal(t, networkID, req.NetworkId)
+		return &network.Network{
+			Id:            networkID,
+			ProjectId:     testProjectId,
+			CloudType:     "aws",
+			RegionId:      regionID,
+			Name:          testAccNetworkName,
+			Ipv4CidrBlock: ipv4,
+			Ipv6CidrBlock: ipv6,
+			Status:        network.Network_NETWORK_STATUS_ACTIVE,
+			ExternalResources: &network.Network_Aws{
+				Aws: &network.AwsExternalResources{
+					VpcId:          vpcID,
+					AccountId:      &wrappers.StringValue{Value: accountID},
+					IamRoleArn:     &wrappers.StringValue{Value: roleARN},
+					PrivateSubnets: &wrappers.BoolValue{Value: true},
 				},
-				IsExternal: true,
-			}, nil
-		},
+			},
+			IsExternal: true,
+		}, nil
+	}
+	gcpGetMock := func(ctx context.Context, req *network.GetNetworkRequest) (*network.Network, error) {
+		require.Equal(t, networkID, req.NetworkId)
+		return &network.Network{
+			Id:            networkID,
+			ProjectId:     testProjectId,
+			CloudType:     "gcp",
+			RegionId:      regionID,
+			Name:          testAccNetworkName,
+			Ipv4CidrBlock: ipv4,
+			Ipv6CidrBlock: ipv6,
+			Status:        network.Network_NETWORK_STATUS_ACTIVE,
+			ExternalResources: &network.Network_Gcp{
+				Gcp: &network.GcpExternalResources{
+					NetworkName:         &wrappers.StringValue{Value: netName},
+					SubnetworkName:      &wrappers.StringValue{Value: subnetName},
+					ProjectName:         &wrappers.StringValue{Value: projectName},
+					ServiceAccountEmail: &wrappers.StringValue{Value: saName},
+				},
+			},
+			IsExternal: true,
+		}, nil
+	}
+	f := &fakeNetworkServiceServer{
 		deleteMock: func(ctx context.Context, req *network.DeleteNetworkRequest) (*doublecloud.Operation, error) {
 			require.Equal(t, networkID, req.NetworkId)
 			return &doublecloud.Operation{
@@ -156,13 +208,15 @@ func TestBYOCNetworkResource(t *testing.T) {
 		})
 	}
 
-	t.Run("create external network with mocks", func(t *testing.T) {
+	t.Run("create AWS network", func(t *testing.T) {
+		f.importMock = awsImportMock
+		f.getMock = awsGetMock
 		resource.UnitTest(t, resource.TestCase{
 			IsUnitTest:               true,
 			ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
 			Steps: []resource.TestStep{
 				{
-					Config: testExternalNetworkResourceConfig(&m),
+					Config: testAWSNetworkResourceConfig(&m),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr(testAccNetworkId, "id", networkID),
 						resource.TestCheckResourceAttr(testAccNetworkId, "name", testAccNetworkName),
@@ -183,10 +237,9 @@ func TestBYOCNetworkResource(t *testing.T) {
 		})
 	})
 
-	t.Run("import external network with mocks", func(t *testing.T) {
-		mock := f.importMock
-		f.importMock = nil // check that /Import method will not be called
-		defer func() { f.importMock = mock }()
+	t.Run("import AWS network", func(t *testing.T) {
+		f.importMock = nil
+		f.getMock = awsGetMock
 
 		resource.UnitTest(t, resource.TestCase{
 			IsUnitTest:               true,
@@ -196,7 +249,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 					ImportState:   true,
 					ResourceName:  testAccNetworkId,
 					ImportStateId: networkID,
-					Config:        testExternalNetworkResourceConfig(&m),
+					Config:        testAWSNetworkResourceConfig(&m),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr(testAccNetworkId, "id", networkID),
 						resource.TestCheckResourceAttr(testAccNetworkId, "name", testAccNetworkName),
@@ -208,6 +261,68 @@ func TestBYOCNetworkResource(t *testing.T) {
 						resource.TestCheckResourceAttr(testAccNetworkId, "aws.account_id", accountID),
 						resource.TestCheckResourceAttr(testAccNetworkId, "aws.iam_role_arn", roleARN),
 						resource.TestCheckResourceAttr(testAccNetworkId, "aws.private_subnets", "true"),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", ipv4),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv6_cidr_block", ipv6),
+						resource.TestCheckResourceAttr(testAccNetworkId, "is_external", "true"),
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("create GCP network", func(t *testing.T) {
+		f.importMock = gcpImportMock
+		f.getMock = gcpGetMock
+		resource.UnitTest(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
+			Steps: []resource.TestStep{
+				{
+					Config: testGCPNetworkResourceConfig(&m),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr(testAccNetworkId, "id", networkID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "name", testAccNetworkName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "project_id", testProjectId),
+						resource.TestCheckResourceAttr(testAccNetworkId, "description", ""),
+						resource.TestCheckResourceAttr(testAccNetworkId, "region_id", regionID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "cloud_type", "gcp"),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.network_name", netName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.subnetwork_name", subnetName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.project_name", projectName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.service_account_email", saName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", ipv4),
+						resource.TestCheckResourceAttr(testAccNetworkId, "ipv6_cidr_block", ipv6),
+						resource.TestCheckResourceAttr(testAccNetworkId, "is_external", "true"),
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("import GCP network", func(t *testing.T) {
+		f.importMock = nil
+		f.getMock = gcpGetMock
+
+		resource.UnitTest(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
+			Steps: []resource.TestStep{
+				{
+					ImportState:   true,
+					ResourceName:  testAccNetworkId,
+					ImportStateId: networkID,
+					Config:        testGCPNetworkResourceConfig(&m),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr(testAccNetworkId, "id", networkID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "name", testAccNetworkName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "project_id", testProjectId),
+						resource.TestCheckResourceAttr(testAccNetworkId, "description", ""),
+						resource.TestCheckResourceAttr(testAccNetworkId, "region_id", regionID),
+						resource.TestCheckResourceAttr(testAccNetworkId, "cloud_type", "aws"),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.network_name", netName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.subnetwork_name", subnetName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.project_name", projectName),
+						resource.TestCheckResourceAttr(testAccNetworkId, "gcp.service_account_email", saName),
 						resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", ipv4),
 						resource.TestCheckResourceAttr(testAccNetworkId, "ipv6_cidr_block", ipv6),
 						resource.TestCheckResourceAttr(testAccNetworkId, "is_external", "true"),
@@ -218,7 +333,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 	})
 }
 
-func testExternalNetworkResourceConfig(m *NetworkResourceModel) string {
+func testAWSNetworkResourceConfig(m *NetworkResourceModel) string {
 	return fmt.Sprintf(`
 resource "doublecloud_network" %[2]q {
   project_id = %[1]q
@@ -239,6 +354,30 @@ resource "doublecloud_network" %[2]q {
 		m.AWS.IAMRoleARN.ValueString(),
 		m.RegionID.ValueString(),
 		m.AWS.PrivateSubnets,
+	)
+}
+
+func testGCPNetworkResourceConfig(m *NetworkResourceModel) string {
+	return fmt.Sprintf(`
+resource "doublecloud_network" %[2]q {
+  project_id = %[1]q
+  name = %[2]q
+  region_id = %[6]q
+  cloud_type = "gcp"
+  gcp = {
+    network_name = %[3]q
+    subnetwork_name = %[4]q
+    project_name = %[5]q
+	service_account_email = %[7]v
+  }
+}
+`, m.ProjectID.ValueString(),
+		m.Name.ValueString(),
+		m.GCP.NetworkName.ValueString(),
+		m.GCP.SubnetworkName.ValueString(),
+		m.GCP.ProjectName.ValueString(),
+		m.RegionID.ValueString(),
+		m.GCP.SAEmail,
 	)
 }
 
