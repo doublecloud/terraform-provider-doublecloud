@@ -4,10 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
-	"github.com/doublecloud/go-genproto/doublecloud/v1"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgennet "github.com/doublecloud/go-sdk/gen/network"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -19,6 +15,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
+	"github.com/doublecloud/go-genproto/doublecloud/v1"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgennet "github.com/doublecloud/go-sdk/gen/network"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -277,7 +278,15 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 				},
 			}
 		case data.GCP != nil:
-			// TODO export google to public API
+			importReq.Params = &network.ImportNetworkRequest_Google{
+				Google: &network.ImportGoogleVPCRequest{
+					ServiceAccountEmail: data.GCP.SAEmail.ValueString(),
+					ProjectName:         data.GCP.ProjectName.ValueString(),
+					NetworkName:         data.GCP.NetworkName.ValueString(),
+					RegionId:            data.RegionID.ValueString(),
+					SubnetworkName:      data.GCP.SubnetworkName.ValueString(),
+				},
+			}
 		}
 
 		opObj, err = r.networkService.Import(ctx, importReq)
@@ -347,6 +356,32 @@ func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	data.Ipv6CidrBlock = types.StringValue(net.Ipv6CidrBlock)
 	data.IsExternal = types.BoolValue(net.IsExternal)
 
+	if net.IsExternal {
+		switch {
+		case net.GetAws() != nil:
+			awsER := net.GetAws()
+			if data.AWS == nil {
+				data.AWS = &awsExternalNetworkResourceModel{}
+			}
+			data.AWS.IAMRoleARN = types.StringValue(awsER.IamRoleArn.GetValue())
+			data.AWS.AccountID = types.StringValue(awsER.AccountId.GetValue())
+			data.AWS.VPCID = types.StringValue(awsER.VpcId)
+			data.AWS.PrivateSubnets = types.BoolValue(awsER.PrivateSubnets.GetValue())
+		case net.GetGcp() != nil:
+			gcpER := net.GetGcp()
+			if data.GCP == nil {
+				data.GCP = &googleExternalNetworkResourceModel{}
+			}
+			data.GCP.SAEmail = types.StringValue(gcpER.ServiceAccountEmail.GetValue())
+			data.GCP.ProjectName = types.StringValue(gcpER.ProjectName.GetValue())
+			data.GCP.NetworkName = types.StringValue(gcpER.NetworkName.GetValue())
+			data.GCP.SubnetworkName = types.StringValue(gcpER.SubnetworkName.GetValue())
+		default:
+			resp.Diagnostics.AddError("unsupported network cloud provider", fmt.Sprintf("got: %v", net.GetExternalResources()))
+			return
+		}
+	}
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -409,9 +444,6 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 				fmt.Sprintf("Provided BYOC GCP configuration, but \"cloud_type\" is set to %q.", data.CloudType.ValueString()),
 			)
 		}
-
-		// TODO add GCP BYOC to public API
-		resp.Diagnostics.AddError("GCP BYOC is not supported yet", "")
 	}
 
 	if data.AWS == nil && data.GCP == nil && data.Ipv4CidrBlock.IsNull() {
