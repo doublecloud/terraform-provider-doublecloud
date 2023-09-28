@@ -463,7 +463,7 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 		if data.Settings.KafkaSource == nil {
 			data.Settings.KafkaSource = &endpointKafkaSourceSettings{}
 		}
-		diag.Append(parseTransferEndpointKafkaSource(ctx, settings, data.Settings.KafkaSource)...)
+		diag.Append(data.Settings.KafkaSource.parse(settings)...)
 	}
 	if settings := e.Settings.GetKafkaTarget(); settings != nil {
 		if data.Settings.KafkaTarget == nil {
