@@ -8,13 +8,13 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ci-acc-tests
-  cancel-in-progress: false
-
 jobs:
   sweep:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ci-acc-tests
+      cancel-in-progress: false
+
     steps:
 
       - uses: actions/checkout@v3

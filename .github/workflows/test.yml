@@ -2,15 +2,14 @@ name: Tests
 
 on: [pull_request]
 
-concurrency:
-  group: ci-acc-tests
-  cancel-in-progress: false
-
 jobs:
   test:
     name: test
     runs-on: ubuntu-latest
     timeout-minutes: 125
+    concurrency:
+      group: ci-acc-tests
+      cancel-in-progress: false
 
     steps:
       - uses: actions/checkout@v3
