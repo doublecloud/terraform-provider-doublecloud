@@ -74,10 +74,12 @@ resource "doublecloud_transfer_endpoint" "sample-pg2ch-target" {
 
 Optional:
 
+- `aws_cloudtrail_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--aws_cloudtrail_source))
 - `clickhouse_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source))
 - `clickhouse_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
+- `linkedinads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source))
 - `mongo_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source))
 - `mongo_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target))
 - `mysql_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source))
@@ -85,6 +87,17 @@ Optional:
 - `postgres_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source))
 - `postgres_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_target))
 - `s3_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--s3_source))
+
+<a id="nestedblock--settings--aws_cloudtrail_source"></a>
+### Nested Schema for `settings.aws_cloudtrail_source`
+
+Optional:
+
+- `key_id` (String, Sensitive) AWS CloudTrail Access Key ID. See [documentation](https://docs.airbyte.io/integrations/sources/aws-cloudtrail) for information on how to obtain this value.
+- `region_name` (String) The default AWS region; for example, `us-west-1`.
+- `secret_key` (String, Sensitive) AWS CloudTrail Secret Key. See [documentation](https://docs.airbyte.io/integrations/sources/aws-cloudtrail) for information on how to obtain this value.
+- `start_date` (String) The date from which replication should start. Note that in AWS CloudTrail, historical data are available for the last 90 days only. Format `YYYY-MM-DD`; for example, `2021-01-25`.
+
 
 <a id="nestedblock--settings--clickhouse_source"></a>
 ### Nested Schema for `settings.clickhouse_source`
@@ -380,6 +393,43 @@ Optional:
 
 - `save_tx_order` (Boolean) Save transactions order. Not to split events queue into separate per-table queues.
 - `topic_name` (String) Topic name
+
+
+
+
+<a id="nestedblock--settings--linkedinads_source"></a>
+### Nested Schema for `settings.linkedinads_source`
+
+Optional:
+
+- `account_ids` (List of Number) Account IDs separated by space, to pull the data from. Leave empty, if you want to pull the data from all associated accounts
+- `credentials` (Block, Optional) Authentication method (see [below for nested schema](#nestedblock--settings--linkedinads_source--credentials))
+- `start_date` (String) UTC date in the format YYYY-MM-DD. Any data before this date will not be replicated. Example: 2021-05-17
+
+<a id="nestedblock--settings--linkedinads_source--credentials"></a>
+### Nested Schema for `settings.linkedinads_source.credentials`
+
+Optional:
+
+- `access_token` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source--credentials--access_token))
+- `oauth` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source--credentials--oauth))
+
+<a id="nestedblock--settings--linkedinads_source--credentials--access_token"></a>
+### Nested Schema for `settings.linkedinads_source.credentials.access_token`
+
+Optional:
+
+- `access_token` (String, Sensitive)
+
+
+<a id="nestedblock--settings--linkedinads_source--credentials--oauth"></a>
+### Nested Schema for `settings.linkedinads_source.credentials.oauth`
+
+Optional:
+
+- `client_id` (String, Sensitive) The Client ID of the LinkedIn Ads developer application
+- `client_secret` (String, Sensitive) The Client Secret for the LinkedIn Ads developer application
+- `refresh_token` (String, Sensitive) The key to refresh the expired access token
 
 
 

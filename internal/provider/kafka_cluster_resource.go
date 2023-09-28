@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgen "github.com/doublecloud/go-sdk/gen/kafka"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -16,10 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-
-	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgen "github.com/doublecloud/go-sdk/gen/kafka"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.

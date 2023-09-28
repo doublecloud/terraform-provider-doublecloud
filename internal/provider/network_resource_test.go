@@ -129,11 +129,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 	endpoint, err := startNetworkServiceMock(f)
 	require.NoError(t, err)
 
-	for _, tc := range []struct {
-		name   string
-		config string
-		err    *regexp.Regexp
-	}{
+	for _, tc := range []testCaseErrorConfig{
 		{
 			name:   "bothExternalAndCidrNetworkConfig",
 			config: bothExternalAndCidrNetworkConfig,
@@ -156,16 +152,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			resource.UnitTest(t, resource.TestCase{
-				IsUnitTest:               true,
-				ProtoV6ProviderFactories: testFakeProtoV6ProviderFactories(endpoint),
-				Steps: []resource.TestStep{
-					{
-						Config:      tc.config,
-						ExpectError: tc.err,
-					},
-				},
-			})
+			resource.UnitTest(t, unitTestCase(endpoint, tc))
 		})
 	}
 

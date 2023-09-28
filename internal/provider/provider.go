@@ -148,6 +148,8 @@ func (p *DoubleCloudProvider) Resources(ctx context.Context) []func() resource.R
 		NewTransferResource,
 		NewTransferEndpointResource,
 		NewClickhouseClusterResource,
+		NewNetworkConnectionResource,
+		NewNetworkConnectionAccepterResource,
 	}
 }
 
@@ -159,6 +161,7 @@ func (p *DoubleCloudProvider) DataSources(ctx context.Context) []func() datasour
 		NewTransferDataSource,
 		// NewTransferEndpointDataSource,
 		NewClickhouseDataSource,
+		NewNetworkConnectionDataSource,
 	}
 }
 
