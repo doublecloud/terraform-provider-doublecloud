@@ -70,7 +70,7 @@ func TestNetworkConnectionResource(t *testing.T) {
 		{
 			name:   "missedIPAWSPeeringNCConfig",
 			config: missedIPAWSPeeringNCConfig,
-			err:    regexp.MustCompile(`(?s)At least one attribute out of.*\[aws.peering.ipv4_cidr_block,aws.peering.ipv6_cidr_block] must be specified`),
+			err:    regexp.MustCompile(`"ipv4_cidr_block" is required`),
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -114,6 +114,7 @@ func TestNetworkConnectionResource(t *testing.T) {
 						},
 					},
 				},
+				Status: network.NetworkConnection_NETWORK_CONNECTION_STATUS_CREATING,
 			}, nil
 		}
 		defer func() {
@@ -180,6 +181,7 @@ func TestNetworkConnectionResource(t *testing.T) {
 						ManagedNetworkUrl: managedURL,
 					},
 				},
+				Status: network.NetworkConnection_NETWORK_CONNECTION_STATUS_CREATING,
 			}, nil
 		}
 		defer func() {
@@ -236,6 +238,7 @@ func TestNetworkConnectionResource(t *testing.T) {
 						},
 					},
 				},
+				Status: network.NetworkConnection_NETWORK_CONNECTION_STATUS_CREATING,
 			}, nil
 		}
 		defer func() {
@@ -295,6 +298,7 @@ func TestNetworkConnectionResource(t *testing.T) {
 						ManagedNetworkUrl: managedURL,
 					},
 				},
+				Status: network.NetworkConnection_NETWORK_CONNECTION_STATUS_CREATING,
 			}, nil
 		}
 		defer func() {
@@ -389,6 +393,10 @@ resource "doublecloud_network_connection" %[1]q {
     }
   }
 }
+
+output "test_attr" {
+   value = doublecloud_network_connection.%[1]s.aws.peering.peering_connection_id
+}
 `,
 		ncName,
 		m.NetworkID.ValueString(),
@@ -408,6 +416,10 @@ resource "doublecloud_network_connection" %[1]q {
     name = %[3]q
     peer_network_url = %[4]q
   }
+}
+
+output "test_attr" {
+   value = doublecloud_network_connection.%[1]s.google.managed_network_url
 }
 `,
 		ncName,

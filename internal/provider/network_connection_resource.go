@@ -109,10 +109,6 @@ func (r *NetworkConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("failed to create", err.Error())
 	}
 
-	if err = op.Wait(ctx); err != nil {
-		resp.Diagnostics.AddError("failed to create", err.Error())
-	}
-
 	data.ID = types.StringValue(op.ResourceId())
 
 	if !getNetworkConnection(ctx, r.networkConnectionService, op.ResourceId(), data, resp.Diagnostics) {
@@ -142,7 +138,7 @@ func (r *NetworkConnectionResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *NetworkConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError("Failed to update network connection", "network connections doesn't support updates")
+	resp.Diagnostics.AddError("Failed to update network connection", "network connections don't support updates")
 }
 
 func (r *NetworkConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

@@ -7,7 +7,6 @@ import (
 	"github.com/doublecloud/go-genproto/doublecloud/network/v1"
 	dcgennet "github.com/doublecloud/go-sdk/gen/network"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -26,6 +25,9 @@ type NetworkConnectionModel struct {
 
 	AWS    *awsNetworkConnectionInfo    `tfsdk:"aws"`
 	Google *googleNetworkConnectionInfo `tfsdk:"google"`
+
+	status       string
+	statusReason string
 }
 
 type awsNetworkConnectionInfo struct {
@@ -110,30 +112,20 @@ var (
 								},
 							},
 							"ipv4_cidr_block": resourceschema.StringAttribute{
-								Optional:            true,
+								Required:            true,
 								MarkdownDescription: "Customer IPv4 CIDR block.\nDoubleCloud will create route to this CIDR using Peering Connection.",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
-								Validators: []validator.String{
-									stringvalidator.AtLeastOneOf(path.Expressions{
-										path.MatchRelative(),
-										path.MatchRoot("aws").AtName("peering").AtName("ipv6_cidr_block"),
-									}...),
-								},
 							},
 							"ipv6_cidr_block": resourceschema.StringAttribute{
 								Optional:            true,
+								Computed:            true,
 								MarkdownDescription: "Customer IPv6 CIDR block.\nDoubleCloud will create route to this CIDR using Peering Connection.",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
-								Validators: []validator.String{
-									stringvalidator.AtLeastOneOf(path.Expressions{
-										path.MatchRoot("aws").AtName("peering").AtName("ipv4_cidr_block"),
-										path.MatchRelative(),
-									}...),
-								},
+								Default: stringdefault.StaticString(""),
 							},
 							"peering_connection_id": resourceschema.StringAttribute{
 								Computed:            true,
@@ -225,6 +217,8 @@ func (m *NetworkConnectionModel) FromProtobuf(nc *network.NetworkConnection) err
 	m.NetworkID = types.StringValue(nc.NetworkId)
 	m.ID = types.StringValue(nc.Id)
 	m.Description = types.StringValue(nc.Description)
+	m.status = nc.Status.String()
+	m.statusReason = nc.StatusReason
 
 	switch {
 	case nc.GetAws() != nil:
@@ -265,6 +259,21 @@ func (m *NetworkConnectionModel) FromProtobuf(nc *network.NetworkConnection) err
 	}
 
 	return nil
+}
+
+func (m *NetworkConnectionModel) IsReady() bool {
+	return m.status == network.NetworkConnection_NETWORK_CONNECTION_STATUS_ACTIVE.String() || m.status == network.NetworkConnection_NETWORK_CONNECTION_STATUS_ERROR.String()
+}
+
+func (m *NetworkConnectionModel) IsOK() (bool, string) {
+	if m.status == network.NetworkConnection_NETWORK_CONNECTION_STATUS_ERROR.String() {
+		return false, fmt.Sprintf("network connection %s is in ERROR state, reason: %s", m.ID, m.statusReason)
+	}
+	return true, ""
+}
+
+func (m *NetworkConnectionModel) Poll(ctx context.Context, client *dcgennet.NetworkConnectionServiceClient, diagn diag.Diagnostics) {
+	getNetworkConnection(ctx, client, m.ID.ValueString(), m, diagn)
 }
 
 func getNetworkConnection(

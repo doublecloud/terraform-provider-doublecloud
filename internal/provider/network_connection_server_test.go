@@ -9,11 +9,13 @@ import (
 	"google.golang.org/grpc"
 )
 
+type getNetworkConnectionMockFunc func(context.Context, *network.GetNetworkConnectionRequest) (*network.NetworkConnection, error)
+
 type fakeNetworkConnectionServiceServer struct {
 	network.UnimplementedNetworkConnectionServiceServer
 
 	createMock func(context.Context, *network.CreateNetworkConnectionRequest) (*doublecloud.Operation, error)
-	getMock    func(context.Context, *network.GetNetworkConnectionRequest) (*network.NetworkConnection, error)
+	getMock    getNetworkConnectionMockFunc
 	deleteMock func(context.Context, *network.DeleteNetworkConnectionRequest) (*doublecloud.Operation, error)
 }
 
