@@ -65,7 +65,7 @@ func TestNetworkConnectionResource(t *testing.T) {
 		{
 			name:   "missedTypeAWSNCConfig",
 			config: missedTypeAWSNCConfig,
-			err:    regexp.MustCompile(`No attribute specified when one \(and only one\) of \[aws.peering] is required`),
+			err:    regexp.MustCompile(`Inappropriate value for attribute "aws": attribute "peering" is required`),
 		},
 		{
 			name:   "missedIPAWSPeeringNCConfig",

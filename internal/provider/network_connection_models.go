@@ -87,7 +87,7 @@ var (
 				MarkdownDescription: "AWS connection info",
 				Attributes: map[string]resourceschema.Attribute{
 					"peering": resourceschema.SingleNestedAttribute{
-						Optional:            true,
+						Required:            true,
 						MarkdownDescription: "VPC Peering connection info",
 						Attributes: map[string]resourceschema.Attribute{
 							"vpc_id": resourceschema.StringAttribute{
@@ -149,11 +149,6 @@ var (
 								},
 							},
 						},
-						Validators: []validator.Object{
-							objectvalidator.ExactlyOneOf(path.Expressions{
-								path.MatchRelative(),
-							}...),
-						},
 					},
 				},
 				Validators: []validator.Object{
@@ -200,10 +195,12 @@ var (
 	}
 )
 
-func generateNetworkConnectionDatasourceSchema(diagn diag.Diagnostics) dataschema.Schema {
+func generateNetworkConnectionDatasourceSchema(diags diag.Diagnostics) dataschema.Schema {
+	attrs := make(map[string]dataschema.Attribute)
+	diags.Append(convertSchemaAttributes(networkConnectionResourceSchema.Attributes, attrs)...)
 	res := dataschema.Schema{
 		MarkdownDescription: "Network Connection datasource",
-		Attributes:          convertSchemaAttributes(networkConnectionResourceSchema.Attributes, diagn),
+		Attributes:          attrs,
 	}
 
 	id := res.Attributes["id"].(*dataschema.StringAttribute)
@@ -272,8 +269,8 @@ func (m *NetworkConnectionModel) IsOK() (bool, string) {
 	return true, ""
 }
 
-func (m *NetworkConnectionModel) Poll(ctx context.Context, client *dcgennet.NetworkConnectionServiceClient, diagn diag.Diagnostics) {
-	getNetworkConnection(ctx, client, m.ID.ValueString(), m, diagn)
+func (m *NetworkConnectionModel) Poll(ctx context.Context, client *dcgennet.NetworkConnectionServiceClient) diag.Diagnostics {
+	return getNetworkConnection(ctx, client, m.ID.ValueString(), m)
 }
 
 func getNetworkConnection(
@@ -281,18 +278,18 @@ func getNetworkConnection(
 	client *dcgennet.NetworkConnectionServiceClient,
 	id string,
 	data *NetworkConnectionModel,
-	diagn diag.Diagnostics,
-) bool {
+) diag.Diagnostics {
+	var diags diag.Diagnostics
 	nc, err := client.Get(ctx, &network.GetNetworkConnectionRequest{NetworkConnectionId: id})
 	if err != nil {
-		diagn.AddError("Failed to get network connection", fmt.Sprintf("failed request, error: %v", err))
-		return false
+		diags.AddError("Failed to get network connection", fmt.Sprintf("failed request, error: %v", err))
+		return diags
 	}
 
 	if err = data.FromProtobuf(nc); err != nil {
-		diagn.AddError("Failed to get network connection", fmt.Sprintf("failed parse, error: %v", err))
-		return false
+		diags.AddError("Failed to get network connection", fmt.Sprintf("failed parse, error: %v", err))
+		return diags
 	}
 
-	return true
+	return diags
 }

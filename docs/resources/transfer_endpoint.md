@@ -74,6 +74,7 @@ resource "doublecloud_transfer_endpoint" "sample-pg2ch-target" {
 
 Optional:
 
+- `aws_cloudtrail_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--aws_cloudtrail_source))
 - `clickhouse_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source))
 - `clickhouse_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
@@ -86,6 +87,17 @@ Optional:
 - `postgres_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source))
 - `postgres_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_target))
 - `s3_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--s3_source))
+
+<a id="nestedblock--settings--aws_cloudtrail_source"></a>
+### Nested Schema for `settings.aws_cloudtrail_source`
+
+Optional:
+
+- `key_id` (String, Sensitive) AWS CloudTrail Access Key ID. See [documentation](https://docs.airbyte.io/integrations/sources/aws-cloudtrail) for information on how to obtain this value.
+- `region_name` (String) The default AWS region; for example, `us-west-1`.
+- `secret_key` (String, Sensitive) AWS CloudTrail Secret Key. See [documentation](https://docs.airbyte.io/integrations/sources/aws-cloudtrail) for information on how to obtain this value.
+- `start_date` (String) The date from which replication should start. Note that in AWS CloudTrail, historical data are available for the last 90 days only. Format `YYYY-MM-DD`; for example, `2021-01-25`.
+
 
 <a id="nestedblock--settings--clickhouse_source"></a>
 ### Nested Schema for `settings.clickhouse_source`

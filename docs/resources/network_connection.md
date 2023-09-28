@@ -93,7 +93,7 @@ resource "aws_route" "ipv6" {
 <a id="nestedatt--aws"></a>
 ### Nested Schema for `aws`
 
-Optional:
+Required:
 
 - `peering` (Attributes) VPC Peering connection info (see [below for nested schema](#nestedatt--aws--peering))
 

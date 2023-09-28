@@ -12,6 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// Ensure provider defined types fully satisfy framework interfaces.
+var _ resource.Resource = &NetworkConnectionResource{}
+
 func NewNetworkConnectionResource() resource.Resource {
 	return &NetworkConnectionResource{}
 }
@@ -111,7 +114,8 @@ func (r *NetworkConnectionResource) Create(ctx context.Context, req resource.Cre
 
 	data.ID = types.StringValue(op.ResourceId())
 
-	if !getNetworkConnection(ctx, r.networkConnectionService, op.ResourceId(), data, resp.Diagnostics) {
+	resp.Diagnostics.Append(getNetworkConnection(ctx, r.networkConnectionService, op.ResourceId(), data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -129,7 +133,8 @@ func (r *NetworkConnectionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	if !getNetworkConnection(ctx, r.networkConnectionService, data.ID.ValueString(), data, resp.Diagnostics) {
+	resp.Diagnostics.Append(getNetworkConnection(ctx, r.networkConnectionService, data.ID.ValueString(), data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

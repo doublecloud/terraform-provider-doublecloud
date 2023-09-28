@@ -11,21 +11,21 @@ import (
 // convertSchemaAttributes helps to convert resource schema to datasource schema.
 // All attributes marked as Computed, not Required and not Optional.
 // You can modify any of the attributes later.
-func convertSchemaAttributes(attrs map[string]resourceschema.Attribute, diagn diag.Diagnostics) map[string]dataschema.Attribute {
-	res := make(map[string]dataschema.Attribute)
+func convertSchemaAttributes(resAttrs map[string]resourceschema.Attribute, dataAttrs map[string]dataschema.Attribute) diag.Diagnostics {
+	var diags diag.Diagnostics
 
-	for name, attrInterface := range attrs {
+	for name, attrInterface := range resAttrs {
 		switch attr := attrInterface.(type) {
 		case resourceschema.StringAttribute:
-			res[name] = convertStringAttribute(attr)
+			dataAttrs[name] = convertStringAttribute(attr)
 		case resourceschema.SingleNestedAttribute:
-			res[name] = convertSingleNestedAttribute(attr, diagn)
+			dataAttrs[name] = convertSingleNestedAttribute(attr, diags)
 		default:
-			diagn.AddError("can not convert resource attribute to datasource attribute", fmt.Sprintf("unsupported type for attribute %q: %v", name, attr))
+			diags.AddError("can not convert resource attribute to datasource attribute", fmt.Sprintf("unsupported type for attribute %q: %v", name, attr))
 		}
 	}
 
-	return res
+	return diags
 }
 
 func convertStringAttribute(attr resourceschema.StringAttribute) *dataschema.StringAttribute {
@@ -38,9 +38,12 @@ func convertStringAttribute(attr resourceschema.StringAttribute) *dataschema.Str
 	}
 }
 
-func convertSingleNestedAttribute(attr resourceschema.SingleNestedAttribute, diagn diag.Diagnostics) *dataschema.SingleNestedAttribute {
+func convertSingleNestedAttribute(attr resourceschema.SingleNestedAttribute, diags diag.Diagnostics) *dataschema.SingleNestedAttribute {
+	dataAttrs := make(map[string]dataschema.Attribute)
+
+	diags.Append(convertSchemaAttributes(attr.Attributes, dataAttrs)...)
 	return &dataschema.SingleNestedAttribute{
-		Attributes:          convertSchemaAttributes(attr.Attributes, diagn),
+		Attributes:          dataAttrs,
 		Computed:            true,
 		Sensitive:           attr.Sensitive,
 		Description:         attr.Description,

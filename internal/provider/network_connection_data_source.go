@@ -9,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
+// Ensure provider defined types fully satisfy framework interfaces.
+var _ datasource.DataSource = &NetworkConnectionDataSource{}
+
 func NewNetworkConnectionDataSource() datasource.DataSource {
 	return &NetworkConnectionDataSource{}
 }
@@ -57,7 +60,8 @@ func (d *NetworkConnectionDataSource) Read(ctx context.Context, req datasource.R
 		return
 	}
 
-	if !getNetworkConnection(ctx, d.networkConnectionService, data.ID.ValueString(), data, resp.Diagnostics) {
+	resp.Diagnostics.Append(getNetworkConnection(ctx, d.networkConnectionService, data.ID.ValueString(), data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

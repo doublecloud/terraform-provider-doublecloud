@@ -58,12 +58,13 @@ func (r *NetworkConnectionAccepterResource) Create(ctx context.Context, req reso
 	}
 
 	ncData := &NetworkConnectionModel{}
-	if !getNetworkConnection(ctx, r.networkConnectionService, data.ID.ValueString(), ncData, resp.Diagnostics) {
+	resp.Diagnostics.Append(getNetworkConnection(ctx, r.networkConnectionService, data.ID.ValueString(), ncData)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	for !ncData.IsReady() {
-		ncData.Poll(ctx, r.networkConnectionService, resp.Diagnostics)
+		resp.Diagnostics.Append(ncData.Poll(ctx, r.networkConnectionService)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}

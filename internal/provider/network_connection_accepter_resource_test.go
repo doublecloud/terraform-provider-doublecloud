@@ -163,37 +163,28 @@ func TestNetworkConnectionAccepterResource(t *testing.T) {
 
 			managedURL = "managedURL"
 		)
+		generateMock := func(status network.NetworkConnection_NetworkConnectionStatus) getNetworkConnectionMockFunc {
+			return func(ctx context.Context, req *network.GetNetworkConnectionRequest) (*network.NetworkConnection, error) {
+				require.Equal(t, ncID, req.NetworkConnectionId)
+				return &network.NetworkConnection{
+					Id:        ncID,
+					NetworkId: netID,
+					ConnectionInfo: &network.NetworkConnection_Google{
+						Google: &network.GoogleNetworkConnectionInfo{
+							Name:              name,
+							PeerNetworkUrl:    peerURL,
+							ManagedNetworkUrl: managedURL,
+						},
+					},
+					Status: status,
+				}, nil
+			}
+		}
 		mocks = []getNetworkConnectionMockFunc{
-			func(ctx context.Context, req *network.GetNetworkConnectionRequest) (*network.NetworkConnection, error) {
-				require.Equal(t, ncID, req.NetworkConnectionId)
-				return &network.NetworkConnection{
-					Id:        ncID,
-					NetworkId: netID,
-					ConnectionInfo: &network.NetworkConnection_Google{
-						Google: &network.GoogleNetworkConnectionInfo{
-							Name:              name,
-							PeerNetworkUrl:    peerURL,
-							ManagedNetworkUrl: managedURL,
-						},
-					},
-					Status: network.NetworkConnection_NETWORK_CONNECTION_STATUS_CREATING,
-				}, nil
-			},
-			func(ctx context.Context, req *network.GetNetworkConnectionRequest) (*network.NetworkConnection, error) {
-				require.Equal(t, ncID, req.NetworkConnectionId)
-				return &network.NetworkConnection{
-					Id:        ncID,
-					NetworkId: netID,
-					ConnectionInfo: &network.NetworkConnection_Google{
-						Google: &network.GoogleNetworkConnectionInfo{
-							Name:              name,
-							PeerNetworkUrl:    peerURL,
-							ManagedNetworkUrl: managedURL,
-						},
-					},
-					Status: network.NetworkConnection_NETWORK_CONNECTION_STATUS_ACTIVE,
-				}, nil
-			},
+			generateMock(network.NetworkConnection_NETWORK_CONNECTION_STATUS_CREATING), // create Network Connection
+			generateMock(network.NetworkConnection_NETWORK_CONNECTION_STATUS_CREATING), // Create Accepter
+			generateMock(network.NetworkConnection_NETWORK_CONNECTION_STATUS_ACTIVE),   // Poll in accepter creation
+			generateMock(network.NetworkConnection_NETWORK_CONNECTION_STATUS_ACTIVE),   // Read Network Connection
 		}
 		expectedCalls := len(mocks)
 
