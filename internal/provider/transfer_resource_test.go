@@ -7,138 +7,203 @@ import (
 	"testing"
 
 	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-)
-
-var (
-	testTChSourceName string = fmt.Sprintf("%v-transfer-ch-source", testPrefix)
-	testTChTargetName string = fmt.Sprintf("%v-transfer-ch-target", testPrefix)
-	testTransferName  string = fmt.Sprintf("%v-transfer", testPrefix)
-
-	testTChSourceId string = fmt.Sprintf("doublecloud_transfer_endpoint.%v", testTChSourceName)
-	testTChTargetId string = fmt.Sprintf("doublecloud_transfer_endpoint.%v", testTChTargetName)
-	testTransferId  string = fmt.Sprintf("doublecloud_transfer.%v", testTransferName)
 )
 
 func TestAccTransferResource(t *testing.T) {
 	t.Parallel()
 
-	m := TransferResourceModel{
-		ProjectID:   types.StringValue(testProjectId),
-		Name:        types.StringValue(testTransferName),
-		Description: types.StringValue("transfer description"),
-		Type:        types.StringValue("SNAPSHOT_ONLY"),
-		Activated:   types.BoolValue(false),
-	}
-
-	m2 := TransferResourceModel{
-		ProjectID:   m.ProjectID,
-		Name:        types.StringValue(fmt.Sprintf("%v-updated", testTransferName)),
-		Description: m.Description,
-		Type:        m.Type,
-		Activated:   m.Activated,
-	}
-
-	m3 := TransferResourceModel{
-		ProjectID:   m.ProjectID,
-		Name:        m2.Name,
-		Description: m.Description,
-		Type:        m.Type,
-		Activated:   types.BoolValue(true),
-	}
+	const testTransferResource = "doublecloud_transfer.ttr-transfer"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read testing
 			{
-				Config: testAccTransferResourceConfig(&m),
+				Config: (testTransferResourceEndpointsConfig() +
+					"\n\n" +
+					fmt.Sprintf(`resource "doublecloud_transfer" "ttr-transfer" {
+						project_id = %[1]q
+						name = "ttr-transfer"
+						description = "test description"
+						source = doublecloud_transfer_endpoint.ttr-src-pg.id
+						target = doublecloud_transfer_endpoint.ttr-dst-ch.id
+						type = "SNAPSHOT_ONLY"
+						activated = false
+						transformation = {
+							transformers = [
+								{
+									replace_primary_key = {
+										tables = {
+											include = ["t1"]
+											exclude = ["t2"]
+										}
+										keys = [
+											"pk_field_1",
+											"pk_field_2"
+										]
+									}
+								},
+								{
+									convert_to_string = {
+										tables = {
+											include = ["t1"]
+											exclude = ["t2"]
+										}
+										columns = {
+											include = ["c1"]
+											exclude = ["c2"]
+										}
+									}
+								},
+								{
+									table_splitter = {
+										tables = {
+											include = ["t1", "t2"]
+											exclude = ["te1", "te2", "te3"]
+										}
+										columns = ["c1", "c2"]
+										splitter = "_"
+									}
+								}
+							]
+						}
+					}`, testProjectId)),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testTChSourceId, "name", testTChSourceName),
-					resource.TestCheckResourceAttr(testTChTargetId, "name", testTChTargetName),
-
-					resource.TestCheckResourceAttr(testTransferId, "name", m.Name.ValueString()),
-					resource.TestCheckResourceAttr(testTransferId, "description", m.Description.ValueString()),
-					resource.TestCheckResourceAttr(testTransferId, "type", m.Type.ValueString()),
-					resource.TestCheckResourceAttr(testTransferId, "activated", m.Activated.String()),
-
-					resource.TestCheckResourceAttrSet(testTransferId, "source"),
-					resource.TestCheckResourceAttrSet(testTransferId, "target"),
+					resource.TestCheckResourceAttr(testTransferResource, "name", "ttr-transfer"),
+					resource.TestCheckResourceAttr(testTransferResource, "description", "test description"),
+					resource.TestCheckResourceAttrSet(testTransferResource, "source"),
+					resource.TestCheckResourceAttrSet(testTransferResource, "target"),
+					resource.TestCheckResourceAttr(testTransferResource, "type", "SNAPSHOT_ONLY"),
+					resource.TestCheckResourceAttr(testTransferResource, "activated", "false"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "3"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.include.0", "t1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.exclude.0", "t2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.keys.0", "pk_field_1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.keys.1", "pk_field_2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.tables.include.0", "t1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.tables.exclude.0", "t2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.columns.include.0", "c1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.columns.exclude.0", "c2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.include.0", "t1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.include.1", "t2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.exclude.0", "te1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.exclude.1", "te2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.exclude.2", "te3"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.columns.0", "c1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.columns.1", "c2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.splitter", "_"),
 				),
 			},
-			// Update and Read testing
 			{
-				Config: testAccTransferResourceConfig(&m2),
+				Config: (testTransferResourceEndpointsConfig() +
+					"\n\n" +
+					fmt.Sprintf(`resource "doublecloud_transfer" "ttr-transfer" {
+						project_id = %[1]q
+						name = "ttr-transfer"
+						description = "test description"
+						source = doublecloud_transfer_endpoint.ttr-src-pg.id
+						target = doublecloud_transfer_endpoint.ttr-dst-ch.id
+						type = "SNAPSHOT_ONLY"
+						activated = false
+						transformation = {
+							transformers = [
+								{
+									convert_to_string = {
+										tables = {
+											include = ["t1"]
+											exclude = ["t2"]
+										}
+										columns = {
+											include = ["c1"]
+											exclude = ["c2"]
+										}
+									}
+								},
+							]
+						}
+					}`, testProjectId)),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testTransferId, "name", m2.Name.ValueString()),
-					resource.TestCheckResourceAttr(testTransferId, "description", m2.Description.ValueString()),
-
-					resource.TestCheckResourceAttr(testTransferId, "type", m2.Type.ValueString()),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.convert_to_string.tables.include.0", "t1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.convert_to_string.tables.exclude.0", "t2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.convert_to_string.columns.include.0", "c1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.convert_to_string.columns.exclude.0", "c2"),
 				),
 			},
-			// Update and Read testing
 			{
-				Config: testAccTransferResourceConfig(&m3),
+				Config: (testTransferResourceEndpointsConfig() +
+					"\n\n" +
+					fmt.Sprintf(`resource "doublecloud_transfer" "ttr-transfer" {
+						project_id = %[1]q
+						name = "ttr-transfer"
+						description = "test description"
+						source = doublecloud_transfer_endpoint.ttr-src-pg.id
+						target = doublecloud_transfer_endpoint.ttr-dst-ch.id
+						type = "SNAPSHOT_ONLY"
+						activated = false
+						transformation = {
+							transformers = [
+								{
+									dbt = {
+										git_repository_link = "https://github.com/doublecloud/tests-clickhouse-dbt.git"
+										profile_name = "my_clickhouse_profile"
+										operation = "run"
+									}
+								},
+							]
+						}
+					}`, testProjectId)),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testTransferId, "name", m2.Name.ValueString()),
-
-					resource.TestCheckResourceAttr(testTransferId, "activated", m3.Activated.String()),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.dbt.git_repository_link", "https://github.com/doublecloud/tests-clickhouse-dbt.git"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.dbt.profile_name", "my_clickhouse_profile"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.dbt.operation", "run"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
+			// Delete occurs automatically
 		},
 	})
 }
 
-func testAccTransferResourceConfig(m *TransferResourceModel) string {
-	return fmt.Sprintf(`
-resource "doublecloud_transfer" "tf-acc-transfer" {
-	project_id = %[1]q
-	name = %[2]q
-	description = %[3]q
-	source = %[8]s.id
-	target = %[9]s.id
-	type = %[4]q
-	activated = %[5]q
-}
-
-resource "doublecloud_transfer_endpoint" %[6]q {
-	project_id = %[1]q
-	name = %[6]q
-	settings {
-		clickhouse_source {
-			connection {
-				address {
-					cluster_id = "cluster-foo-id"
+func testTransferResourceEndpointsConfig() string {
+	return fmt.Sprintf(
+		`resource "doublecloud_transfer_endpoint" "ttr-src-pg" {
+			project_id = %[1]q
+			name = "ttr-src-pg"
+			settings {
+				postgres_source {
+					connection {
+						on_premise {
+							hosts = ["leader-0.company.tech"]
+							port = 5432
+						}
+					}
+					database = "production"
+					user = "dc-transfer"
+					password = "foobar123"
 				}
-				database = "default"
-				user = "admin"
-				password = "foobar123"	
 			}
 		}
-	}
-}
 
-resource "doublecloud_transfer_endpoint" %[7]q {
-  project_id = %[1]q
-  name = %[7]q
-  settings {
-	clickhouse_target {
-			connection {
-				address {
-					cluster_id = "cluster-foo-id2"
+		resource "doublecloud_transfer_endpoint" "ttr-dst-ch" {
+		project_id = %[1]q
+		name = "ttr-dst-ch"
+		settings {
+			clickhouse_target {
+					connection {
+						address {
+							cluster_id = "cluster-foo-id2"
+						}
+						database = "default"
+						user = "admin"
+						password = "foobar123"	
+					}
 				}
-				database = "default"
-				user = "admin"
-				password = "foobar123"	
 			}
-		}
-	}
-}
-`, m.ProjectID.ValueString(), m.Name.ValueString(), m.Description.ValueString(), m.Type.ValueString(), m.Activated.String(),
-		testTChSourceName, testTChTargetName, testTChSourceId, testTChTargetId)
+		}`,
+		testProjectId,
+	)
 }
 
 func init() {
