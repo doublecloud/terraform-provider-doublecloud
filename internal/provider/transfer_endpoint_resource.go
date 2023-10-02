@@ -42,14 +42,15 @@ type TransferEndpointModel struct {
 }
 
 type endpointSettings struct {
-	ClickhouseSource    *endpointClickhouseSourceSettings    `tfsdk:"clickhouse_source"`
-	KafkaSource         *endpointKafkaSourceSettings         `tfsdk:"kafka_source"`
-	PostgresSource      *endpointPostgresSourceSettings      `tfsdk:"postgres_source"`
-	MysqlSource         *endpointMysqlSourceSettings         `tfsdk:"mysql_source"`
-	MongoSource         *endpointMongoSourceSettings         `tfsdk:"mongo_source"`
-	S3Source            *endpointS3SourceSettings            `tfsdk:"s3_source"`
-	LinkedinAdsSource   *endpointLinkedinAdsSourceSettings   `tfsdk:"linkedinads_source"`
-	AWSCloudTrailSource *endpointAWSCloudTrailSourceSettings `tfsdk:"aws_cloudtrail_source"`
+	ClickhouseSource    *endpointClickhouseSourceSettings        `tfsdk:"clickhouse_source"`
+	KafkaSource         *endpointKafkaSourceSettings             `tfsdk:"kafka_source"`
+	PostgresSource      *endpointPostgresSourceSettings          `tfsdk:"postgres_source"`
+	MysqlSource         *endpointMysqlSourceSettings             `tfsdk:"mysql_source"`
+	MongoSource         *endpointMongoSourceSettings             `tfsdk:"mongo_source"`
+	S3Source            *endpointS3SourceSettings                `tfsdk:"s3_source"`
+	LinkedinAdsSource   *endpointLinkedinAdsSourceSettings       `tfsdk:"linkedinads_source"`
+	AWSCloudTrailSource *endpointAWSCloudTrailSourceSettings     `tfsdk:"aws_cloudtrail_source"`
+	GoogleAdsSource     *transferEndpointGoogleAdsSourceSettings `tfsdk:"googleads_source"`
 
 	ClickhouseTarget *endpointClickhouseTargetSettings `tfsdk:"clickhouse_target"`
 	KafkaTarget      *endpointKafkaTargetSettings      `tfsdk:"kafka_target"`
@@ -108,6 +109,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"s3_source":             transferEndpointS3SourceSchema(),
 					"linkedinads_source":    endpointLinkedinAdsSourceSettingsSchema(),
 					"aws_cloudtrail_source": endpointAWSCloudTrailSourceSettingsSchema(),
+					"googleads_source":      transferEndpointGoogleAdsSourceSettingsSchema(),
 
 					"clickhouse_target": transferEndpointChTargetSchema(),
 					"kafka_target":      transferEndpointKafkaTargetSchema(),
@@ -328,7 +330,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
-
 	if m.Settings.KafkaSource != nil {
 		s, d := kafkaSourceEndpointSettings(m.Settings.KafkaSource)
 		if d.HasError() {
@@ -337,7 +338,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
-
 	if m.Settings.PostgresSource != nil {
 		s, d := postgresSourceEndpointSettings(m.Settings.PostgresSource)
 		if d.HasError() {
@@ -379,6 +379,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		diag.Append(m.Settings.AWSCloudTrailSource.convert(result)...)
 		return &transfer.EndpointSettings{
 			Settings: &transfer.EndpointSettings_AwsCloudtrailSource{AwsCloudtrailSource: result},
+		}, diag
+	}
+	if m.Settings.GoogleAdsSource != nil {
+		result := new(endpoint_airbyte.GoogleAdsSource)
+		diag.Append(m.Settings.GoogleAdsSource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_GoogleAdsSource{GoogleAdsSource: result},
 		}, diag
 	}
 
@@ -523,6 +530,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.AWSCloudTrailSource = &endpointAWSCloudTrailSourceSettings{}
 		}
 		diag.Append(data.Settings.AWSCloudTrailSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetGoogleAdsSource(); settings != nil {
+		if data.Settings.GoogleAdsSource == nil {
+			data.Settings.GoogleAdsSource = &transferEndpointGoogleAdsSourceSettings{}
+		}
+		diag.Append(data.Settings.GoogleAdsSource.parse(settings)...)
 	}
 
 	if data.Settings == nil {
