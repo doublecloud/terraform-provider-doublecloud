@@ -21,8 +21,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TransferEndpointResource{}
-var _ resource.ResourceWithImportState = &TransferEndpointResource{}
+var (
+	_ resource.Resource                = &TransferEndpointResource{}
+	_ resource.ResourceWithImportState = &TransferEndpointResource{}
+)
 
 func NewTransferEndpointResource() resource.Resource {
 	return &TransferEndpointResource{}
@@ -47,6 +49,7 @@ type endpointSettings struct {
 	PostgresSource      *endpointPostgresSourceSettings      `tfsdk:"postgres_source"`
 	MysqlSource         *endpointMysqlSourceSettings         `tfsdk:"mysql_source"`
 	MongoSource         *endpointMongoSourceSettings         `tfsdk:"mongo_source"`
+	ObjectStorageSource *endpointObjectStorageSourceSettings `tfsdk:"object_storage_source"`
 	S3Source            *endpointS3SourceSettings            `tfsdk:"s3_source"`
 	LinkedinAdsSource   *endpointLinkedinAdsSourceSettings   `tfsdk:"linkedinads_source"`
 	AWSCloudTrailSource *endpointAWSCloudTrailSourceSettings `tfsdk:"aws_cloudtrail_source"`
@@ -105,6 +108,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"postgres_source":       transferEndpointPostgresSourceSchema(),
 					"mysql_source":          transferEndpointMysqlSourceSchema(),
 					"mongo_source":          transferEndpointMongoSourceSchema(),
+					"object_storage_source": transferEndpointObjectStorageSourceSchema(),
 					"s3_source":             transferEndpointS3SourceSchema(),
 					"linkedinads_source":    endpointLinkedinAdsSourceSettingsSchema(),
 					"aws_cloudtrail_source": endpointAWSCloudTrailSourceSettingsSchema(),
@@ -333,7 +337,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		s, d := kafkaSourceEndpointSettings(m.Settings.KafkaSource)
 		if d.HasError() {
 			diag.Append(d...)
-
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
@@ -342,7 +345,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		s, d := postgresSourceEndpointSettings(m.Settings.PostgresSource)
 		if d.HasError() {
 			diag.Append(d...)
-
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
@@ -355,6 +357,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 	}
 	if m.Settings.MongoSource != nil {
 		s, d := m.Settings.MongoSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.ObjectStorageSource != nil {
+		s, d := m.Settings.ObjectStorageSource.convert()
 		if d.HasError() {
 			diag.Append(d...)
 		}
@@ -499,6 +508,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.MongoSource = &endpointMongoSourceSettings{}
 		}
 		diag.Append(data.Settings.MongoSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetObjectStorageSource(); settings != nil {
+		if data.Settings.ObjectStorageSource == nil {
+			data.Settings.ObjectStorageSource = &endpointObjectStorageSourceSettings{}
+		}
+		diag.Append(data.Settings.ObjectStorageSource.parse(settings)...)
 	}
 	if settings := e.Settings.GetMongoTarget(); settings != nil {
 		if data.Settings.MongoTarget == nil {
