@@ -3,3 +3,4 @@ dist
 authorized_key.json
 CHANGELOG.md
 terraform-provider-doublecloud
+env.fish

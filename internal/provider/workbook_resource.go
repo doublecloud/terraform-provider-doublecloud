@@ -315,7 +315,7 @@ func (r *WorkbookResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	// TODO: support json comparision with null values
+	// TODO: support json comparison with null values
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -32,6 +32,16 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
     log_level = "LOG_LEVEL_TRACE"
     max_connections = 120
   }
+
+  access {
+    data_services = ["transfer"]
+    ipv4_cidr_blocks = [
+      {
+        value = "10.0.0.0/8"
+        description = "Office in Berlin"
+      }
+	  ]
+  }
 }
 ```
 
@@ -48,11 +58,46 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 
 ### Optional
 
+- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) (see [below for nested schema](#nestedblock--config))
 - `description` (String) Description of the ClickHouse cluster.
 - `id` (String) ID of the ClickHouse cluster.
 - `resources` (Block, Optional) (see [below for nested schema](#nestedblock--resources))
 - `version` (String) Version of ClickHouse DBMS.
+
+<a id="nestedblock--access"></a>
+### Nested Schema for `access`
+
+Optional:
+
+- `data_services` (List of String) List of allowed services
+- `ipv4_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
+- `ipv6_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
+
+<a id="nestedatt--access--ipv4_cidr_blocks"></a>
+### Nested Schema for `access.ipv4_cidr_blocks`
+
+Required:
+
+- `value` (String) CIDR block
+
+Optional:
+
+- `description` (String) Description of CIDR block
+
+
+<a id="nestedatt--access--ipv6_cidr_blocks"></a>
+### Nested Schema for `access.ipv6_cidr_blocks`
+
+Required:
+
+- `value` (String) CIDR block
+
+Optional:
+
+- `description` (String) Description of CIDR block
+
+
 
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
@@ -130,3 +175,5 @@ Optional:
 - `replica_count` (Number) Number of hosts per shard.
 - `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
 - `shard_count` (Number) Number of shards in the cluster.
+
+

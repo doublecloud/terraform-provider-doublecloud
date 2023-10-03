@@ -32,6 +32,16 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
   schema_registry {
     enabled = false
   }
+
+  access {
+    data_services = ["transfer"]
+    ipv4_cidr_blocks = [
+      {
+        value = "10.0.0.0/8"
+        description = "Office in Berlin"
+      }
+	  ]
+  }
 }
 ```
 
@@ -48,6 +58,7 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 
 ### Optional
 
+- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
 - `description` (String) Description of cluster
 - `resources` (Block, Optional) Resources of cluster (see [below for nested schema](#nestedblock--resources))
 - `schema_registry` (Block, Optional) Schema Registry configuration (see [below for nested schema](#nestedblock--schema_registry))
@@ -56,6 +67,40 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 ### Read-Only
 
 - `id` (String) Cluster Id
+
+<a id="nestedblock--access"></a>
+### Nested Schema for `access`
+
+Optional:
+
+- `data_services` (List of String) List of allowed services
+- `ipv4_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
+- `ipv6_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
+
+<a id="nestedatt--access--ipv4_cidr_blocks"></a>
+### Nested Schema for `access.ipv4_cidr_blocks`
+
+Required:
+
+- `value` (String) CIDR block
+
+Optional:
+
+- `description` (String) Description of CIDR block
+
+
+<a id="nestedatt--access--ipv6_cidr_blocks"></a>
+### Nested Schema for `access.ipv6_cidr_blocks`
+
+Required:
+
+- `value` (String) CIDR block
+
+Optional:
+
+- `description` (String) Description of CIDR block
+
+
 
 <a id="nestedblock--resources"></a>
 ### Nested Schema for `resources`
@@ -82,3 +127,5 @@ Required:
 Optional:
 
 - `enabled` (Boolean)
+
+

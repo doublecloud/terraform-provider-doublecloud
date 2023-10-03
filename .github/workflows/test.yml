@@ -16,11 +16,13 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
+      - run: go mod download
+      - run: go mod vendor
+      - run: go build -v ./...
       - uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.54
+          version: v1.54.2
           args: --timeout=10m
-      - run: go build -v ./...
       - name: run acceptance tests
         run: |
           echo $DC_KEY > authorized_key.json

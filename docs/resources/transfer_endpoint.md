@@ -77,6 +77,8 @@ Optional:
 - `aws_cloudtrail_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--aws_cloudtrail_source))
 - `clickhouse_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source))
 - `clickhouse_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target))
+- `facebookmarketing_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--facebookmarketing_source))
+- `googleads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--googleads_source))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
 - `linkedinads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source))
@@ -222,6 +224,66 @@ Optional:
 
 
 
+
+
+
+<a id="nestedblock--settings--facebookmarketing_source"></a>
+### Nested Schema for `settings.facebookmarketing_source`
+
+Optional:
+
+- `access_token` (String, Sensitive) The value of the access token. See  [documentation](https://docs.airbyte.io/integrations/sources/facebook-marketing) for more information on the meaning of this token and how to obtain it
+- `account_id` (String) The Facebook Ad account ID to use when pulling data from the Facebook Marketing API. Example: `111111111111111`
+- `custom_insights` (Attributes List) Insights. Each entry must have a name and can contains `fields`, `breakdowns`, or `action_breakdowns` (see [below for nested schema](#nestedatt--settings--facebookmarketing_source--custom_insights))
+- `end_date` (String) The date until which you'd like to replicate data for all incremental streams, in the format `YYYY-MM-DDT00:00:00Z`. All data generated between `start_date` and this date will be replicated. Not setting this option will result in always syncing the latest data. Example: `2017-01-25T23:59:59Z`
+- `fetch_thumbnail_images` (Boolean) In each Ad Creative, fetch the `thumbnail_url` and store the result in `thumbnail_data_url`
+- `include_deleted` (Boolean) Include data from deleted Campaigns, Ads, and AdSets
+- `start_date` (String) The date from which to replicate data for all incremental streams, in the format `YYYY-MM-DDT00:00:00Z`. All data generated after this date and before `end_date` (if set) will be replicated. Example: `2017-01-25T00:00:00Z`
+
+<a id="nestedatt--settings--facebookmarketing_source--custom_insights"></a>
+### Nested Schema for `settings.facebookmarketing_source.custom_insights`
+
+Optional:
+
+- `action_breakdowns` (List of String) `action_breakdowns` request parameter
+- `breakdowns` (List of String) `breakdowns` request parameter
+- `fields` (List of String) `fields` request parameter
+- `name` (String) The name of the insight
+
+
+
+<a id="nestedblock--settings--googleads_source"></a>
+### Nested Schema for `settings.googleads_source`
+
+Optional:
+
+- `conversion_window_days` (Number)
+- `credentials` (Block, Optional) (see [below for nested schema](#nestedblock--settings--googleads_source--credentials))
+- `custom_queries` (Attributes List) (see [below for nested schema](#nestedatt--settings--googleads_source--custom_queries))
+- `customer_id` (String)
+- `end_date` (String)
+- `login_customer_id` (String)
+- `start_date` (String)
+
+<a id="nestedblock--settings--googleads_source--credentials"></a>
+### Nested Schema for `settings.googleads_source.credentials`
+
+Optional:
+
+- `access_token` (String)
+- `client_id` (String)
+- `client_secret` (String)
+- `developer_token` (String)
+- `refresh_token` (String)
+
+
+<a id="nestedatt--settings--googleads_source--custom_queries"></a>
+### Nested Schema for `settings.googleads_source.custom_queries`
+
+Optional:
+
+- `query` (String)
+- `table_name` (String)
 
 
 
@@ -911,3 +973,5 @@ Optional:
 - `path_prefix` (String)
 - `use_ssl` (Boolean)
 - `verify_ssl_cert` (Boolean)
+
+

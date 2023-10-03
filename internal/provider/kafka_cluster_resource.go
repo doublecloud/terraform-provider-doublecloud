@@ -47,6 +47,7 @@ type KafkaClusterModel struct {
 	Resources      KafkaResourcesModel  `tfsdk:"resources"`
 	NetworkId      types.String         `tfsdk:"network_id"`
 	SchemaRegistry *schemaRegistryModel `tfsdk:"schema_registry"`
+	Access         *AccessModel         `tfsdk:"access"`
 }
 
 type schemaRegistryModel struct {
@@ -142,6 +143,7 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 					"enabled": schema.BoolAttribute{Computed: true, Optional: true},
 				},
 			},
+			"access": AccessSchemaBlock(),
 		},
 		MarkdownDescription: "Kafka cluster resource",
 		Version:             0,
@@ -171,6 +173,7 @@ func (r *KafkaClusterResource) Configure(ctx context.Context, req resource.Confi
 }
 
 func createKafkaClusterRequest(m *KafkaClusterModel) (*kafka.CreateClusterRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	rq := &kafka.CreateClusterRequest{}
 	rq.Name = m.Name.ValueString()
 	rq.CloudType = m.CloudType.ValueString()
@@ -196,7 +199,13 @@ func createKafkaClusterRequest(m *KafkaClusterModel) (*kafka.CreateClusterReques
 		}
 	}
 
-	return rq, nil
+	if m.Access != nil {
+		access, d := m.Access.convert()
+		diags.Append(d...)
+		rq.Access = access
+	}
+
+	return rq, diags
 }
 
 func deleteKafkaClusterRequest(m *KafkaClusterModel) (*kafka.DeleteClusterRequest, diag.Diagnostics) {
@@ -313,6 +322,7 @@ func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadReques
 }
 
 func updateKafkaClusterRequest(m *KafkaClusterModel) (*kafka.UpdateClusterRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	rq := &kafka.UpdateClusterRequest{}
 	rq.ClusterId = m.Id.ValueString()
 	rq.Name = m.Name.ValueString()
@@ -333,8 +343,13 @@ func updateKafkaClusterRequest(m *KafkaClusterModel) (*kafka.UpdateClusterReques
 			Enabled: m.SchemaRegistry.Enabled.ValueBool(),
 		}
 	}
+	if m.Access != nil {
+		access, d := m.Access.convert()
+		diags.Append(d...)
+		rq.Access = access
+	}
 
-	return rq, nil
+	return rq, diags
 }
 
 func (r *KafkaClusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
