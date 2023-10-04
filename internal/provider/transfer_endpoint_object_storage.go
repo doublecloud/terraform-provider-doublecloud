@@ -124,6 +124,33 @@ type endpointObjectStorageEventSourceSQS struct {
 	VerifySSLCert      types.Bool   `tfsdk:"verify_ssl_cert"`
 }
 
+type endpointObjectStorageTargetSettings struct {
+	Bucket               types.String                           `tfsdk:"bucket"`
+	ServiceAccountID     types.String                           `tfsdk:"service_account_id"`
+	OutputFormat         types.String                           `tfsdk:"output_format"`
+	BucketLayout         types.String                           `tfsdk:"bucket_layout"`
+	BucketLayoutTimezone types.String                           `tfsdk:"bucket_layout_timezone"`
+	BucketLayoutColumn   types.String                           `tfsdk:"bucket_layout_column"`
+	BufferSize           types.String                           `tfsdk:"buffer_size"`
+	BufferInterval       types.String                           `tfsdk:"buffer_interval"`
+	OutputEncoding       types.String                           `tfsdk:"output_encoding"`
+	Connection           *endpointObjectStorageConnection       `tfsdk:"connection"`
+	SerializerConfig     *endpointObjectStorageSerializerConfig `tfsdk:"serializer_config"`
+}
+
+type endpointObjectStorageSerializerConfig struct {
+	AnyAsString types.Bool `tfsdk:"any_as_string"`
+}
+
+type endpointObjectStorageConnection struct {
+	AwsAccessKeyId     types.String `tfsdk:"aws_access_key_id"`
+	AwsSecretAccessKey types.String `tfsdk:"aws_secret_access_key"`
+	Region             types.String `tfsdk:"region"`
+	Endpoint           types.String `tfsdk:"endpoint"`
+	UseSSL             types.Bool   `tfsdk:"use_ssl"`
+	VerifySSLCert      types.Bool   `tfsdk:"verify_ssl_cert"`
+}
+
 func endpointObjetStorageDataSchemaJsonFieldsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
@@ -278,6 +305,72 @@ func endpointObjectStorageSourceEventSourceSchema() schema.Block {
 			"pub_sub": schema.SingleNestedBlock{},
 		},
 	}
+}
+
+func transferEndpointObjectStorageTargetSchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{
+			"bucket":             schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"service_account_id": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"output_format": schema.StringAttribute{
+				Optional:      true,
+				Computed:      true,
+				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Validators:    []validator.String{transferEndpointObjectStorageOutputFormatValidator()},
+			},
+			"bucket_layout":          schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"bucket_layout_timezone": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"bucket_layout_column":   schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"buffer_size":            schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"buffer_interval":        schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"output_encoding": schema.StringAttribute{
+				Optional:      true,
+				Computed:      true,
+				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Validators:    []validator.String{transferEndpointObjectStorageOutputEncodingValidator()},
+			},
+			"connection":        endpointObjectStorageTargetConnectionSchema(),
+			"serializer_config": endpointObjectStorageTargetSerializerConfigSchema(),
+		},
+	}
+}
+
+func endpointObjectStorageTargetConnectionSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Attributes: map[string]schema.Attribute{
+			"skip_rows":                 schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"skip_rows_after_names":     schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"autogenerate_column_names": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"column_names":              schema.ListAttribute{ElementType: types.StringType, Optional: true},
+		},
+	}
+}
+
+func endpointObjectStorageTargetSerializerConfigSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Attributes: map[string]schema.Attribute{
+			"skip_rows":                 schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"skip_rows_after_names":     schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"autogenerate_column_names": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"column_names":              schema.ListAttribute{ElementType: types.StringType, Optional: true},
+		},
+	}
+}
+
+func transferEndpointObjectStorageOutputFormatValidator() validator.String {
+	names := make([]string, len(endpoint.ObjectStorageSerializationFormat_name))
+	for i, v := range endpoint.ObjectStorageSerializationFormat_name {
+		names[i] = v
+	}
+	return stringvalidator.OneOfCaseInsensitive(names...)
+}
+
+func transferEndpointObjectStorageOutputEncodingValidator() validator.String {
+	names := make([]string, len(endpoint.ObjectStorageCodec_name))
+	for i, v := range endpoint.ObjectStorageCodec_name {
+		names[i] = v
+	}
+	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
 func (m *endpointObjectStorageSourceSettings) convert() (*transfer.EndpointSettings_ObjectStorageSource, diag.Diagnostics) {
@@ -735,4 +828,124 @@ func (m *endpointObjectStorageEventSource) convert() (*endpoint.ObjectStorageEve
 	diags.AddError("missed s3 event source format", "missed one of block: sqs, sns, pub/sub")
 
 	return &event, diags
+}
+
+func (m *endpointObjectStorageTargetSettings) parse(e *endpoint.ObjectStorageTarget) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	m.Bucket = types.StringValue(e.Bucket)
+	m.BucketLayout = types.StringValue(e.BucketLayout)
+	m.BucketLayoutColumn = types.StringValue(e.BucketLayoutColumn)
+	m.BucketLayoutTimezone = types.StringValue(e.BucketLayoutTimezone)
+	m.BufferInterval = types.StringValue(e.BufferInterval)
+	m.BufferSize = types.StringValue(e.BufferSize)
+	m.ServiceAccountID = types.StringValue(e.ServiceAccountId)
+	m.OutputFormat = types.StringValue(e.OutputFormat.String())
+	m.OutputEncoding = types.StringValue(e.OutputEncoding.String())
+	diags.Append(m.Connection.parse(e.Connection)...)
+	diags.Append(m.SerializerConfig.parse(e.SerializerConfig)...)
+
+	return diags
+}
+
+func (m *endpointObjectStorageTargetSettings) convert() (*transfer.EndpointSettings_ObjectStorageTarget, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	settings := &transfer.EndpointSettings_ObjectStorageTarget{ObjectStorageTarget: &endpoint.ObjectStorageTarget{}}
+
+	if v := m.Bucket; !v.IsNull() {
+		settings.ObjectStorageTarget.Bucket = v.ValueString()
+	}
+
+	if v := m.BucketLayout; !v.IsNull() {
+		settings.ObjectStorageTarget.BucketLayout = v.ValueString()
+	}
+	if v := m.BucketLayoutColumn; !v.IsNull() {
+		settings.ObjectStorageTarget.BucketLayoutColumn = v.ValueString()
+	}
+	if v := m.BucketLayoutTimezone; !v.IsNull() {
+		settings.ObjectStorageTarget.BucketLayoutTimezone = v.ValueString()
+	}
+	if v := m.ServiceAccountID; !v.IsNull() {
+		settings.ObjectStorageTarget.ServiceAccountId = v.ValueString()
+	}
+	if v := m.BufferInterval; !v.IsNull() {
+		settings.ObjectStorageTarget.BufferInterval = v.ValueString()
+	}
+	if v := m.BufferSize; !v.IsNull() {
+		settings.ObjectStorageTarget.BufferSize = v.ValueString()
+	}
+	if v := m.OutputFormat; !v.IsNull() {
+		settings.ObjectStorageTarget.OutputFormat = endpoint.ObjectStorageSerializationFormat(endpoint.ObjectStorageSerializationFormat_value[v.ValueString()])
+	}
+	if v := m.OutputEncoding; !v.IsNull() {
+		settings.ObjectStorageTarget.OutputEncoding = endpoint.ObjectStorageCodec(endpoint.ObjectStorageCodec_value[v.ValueString()])
+	}
+
+	if v := m.Connection; v != nil {
+		connection, d := v.convert()
+		settings.ObjectStorageTarget.Connection = connection
+		diags.Append(d...)
+	}
+	if v := m.SerializerConfig; v != nil {
+		config, d := v.convert()
+		settings.ObjectStorageTarget.SerializerConfig = config
+		diags.Append(d...)
+	}
+	return settings, diags
+}
+
+func (m *endpointObjectStorageConnection) parse(e *endpoint.ObjectStorageConnection) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	m.AwsAccessKeyId = types.StringValue(e.AwsAccessKeyId)
+	m.AwsSecretAccessKey = types.StringValue(e.AwsSecretAccessKey)
+	m.Endpoint = types.StringValue(e.Endpoint)
+	m.Region = types.StringValue(e.Region)
+	m.UseSSL = types.BoolValue(e.UseSsl)
+	m.VerifySSLCert = types.BoolValue(e.VerifySslCert)
+
+	return diags
+}
+
+func (m *endpointObjectStorageConnection) convert() (*endpoint.ObjectStorageConnection, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	connection := endpoint.ObjectStorageConnection{}
+	if v := m.AwsAccessKeyId; !v.IsNull() {
+		connection.AwsAccessKeyId = v.ValueString()
+	}
+	if v := m.AwsSecretAccessKey; !v.IsNull() {
+		connection.AwsSecretAccessKey = v.ValueString()
+	}
+	if v := m.Endpoint; !v.IsNull() {
+		connection.Endpoint = v.ValueString()
+	}
+	if v := m.Region; !v.IsNull() {
+		connection.Region = v.ValueString()
+	}
+	if v := m.UseSSL; !v.IsNull() {
+		connection.UseSsl = v.ValueBool()
+	}
+	if v := m.VerifySSLCert; !v.IsNull() {
+		connection.VerifySslCert = v.ValueBool()
+	}
+
+	return &connection, diags
+}
+
+func (m *endpointObjectStorageSerializerConfig) parse(e *endpoint.ObjectStorageSerializerConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	m.AnyAsString = types.BoolValue(e.AnyAsString)
+	return diags
+}
+
+func (m *endpointObjectStorageSerializerConfig) convert() (*endpoint.ObjectStorageSerializerConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	config := endpoint.ObjectStorageSerializerConfig{}
+	if v := m.AnyAsString; !v.IsNull() {
+		config.AnyAsString = v.ValueBool()
+	}
+	return &config, diags
 }
