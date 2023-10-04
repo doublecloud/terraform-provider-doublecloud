@@ -228,19 +228,7 @@ func transferEndpointObjectStorageSourceSchema() schema.Block {
 func endpointObjectStorageSourceFormatSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Blocks: map[string]schema.Block{
-			"csv": schema.SingleNestedBlock{
-				Attributes: map[string]schema.Attribute{
-					"delimiter":          schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"quote_char":         schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"escape_char":        schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"encoding":           schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"double_quote":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"newlines_in_values": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"block_size":         schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-					"additional_options": endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema(),
-					"advanced_options":   endpointObjectStorageSourceFormatCsvAdvancedOptionsSchema(),
-				},
-			},
+			"csv":     endpointObjectStorageSourceFormatCsvSchema(),
 			"parquet": schema.SingleNestedBlock{},
 			"avro":    schema.SingleNestedBlock{},
 			"jsonl": schema.SingleNestedBlock{
@@ -259,8 +247,26 @@ func endpointObjectStorageSourceFormatSchema() schema.Block {
 	}
 }
 
-func endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema() schema.Attribute {
-	return schema.SingleNestedAttribute{
+func endpointObjectStorageSourceFormatCsvSchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{
+			"delimiter":          schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"quote_char":         schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"escape_char":        schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"encoding":           schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"double_quote":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"newlines_in_values": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"block_size":         schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+		},
+		Blocks: map[string]schema.Block{
+			"additional_options": endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema(),
+			"advanced_options":   endpointObjectStorageSourceFormatCsvAdvancedOptionsSchema(),
+		},
+	}
+}
+
+func endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema() schema.Block {
+	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"null_values":                schema.ListAttribute{ElementType: types.StringType, Optional: true},
 			"true_values":                schema.ListAttribute{ElementType: types.StringType, Optional: true},
@@ -275,8 +281,8 @@ func endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema() schema.Attrib
 	}
 }
 
-func endpointObjectStorageSourceFormatCsvAdvancedOptionsSchema() schema.Attribute {
-	return schema.SingleNestedAttribute{
+func endpointObjectStorageSourceFormatCsvAdvancedOptionsSchema() schema.Block {
+	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"skip_rows":                 schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"skip_rows_after_names":     schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
@@ -329,30 +335,31 @@ func transferEndpointObjectStorageTargetSchema() schema.Block {
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:    []validator.String{transferEndpointObjectStorageOutputEncodingValidator()},
 			},
+		},
+		Blocks: map[string]schema.Block{
 			"connection":        endpointObjectStorageTargetConnectionSchema(),
 			"serializer_config": endpointObjectStorageTargetSerializerConfigSchema(),
 		},
 	}
 }
 
-func endpointObjectStorageTargetConnectionSchema() schema.Attribute {
-	return schema.SingleNestedAttribute{
+func endpointObjectStorageTargetConnectionSchema() schema.Block {
+	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"skip_rows":                 schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"skip_rows_after_names":     schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"autogenerate_column_names": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"column_names":              schema.ListAttribute{ElementType: types.StringType, Optional: true},
+			"aws_access_key_id":     schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"aws_secret_access_key": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"endpoint":              schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"region":                schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
 
-func endpointObjectStorageTargetSerializerConfigSchema() schema.Attribute {
-	return schema.SingleNestedAttribute{
+func endpointObjectStorageTargetSerializerConfigSchema() schema.Block {
+	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"skip_rows":                 schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"skip_rows_after_names":     schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"autogenerate_column_names": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"column_names":              schema.ListAttribute{ElementType: types.StringType, Optional: true},
+			"any_as_string": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
