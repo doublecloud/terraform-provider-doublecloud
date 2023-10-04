@@ -561,8 +561,14 @@ func (m *endpointObjectStorageFormat) parse(e *endpoint.ObjectStorageReaderForma
 		m.Csv.DoubleQuote = types.BoolValue(v.DoubleQuote)
 		m.Csv.NewlinesInValues = types.BoolValue(v.NewlinesInValues)
 		m.Csv.BlockSize = types.Int64Value(v.BlockSize)
-		diags.Append(m.Csv.AdditionalReaderOptions.parse(e.GetCsv().GetAdditionalOptions())...)
-		diags.Append(m.Csv.AdvancedOptions.parse(e.GetCsv().GetAdvancedOptions())...)
+		if additionalOptions := v.GetAdditionalOptions(); additionalOptions != nil {
+			m.Csv.AdditionalReaderOptions = &endpointObjectStorageFormatCSVAdditionalReaderOptions{}
+			diags.Append(m.Csv.AdditionalReaderOptions.parse(additionalOptions)...)
+		}
+		if advancedOptions := v.GetAdvancedOptions(); advancedOptions != nil {
+			m.Csv.AdvancedOptions = &endpointObjectStorageFormatCSVAdvancedOptions{}
+			diags.Append(m.Csv.AdvancedOptions.parse(advancedOptions)...)
+		}
 	}
 	if v := e.GetParquet(); v != nil {
 		m.Parquet = &endpointObjectStorageFormatParquet{}
@@ -849,8 +855,8 @@ func (m *endpointObjectStorageTargetSettings) parse(e *endpoint.ObjectStorageTar
 	m.ServiceAccountID = types.StringValue(e.ServiceAccountId)
 	m.OutputFormat = types.StringValue(e.OutputFormat.String())
 	m.OutputEncoding = types.StringValue(e.OutputEncoding.String())
-	diags.Append(m.Connection.parse(e.Connection)...)
-	diags.Append(m.SerializerConfig.parse(e.SerializerConfig)...)
+	diags.Append(m.Connection.parse(e.GetConnection())...)
+	diags.Append(m.SerializerConfig.parse(e.GetSerializerConfig())...)
 
 	return diags
 }
