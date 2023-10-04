@@ -696,9 +696,11 @@ func (m *endpointObjectStorageResultSchema) parse(e *endpoint.ObjectStorageDataS
 	var diags diag.Diagnostics
 
 	if e.GetInfer() != nil {
-		m.Infer = new(endpointObjectStorageResultSchemaInfer)
-	} else {
-		diags.Append(m.DataSchema.parse(e.GetDataSchema())...)
+		m.Infer = &endpointObjectStorageResultSchemaInfer{}
+	}
+	if v := e.GetDataSchema(); v != nil {
+		m.DataSchema = &endpointObjectStorageDataSchema{}
+		diags.Append(m.DataSchema.parse(v)...)
 	}
 	return diags
 }
@@ -855,8 +857,15 @@ func (m *endpointObjectStorageTargetSettings) parse(e *endpoint.ObjectStorageTar
 	m.ServiceAccountID = types.StringValue(e.ServiceAccountId)
 	m.OutputFormat = types.StringValue(e.OutputFormat.String())
 	m.OutputEncoding = types.StringValue(e.OutputEncoding.String())
-	diags.Append(m.Connection.parse(e.GetConnection())...)
-	diags.Append(m.SerializerConfig.parse(e.GetSerializerConfig())...)
+
+	if v := e.GetConnection(); v != nil {
+		m.Connection = &endpointObjectStorageConnection{}
+		diags.Append(m.Connection.parse(v)...)
+	}
+	if v := e.GetSerializerConfig(); v != nil {
+		m.SerializerConfig = &endpointObjectStorageSerializerConfig{}
+		diags.Append(m.SerializerConfig.parse(v)...)
+	}
 
 	return diags
 }
