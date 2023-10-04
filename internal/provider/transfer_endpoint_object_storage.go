@@ -42,7 +42,7 @@ type endpointObjectStorageFormatCSV struct {
 	NewlinesInValues        types.Bool                                             `tfsdk:"newlines_in_values"`
 	BlockSize               types.Int64                                            `tfsdk:"block_size"`
 	AdvancedOptions         *endpointObjectStorageFormatCSVAdvancedOptions         `tfsdk:"advanced_options"`
-	AdditionalReaderOptions *endpointObjectStorageFormatCSVAdditionalReaderOptions `tfsdk:"additional_reader_options"`
+	AdditionalReaderOptions *endpointObjectStorageFormatCSVAdditionalReaderOptions `tfsdk:"additional_options"`
 }
 type endpointObjectStorageFormatJsonl struct {
 	NewlinesInValues        types.Bool   `tfsdk:"newlines_in_values"`

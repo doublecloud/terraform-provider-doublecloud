@@ -137,7 +137,7 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 			bucket_layout = "test-layout"
 			bucket_layout_timezone = "test-timezone"
 			buffer_size = "1000"
-			buffer_interval = "20"
+			buffer_interval = "20s"
 			output_encoding = "GZIP"
 			connection {
 				aws_access_key_id = "test-key-id"
@@ -153,7 +153,7 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 		}
 	}
 }
-`, testEMysqlSourceName, testEMysqlTargetName, testProjectId)
+`, testEObjectStorageSourceName, testEObjectStorageTargetName, testProjectId)
 }
 
 func testAccTransferEndpointResourceObjectStorageModifiedConfig() string {
@@ -225,7 +225,7 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 			bucket_layout = "test-layout"
 			bucket_layout_timezone = "test-timezone"
 			buffer_size = "1000"
-			buffer_interval = "20"
+			buffer_interval = "20s"
 			output_encoding = "UNCOMPRESSED"
 			connection {
 				aws_access_key_id = "test-key-id"
@@ -241,5 +241,5 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 		}
 	}
 }
-`, testEMysqlSourceName, testEMysqlTargetName, testProjectId)
+`, testEObjectStorageSourceName, testEObjectStorageTargetName, testProjectId)
 }
