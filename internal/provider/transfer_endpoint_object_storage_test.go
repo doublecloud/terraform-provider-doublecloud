@@ -9,7 +9,7 @@ import (
 
 var (
 	testEObjectStorageSourceName string = fmt.Sprintf("%v-object-storage-source", testPrefix)
-	testEObjectStorageTargetName string = fmt.Sprintf("%v-Object-storage-target", testPrefix)
+	testEObjectStorageTargetName string = fmt.Sprintf("%v-object-storage-target", testPrefix)
 
 	testEObjectStorageSourceId string = fmt.Sprintf("doublecloud_transfer_endpoint.%v", testEObjectStorageSourceName)
 	testEObjectStorageTargetId string = fmt.Sprintf("doublecloud_transfer_endpoint.%v", testEObjectStorageTargetName)
