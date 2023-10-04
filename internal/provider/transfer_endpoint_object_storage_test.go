@@ -24,7 +24,7 @@ func TestAccTransferEndpointObjectStorageResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccTransferEndpointResourceMysqlConfig(),
+				Config: testAccTransferEndpointResourceObjectStorageConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "name", testEObjectStorageSourceName),
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.format.csv.delimiter", ","),
@@ -50,7 +50,7 @@ func TestAccTransferEndpointObjectStorageResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccTransferEndpointResourceMysqlModifiedConfig(),
+				Config: testAccTransferEndpointResourceObjectStorageModifiedConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "name", testEObjectStorageSourceName),
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.format.jsonl.newlines_in_values", "true"),
