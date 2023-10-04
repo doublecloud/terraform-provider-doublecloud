@@ -321,7 +321,7 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 	var diag diag.Diagnostics
 
 	if m.Settings == nil {
-		diag.AddError("unknwon settings", "specify settings block for transfer_endpoint")
+		diag.AddError("unknown settings", "specify settings block for transfer_endpoint")
 		return nil, diag
 	}
 

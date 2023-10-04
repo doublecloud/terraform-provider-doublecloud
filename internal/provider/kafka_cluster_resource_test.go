@@ -13,6 +13,7 @@ import (
 
 var (
 	testAccKafkaName string = fmt.Sprintf("%v-kafka", testPrefix)
+	testAccKafkaId   string = fmt.Sprintf("doublecloud_kafka_cluster.%v", testAccKafkaName)
 )
 
 func TestAccKafkaClusterResource(t *testing.T) {
@@ -38,7 +39,7 @@ func TestAccKafkaClusterResource(t *testing.T) {
 		},
 	}
 
-	m2 := KafkaClusterModel(m)
+	m2 := m
 	m2.Name = types.StringValue("terraform-kafka-changed")
 	m2.Resources.Kafka.DiskSize = types.Int64Value(51539607552)
 
@@ -50,11 +51,13 @@ func TestAccKafkaClusterResource(t *testing.T) {
 			{
 				Config: testAccKafkaClusterResourceConfig(&m),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("doublecloud_kafka_cluster.test", "region_id", "eu-central-1"),
-					resource.TestCheckResourceAttr("doublecloud_kafka_cluster.test", "name", testAccKafkaName),
-					resource.TestCheckResourceAttr("doublecloud_kafka_cluster.test", "resources.kafka.disk_size", "34359738368"),
-					// resource.TestCheckResourceAttr("doublecloud_kafka_cluster.test", "encryption.enabled", "true"),
-					resource.TestCheckResourceAttr("doublecloud_kafka_cluster.test", "schema_registry.enabled", "false"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "region_id", "eu-central-1"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "name", testAccKafkaName),
+					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.disk_size", "34359738368"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "schema_registry.enabled", "false"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "access.data_services.0", "transfer"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "access.ipv4_cidr_blocks.0.description", "Office in Berlin"),
 				),
 			},
 			// Update and Read testing
@@ -70,9 +73,10 @@ func TestAccKafkaClusterResource(t *testing.T) {
 	})
 }
 
+//nolint:unused
 func testAccKafkaClusterResourceConfig(m *KafkaClusterModel) string {
 	return fmt.Sprintf(`
-resource "doublecloud_kafka_cluster" "test" {
+resource "doublecloud_kafka_cluster" "tf-acc-kafka" {
   project_id = %[1]q
   name = %[2]q
   region_id = %[3]q
@@ -91,6 +95,17 @@ resource "doublecloud_kafka_cluster" "test" {
   schema_registry {
 	enabled = false
   }
+
+  access {
+	data_services = ["transfer"]
+
+	ipv4_cidr_blocks = [
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		}
+	]
+  }
 }
 `, m.ProjectID.ValueString(),
 		m.Name.ValueString(),
@@ -107,7 +122,7 @@ resource "doublecloud_kafka_cluster" "test" {
 //nolint:unused
 func testAccKafkaClusterResourceConfigUpdated(m *KafkaClusterModel) string {
 	return fmt.Sprintf(`
-resource "doublecloud_kafka_cluster" "test" {
+resource "doublecloud_kafka_cluster" "tf-acc-kafka" {
   project_id = %[1]q
   name = %[2]q
   region_id = %[3]q
@@ -125,6 +140,17 @@ resource "doublecloud_kafka_cluster" "test" {
 
   schema_registry {
 	enabled = true
+  }
+
+  access {
+	data_services = ["transfer"]
+
+	ipv4_cidr_blocks = [
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		}
+	]
   }
 }
 `, m.ProjectID.ValueString(),

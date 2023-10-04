@@ -34,7 +34,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 		},
 	}
 
-	m2 := clickhouseClusterModel(m)
+	m2 := m
 	m2.Name = types.StringValue(fmt.Sprintf("%v-changed", testAccClickhouseName))
 	m2.Resources = &clickhouseClusterResources{
 		Clickhouse: &clickhouseClusterResourcesClickhouse{
@@ -57,6 +57,9 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.resource_preset_id", "s1-c2-m4"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.disk_size", "34359738368"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.log_level", "LOG_LEVEL_INFORMATION"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "access.data_services.0", "transfer"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.0.description", "Office in Berlin"),
 				),
 			},
 			// Update and Read testing
@@ -68,6 +71,9 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.disk_size", "51539607552"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.log_level", "LOG_LEVEL_TRACE"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.max_connections", "120"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "access.data_services.0", "transfer"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.1.value", "11.0.0.0/8"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.1.description", "Office in Cupertino"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -94,6 +100,17 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
 
   config {
 	log_level = "LOG_LEVEL_INFORMATION"
+  }
+
+  access {
+	data_services = ["transfer"]
+
+	ipv4_cidr_blocks = [
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		}
+	]
   }
 }
 `, m.ProjectId.ValueString(),
@@ -127,6 +144,21 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
   config {
 	log_level = "LOG_LEVEL_TRACE"
 	max_connections = 120
+  }
+
+  access {
+	data_services = ["transfer"]
+
+	ipv4_cidr_blocks = [
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		},
+		{
+			value = "11.0.0.0/8"
+			description = "Office in Cupertino"
+		}
+	]
   }
 }
 `, m.ProjectId.ValueString(),

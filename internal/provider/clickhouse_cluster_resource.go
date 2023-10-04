@@ -32,11 +32,8 @@ type clickhouseClusterModel struct {
 	Description types.String                `tfsdk:"description"`
 	Version     types.String                `tfsdk:"version"`
 	Resources   *clickhouseClusterResources `tfsdk:"resources"`
-	// TODO: support access field
-	// https://github.com/doublecloud/api/blob/main/doublecloud/v1/cluster.proto
-	// Access            *clickhouseAccess           `tfsdk:"resources"`
-	// Hide encryption due to deprecation
-	// Encryption *DataEncryptionModel `tfsdk:"encryption"`
+
+	Access    *AccessModel      `tfsdk:"access"`
 	NetworkId types.String      `tfsdk:"network_id"`
 	Config    *clickhouseConfig `tfsdk:"config"`
 
@@ -334,18 +331,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 					},
 				},
 			},
-			// "access"
-			// Hide encryption due to deprecation
-			// "encryption": schema.SingleNestedBlock{
-			// 	Description: "Encryption configuration",
-			// 	Attributes: map[string]schema.Attribute{
-			// 		"enabled": schema.BoolAttribute{
-			// 			Computed:      true,
-			// 			Optional:      true,
-			// 			PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
-			// 		},
-			// 	},
-			// },
+			"access": AccessSchemaBlock(),
 			"config": clickhouseConfigSchemaBlock(),
 			// maintenance window
 		},
@@ -390,11 +376,11 @@ func createClickhouseClusterRequest(m *clickhouseClusterModel) (*clickhouse.Crea
 	resources, d := m.Resources.convert()
 	diags.Append(d...)
 	rq.Resources = resources
-	// TODO: access
-	// Hide encryption due to deprecation
-	// if m.Encryption != nil {
-	// 	rq.Encryption = m.Encryption.convert()
-	// }
+	if m.Access != nil {
+		access, d := m.Access.convert()
+		diags.Append(d...)
+		rq.Access = access
+	}
 	if m.Config != nil {
 		rq.ClickhouseConfig, d = m.Config.convert()
 		diags.Append(d...)
@@ -486,6 +472,10 @@ func updateClickhouseCluster(m *clickhouseClusterModel) (*clickhouse.UpdateClust
 	diags.Append(d...)
 	rq.ClickhouseConfig = config
 
+	access, d := m.Access.convert()
+	diags.Append(d...)
+	rq.Access = access
+
 	return rq, diags
 }
 
@@ -568,10 +558,10 @@ func (m *clickhouseClusterModel) parse(rs *clickhouse.Cluster) diag.Diagnostics 
 		m.Config = &clickhouseConfig{}
 	}
 	diags.Append(m.Config.parse(rs.ClickhouseConfig)...)
-	// parse access
+	if access := rs.GetAccess(); access != nil {
+		diags.Append(m.Access.parse(access)...)
+	}
 
-	// Hide encryption due to deprecation
-	// m.Encryption.parse(rs.Encryption)
 	// parse MW
 	return diags
 }
