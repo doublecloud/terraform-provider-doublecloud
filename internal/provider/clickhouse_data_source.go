@@ -96,7 +96,7 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 
 func (d *ClickhouseDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Clickhouse data soruce",
+		MarkdownDescription: "Clickhouse data source",
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				Required:            true,

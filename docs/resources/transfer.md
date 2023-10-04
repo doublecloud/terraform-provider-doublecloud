@@ -20,6 +20,17 @@ resource "doublecloud_transfer" "sample-pg2ch" {
   target = doublecloud_transfer_endpoint.sample-pg2ch-target.id
   type = "SNAPSHOT_ONLY"
   activated = false
+  transformation = {
+    transformers = [
+      {
+        dbt = {
+          git_repository_link = "https://github.com/doublecloud/tests-clickhouse-dbt.git"
+          profile_name = "my_clickhouse_profile"
+          operation = "run"
+        }
+      },
+    ]
+  }
 }
 ```
 
@@ -37,8 +48,101 @@ resource "doublecloud_transfer" "sample-pg2ch" {
 
 - `activated` (Boolean) Activation of transfer
 - `description` (String) Description
+- `transformation` (Attributes) (see [below for nested schema](#nestedatt--transformation))
 - `type` (String) Transfer type
 
 ### Read-Only
 
 - `id` (String) Transfer id
+
+<a id="nestedatt--transformation"></a>
+### Nested Schema for `transformation`
+
+Optional:
+
+- `transformers` (Attributes List) (see [below for nested schema](#nestedatt--transformation--transformers))
+
+<a id="nestedatt--transformation--transformers"></a>
+### Nested Schema for `transformation.transformers`
+
+Optional:
+
+- `convert_to_string` (Attributes) Convert columns' values to strings. (see [below for nested schema](#nestedatt--transformation--transformers--convert_to_string))
+- `dbt` (Attributes) Run DBT after snapshot finish. (see [below for nested schema](#nestedatt--transformation--transformers--dbt))
+- `replace_primary_key` (Attributes) Replace the set of columns marked as PRIMARY KEYs. (see [below for nested schema](#nestedatt--transformation--transformers--replace_primary_key))
+- `table_splitter` (Attributes) Replace the name of the table to a value composed of values of columns of a row. (see [below for nested schema](#nestedatt--transformation--transformers--table_splitter))
+
+<a id="nestedatt--transformation--transformers--convert_to_string"></a>
+### Nested Schema for `transformation.transformers.convert_to_string`
+
+Optional:
+
+- `columns` (Attributes) (see [below for nested schema](#nestedatt--transformation--transformers--convert_to_string--columns))
+- `tables` (Attributes) Tables. (see [below for nested schema](#nestedatt--transformation--transformers--convert_to_string--tables))
+
+<a id="nestedatt--transformation--transformers--convert_to_string--columns"></a>
+### Nested Schema for `transformation.transformers.convert_to_string.tables`
+
+Optional:
+
+- `exclude` (List of String) Excluded columns (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+- `include` (List of String) Included columns (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+
+
+<a id="nestedatt--transformation--transformers--convert_to_string--tables"></a>
+### Nested Schema for `transformation.transformers.convert_to_string.tables`
+
+Optional:
+
+- `exclude` (List of String) Excluded tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+- `include` (List of String) Included tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+
+
+
+<a id="nestedatt--transformation--transformers--dbt"></a>
+### Nested Schema for `transformation.transformers.dbt`
+
+Optional:
+
+- `git_branch` (String) A branch or a tag of the git repository with the DBT project.
+- `git_repository_link` (String) A link to a git repository with a DBT project. Must start with `https://`. The root directory of the repository must contain a `dbt_project.yml` file.
+- `operation` (String) Operation; for example, `run`.
+- `profile_name` (String) The name for a profile which will be created automatically using the settings of the destination endpoint. The name must match the `profile` property in the `dbt_project.yml` file.
+
+
+<a id="nestedatt--transformation--transformers--replace_primary_key"></a>
+### Nested Schema for `transformation.transformers.replace_primary_key`
+
+Optional:
+
+- `keys` (List of String) Columns to mark as PRIMARY KEYs.
+- `tables` (Attributes) Tables. (see [below for nested schema](#nestedatt--transformation--transformers--replace_primary_key--tables))
+
+<a id="nestedatt--transformation--transformers--replace_primary_key--tables"></a>
+### Nested Schema for `transformation.transformers.replace_primary_key.tables`
+
+Optional:
+
+- `exclude` (List of String) Excluded tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+- `include` (List of String) Included tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+
+
+
+<a id="nestedatt--transformation--transformers--table_splitter"></a>
+### Nested Schema for `transformation.transformers.table_splitter`
+
+Optional:
+
+- `columns` (List of String) Columns with values to use as a new table name.
+- `splitter` (String) A string separating the parts of the new table name.
+- `tables` (Attributes) Tables. (see [below for nested schema](#nestedatt--transformation--transformers--table_splitter--tables))
+
+<a id="nestedatt--transformation--transformers--table_splitter--tables"></a>
+### Nested Schema for `transformation.transformers.table_splitter.tables`
+
+Optional:
+
+- `exclude` (List of String) Excluded tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+- `include` (List of String) Included tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+
+

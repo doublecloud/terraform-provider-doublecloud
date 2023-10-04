@@ -28,8 +28,8 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/doublecloud/go-genproto v0.0.0-20230927040541-fe435efac020 h1:UvCcpaaG8pCNIz6tyFykRzQ20zDTJXgIwpjZDoCGzgg=
-github.com/doublecloud/go-genproto v0.0.0-20230927040541-fe435efac020/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
+github.com/doublecloud/go-genproto v0.0.0-20230929140239-39308db3590f h1:P2cs07EWYoYMLcvnVz2E7wkJAFhFcpX3m8rBm5SPSkg=
+github.com/doublecloud/go-genproto v0.0.0-20230929140239-39308db3590f/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-sdk v0.0.0-20230922155224-1f2515f72401 h1:zfzza6JRJt2EXMRNyxe45y12WCu2/Hgod8CXgRw6ypI=
 github.com/doublecloud/go-sdk v0.0.0-20230922155224-1f2515f72401/go.mod h1:fdHQwSRXH1uAv1hs6TcqIBAYfOqh8DO3X8BXGh6fp9o=
 github.com/emirpasic/gods v1.12.0 h1:QAUIPSaCu4G+POclxeqb3F+WPpdKqFGlw36+yOzGlrg=

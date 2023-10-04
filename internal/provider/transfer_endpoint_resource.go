@@ -44,15 +44,17 @@ type TransferEndpointModel struct {
 }
 
 type endpointSettings struct {
-	ClickhouseSource    *endpointClickhouseSourceSettings    `tfsdk:"clickhouse_source"`
-	KafkaSource         *endpointKafkaSourceSettings         `tfsdk:"kafka_source"`
-	PostgresSource      *endpointPostgresSourceSettings      `tfsdk:"postgres_source"`
-	MysqlSource         *endpointMysqlSourceSettings         `tfsdk:"mysql_source"`
-	MongoSource         *endpointMongoSourceSettings         `tfsdk:"mongo_source"`
-	ObjectStorageSource *endpointObjectStorageSourceSettings `tfsdk:"object_storage_source"`
-	S3Source            *endpointS3SourceSettings            `tfsdk:"s3_source"`
-	LinkedinAdsSource   *endpointLinkedinAdsSourceSettings   `tfsdk:"linkedinads_source"`
-	AWSCloudTrailSource *endpointAWSCloudTrailSourceSettings `tfsdk:"aws_cloudtrail_source"`
+	ClickhouseSource        *endpointClickhouseSourceSettings                `tfsdk:"clickhouse_source"`
+	KafkaSource             *endpointKafkaSourceSettings                     `tfsdk:"kafka_source"`
+	PostgresSource          *endpointPostgresSourceSettings                  `tfsdk:"postgres_source"`
+	MysqlSource             *endpointMysqlSourceSettings                     `tfsdk:"mysql_source"`
+	MongoSource             *endpointMongoSourceSettings                     `tfsdk:"mongo_source"`
+	ObjectStorageSource     *endpointObjectStorageSourceSettings             `tfsdk:"object_storage_source"`
+	S3Source                *endpointS3SourceSettings                        `tfsdk:"s3_source"`
+	LinkedinAdsSource       *endpointLinkedinAdsSourceSettings               `tfsdk:"linkedinads_source"`
+	AWSCloudTrailSource     *endpointAWSCloudTrailSourceSettings             `tfsdk:"aws_cloudtrail_source"`
+	GoogleAdsSource         *transferEndpointGoogleAdsSourceSettings         `tfsdk:"googleads_source"`
+	FacebookMarketingSource *transferEndpointFacebookMarketingSourceSettings `tfsdk:"facebookmarketing_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -104,15 +106,17 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 			"settings": schema.SingleNestedBlock{
 				Description: "Settings",
 				Blocks: map[string]schema.Block{
-					"clickhouse_source":     transferEndpointChSourceSchema(),
-					"kafka_source":          transferEndpointKafkaSourceSchema(),
-					"postgres_source":       transferEndpointPostgresSourceSchema(),
-					"mysql_source":          transferEndpointMysqlSourceSchema(),
-					"mongo_source":          transferEndpointMongoSourceSchema(),
-					"object_storage_source": transferEndpointObjectStorageSourceSchema(),
-					"s3_source":             transferEndpointS3SourceSchema(),
-					"linkedinads_source":    endpointLinkedinAdsSourceSettingsSchema(),
-					"aws_cloudtrail_source": endpointAWSCloudTrailSourceSettingsSchema(),
+					"clickhouse_source":        transferEndpointChSourceSchema(),
+					"kafka_source":             transferEndpointKafkaSourceSchema(),
+					"postgres_source":          transferEndpointPostgresSourceSchema(),
+					"mysql_source":             transferEndpointMysqlSourceSchema(),
+					"mongo_source":             transferEndpointMongoSourceSchema(),
+					"object_storage_source":    transferEndpointObjectStorageSourceSchema(),
+					"s3_source":                transferEndpointS3SourceSchema(),
+					"linkedinads_source":       endpointLinkedinAdsSourceSettingsSchema(),
+					"aws_cloudtrail_source":    endpointAWSCloudTrailSourceSettingsSchema(),
+					"googleads_source":         transferEndpointGoogleAdsSourceSettingsSchema(),
+					"facebookmarketing_source": transferEndpointFacebookMarketingSourceSettingsSchema(),
 
 					"clickhouse_target":     transferEndpointChTargetSchema(),
 					"kafka_target":          transferEndpointKafkaTargetSchema(),
@@ -323,7 +327,7 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 	var diag diag.Diagnostics
 
 	if m.Settings == nil {
-		diag.AddError("unknwon settings", "specify settings block for transfer_endpoint")
+		diag.AddError("unknown settings", "specify settings block for transfer_endpoint")
 		return nil, diag
 	}
 
@@ -334,7 +338,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
-
 	if m.Settings.KafkaSource != nil {
 		s, d := kafkaSourceEndpointSettings(m.Settings.KafkaSource)
 		if d.HasError() {
@@ -342,7 +345,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
-
 	if m.Settings.PostgresSource != nil {
 		s, d := postgresSourceEndpointSettings(m.Settings.PostgresSource)
 		if d.HasError() {
@@ -390,6 +392,20 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		diag.Append(m.Settings.AWSCloudTrailSource.convert(result)...)
 		return &transfer.EndpointSettings{
 			Settings: &transfer.EndpointSettings_AwsCloudtrailSource{AwsCloudtrailSource: result},
+		}, diag
+	}
+	if m.Settings.GoogleAdsSource != nil {
+		result := new(endpoint_airbyte.GoogleAdsSource)
+		diag.Append(m.Settings.GoogleAdsSource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_GoogleAdsSource{GoogleAdsSource: result},
+		}, diag
+	}
+	if m.Settings.FacebookMarketingSource != nil {
+		result := new(endpoint_airbyte.FacebookMarketingSource)
+		diag.Append(m.Settings.FacebookMarketingSource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_FacebookMarketingSource{FacebookMarketingSource: result},
 		}, diag
 	}
 
@@ -553,6 +569,18 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.AWSCloudTrailSource = &endpointAWSCloudTrailSourceSettings{}
 		}
 		diag.Append(data.Settings.AWSCloudTrailSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetGoogleAdsSource(); settings != nil {
+		if data.Settings.GoogleAdsSource == nil {
+			data.Settings.GoogleAdsSource = &transferEndpointGoogleAdsSourceSettings{}
+		}
+		diag.Append(data.Settings.GoogleAdsSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetFacebookMarketingSource(); settings != nil {
+		if data.Settings.FacebookMarketingSource == nil {
+			data.Settings.FacebookMarketingSource = &transferEndpointFacebookMarketingSourceSettings{}
+		}
+		diag.Append(data.Settings.FacebookMarketingSource.parse(settings)...)
 	}
 
 	if data.Settings == nil {

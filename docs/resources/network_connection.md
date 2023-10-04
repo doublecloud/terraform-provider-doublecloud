@@ -134,3 +134,5 @@ Required:
 Read-Only:
 
 - `managed_network_url` (String) The URL of the managed GCP network
+
+

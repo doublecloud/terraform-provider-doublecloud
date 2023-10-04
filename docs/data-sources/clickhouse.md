@@ -3,12 +3,12 @@
 page_title: "doublecloud_clickhouse Data Source - terraform-provider-doublecloud"
 subcategory: ""
 description: |-
-  Clickhouse data soruce
+  Clickhouse data source
 ---
 
 # doublecloud_clickhouse (Data Source)
 
-Clickhouse data soruce
+Clickhouse data source
 
 
 
@@ -63,3 +63,5 @@ Read-Only:
 - `password` (String) Password for ClickHouse user
 - `tcp_port_secure` (Number) Port to connect using TCP/native protocol
 - `user` (String) ClickHouse user
+
+

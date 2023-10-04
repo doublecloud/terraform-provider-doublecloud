@@ -17,4 +17,14 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
     log_level = "LOG_LEVEL_TRACE"
     max_connections = 120
   }
+
+  access {
+    data_services = ["transfer"]
+    ipv4_cidr_blocks = [
+      {
+        value = "10.0.0.0/8"
+        description = "Office in Berlin"
+      }
+	  ]
+  }
 }

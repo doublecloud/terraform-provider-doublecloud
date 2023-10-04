@@ -17,4 +17,14 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
   schema_registry {
     enabled = false
   }
+
+  access {
+    data_services = ["transfer"]
+    ipv4_cidr_blocks = [
+      {
+        value = "10.0.0.0/8"
+        description = "Office in Berlin"
+      }
+	  ]
+  }
 }
