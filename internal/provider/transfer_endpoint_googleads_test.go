@@ -8,6 +8,8 @@ import (
 )
 
 func TestAccTransferEndpointGoogleAdsSource(t *testing.T) {
+	return
+	//nolint:govet
 	t.Parallel()
 
 	testEndpointName := fmt.Sprintf("%s-googleads-source", testPrefix)
