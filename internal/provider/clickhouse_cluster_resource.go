@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -105,8 +107,8 @@ type clickhouseConfig struct {
 	BackgroundMessageBrokerSchedulePoolSize   types.Int64   `tfsdk:"background_message_broker_schedule_pool_size"`
 	// MergeTree                                 *clickhouseConfigMergeTree    `tfsdk:"merge_tree"`
 	// Compression                               []clickhouseConfigCompression `tfsdk:"compression"`
-	// Kafka                                     *clickhouseConfigKafka        `tfsdk:"kafka"`
-	// KafkaTopics                               types.Map                     `tfsdk:"kafka_topics"`
+	Kafka *clickhouseConfigKafka `tfsdk:"kafka"`
+	// KafkaTopics types.Map              `tfsdk:"kafka_topics"`
 	// Rabbitmq                                  *clickhouseConfigRabbitmq     `tfsdk:"rabbitmq"`
 	QueryLogRetentionSize              types.Int64  `tfsdk:"query_log_retention_size"`
 	QueryLogRetentionTime              types.String `tfsdk:"query_log_retention_time"`
@@ -182,7 +184,6 @@ type clickhouseConfigCompression struct {
 	Level            types.Int64   `tfsdk:"level"`
 }
 
-//nolint:unused
 type clickhouseConfigKafka struct {
 	SecurityProtocol                 types.String `tfsdk:"security_protocol"`
 	SaslMechanism                    types.String `tfsdk:"sasl_mechanism"`
@@ -208,20 +209,24 @@ func clickhouseConfigLogLevelValidator() validator.String {
 	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
-//nolint:unused
 func clickhouseConfigKafkaSecurityProtocolValidator() validator.String {
-	names := make([]string, len(clickhouse.ClickhouseConfig_Kafka_SecurityProtocol_name))
-	for i, v := range clickhouse.ClickhouseConfig_Kafka_SecurityProtocol_name {
-		names[i] = v
+	names := make([]string, 0)
+	for k, v := range clickhouse.ClickhouseConfig_Kafka_SecurityProtocol_value {
+		if v == 0 {
+			continue
+		}
+		names = append(names, strings.ToUpper(strings.TrimPrefix(k, "SECURITY_PROTOCOL_")))
 	}
 	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
-//nolint:unused
 func clickhouseConfigKafkaSaslMechanismValidator() validator.String {
-	names := make([]string, len(clickhouse.ClickhouseConfig_Kafka_SaslMechanism_name))
-	for i, v := range clickhouse.ClickhouseConfig_Kafka_SaslMechanism_name {
-		names[i] = v
+	names := make([]string, 0)
+	for k, v := range clickhouse.ClickhouseConfig_Kafka_SaslMechanism_value {
+		if v == 0 {
+			continue
+		}
+		names = append(names, strings.ToUpper(strings.TrimPrefix(k, "SASL_MECHANISM_")))
 	}
 	return stringvalidator.OneOfCaseInsensitive(names...)
 }
@@ -601,7 +606,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.KeepAliveTimeout; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse keep_alive_timeout", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse keep_alive_timeout", err.Error())
 		}
 		config.KeepAliveTimeout = durationpb.New(duration)
 	}
@@ -650,7 +655,11 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	// merge_tree
 	// compression
 	// graphite_rollup
-	// kafka
+	if v := m.Kafka; v != nil {
+		k, d := m.Kafka.convert()
+		diags.Append(d...)
+		config.Kafka = k
+	}
 	// kafka_topics
 	// rabbitmq
 	if v := m.QueryLogRetentionSize; !v.IsUnknown() && v.ValueInt64() != 0 {
@@ -659,7 +668,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.QueryLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse query_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse query_log_retention_time", err.Error())
 		}
 		config.QueryLogRetentionTime = durationpb.New(duration)
 	}
@@ -673,7 +682,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.QueryThreadLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse query_thread_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse query_thread_log_retention_time", err.Error())
 		}
 		config.QueryThreadLogRetentionTime = durationpb.New(duration)
 	}
@@ -687,7 +696,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.QueryViewsLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse query_views_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse query_views_log_retention_time", err.Error())
 		}
 		config.QueryViewsLogRetentionTime = durationpb.New(duration)
 	}
@@ -698,7 +707,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.PartLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse part_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse part_log_retention_time", err.Error())
 		}
 		config.PartLogRetentionTime = durationpb.New(duration)
 	}
@@ -712,7 +721,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.MetricLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse metric_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse metric_log_retention_time", err.Error())
 		}
 		config.MetricLogRetentionTime = durationpb.New(duration)
 	}
@@ -726,7 +735,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.AsynchronousMetricLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse asynchronous_metric_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse asynchronous_metric_log_retention_time", err.Error())
 		}
 		config.AsynchronousMetricLogRetentionTime = durationpb.New(duration)
 	}
@@ -740,7 +749,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.TraceLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse trace_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse trace_log_retention_time", err.Error())
 		}
 		config.TraceLogRetentionTime = durationpb.New(duration)
 	}
@@ -754,7 +763,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.TextLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse text_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse text_log_retention_time", err.Error())
 		}
 		config.TextLogRetentionTime = durationpb.New(duration)
 	}
@@ -772,7 +781,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.OpentelemetrySpanLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse opentelemetry_span_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse opentelemetry_span_log_retention_time", err.Error())
 		}
 		config.OpentelemetrySpanLogRetentionTime = durationpb.New(duration)
 	}
@@ -786,7 +795,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.SessionLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse session_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse session_log_retention_time", err.Error())
 		}
 		config.SessionLogRetentionTime = durationpb.New(duration)
 	}
@@ -800,7 +809,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.ZookeeperLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse zookeeper_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse zookeeper_log_retention_time", err.Error())
 		}
 		config.ZookeeperLogRetentionTime = durationpb.New(duration)
 	}
@@ -814,7 +823,7 @@ func (m *clickhouseConfig) convert() (*clickhouse.ClickhouseConfig, diag.Diagnos
 	if v := m.AsynchronousInsertLogRetentionTime; !v.IsUnknown() && v.ValueString() != "" {
 		duration, err := time.ParseDuration(v.ValueString())
 		if err != nil {
-			diags.AddError("failed to parse asynchronous_insert_log_retention_time", err.Error())
+			diags.AddAttributeError(path.Root("config"), "failed to parse asynchronous_insert_log_retention_time", err.Error())
 		}
 		config.AsynchronousInsertLogRetentionTime = durationpb.New(duration)
 	}
@@ -883,7 +892,12 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 	// merge_tree
 	// compression
 	// graphite_rollup
-	// kafka
+	if v := rs.GetKafka(); v != nil {
+		if m.Kafka == nil {
+			m.Kafka = &clickhouseConfigKafka{}
+		}
+		diags.Append(m.Kafka.parse(v)...)
+	}
 	// kafka topics
 	// rabbit_mq
 	if v := rs.QueryLogRetentionSize; v != nil {
@@ -1083,6 +1097,110 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"asynchronous_insert_log_retention_size": schema.Int64Attribute{Optional: true},
 			"asynchronous_insert_log_retention_time": schema.StringAttribute{Optional: true},
 		},
-		// Blocks
+		Blocks: map[string]schema.Block{
+			"kafka": clickhouseKafkaSchemaBlock(),
+		},
 	}
+}
+
+func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"security_protocol": schema.StringAttribute{
+			Optional:      true,
+			Computed:      true,
+			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
+			PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+		},
+		"sasl_mechanism": schema.StringAttribute{
+			Optional:   true,
+			Computed:   true,
+			Validators: []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
+		},
+		"sasl_username": schema.StringAttribute{
+			Optional: true,
+		},
+		"sasl_password": schema.StringAttribute{
+			Optional:  true,
+			Sensitive: true,
+		},
+		"enable_ssl_certificate_verification": schema.BoolAttribute{
+			Optional:      true,
+			PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
+		},
+		"max_poll_interval_ms": schema.StringAttribute{
+			Optional: true,
+		},
+		"session_timeout_ms": schema.StringAttribute{
+			Optional: true,
+		},
+	}
+}
+
+func clickhouseKafkaSchemaBlock() schema.Block {
+	return schema.SingleNestedBlock{Attributes: clickhouseKafkaSchemaAttributes()}
+}
+
+func (m *clickhouseConfigKafka) parse(r *clickhouse.ClickhouseConfig_Kafka) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	m.SecurityProtocol = types.StringValue(strings.TrimPrefix(r.GetSecurityProtocol().String(), "SECURITY_PROTOCOL_"))
+	m.SaslMechanism = types.StringValue(strings.TrimPrefix(r.GetSaslMechanism().String(), "SASL_MECHANISM_"))
+	if v := r.GetSaslUsername(); v != nil {
+		m.SaslMechanism = types.StringValue(v.String())
+	}
+	if v := r.GetSaslPassword(); v != nil {
+		m.SaslPassword = types.StringValue(v.String())
+	}
+	if v := r.GetEnableSslCertificateVerification(); v != nil {
+		m.EnableSslCertificateVerification = types.BoolValue(v.GetValue())
+	}
+	if v := r.GetMaxPollIntervalMs(); v != nil {
+		m.MaxPoolIntervalMs = types.StringValue(v.AsDuration().String())
+	}
+	if v := r.GetSessionTimeoutMs(); v != nil {
+		m.SessionTimeoutMs = types.StringValue(v.AsDuration().String())
+	}
+
+	return diags
+}
+
+func (m *clickhouseConfigKafka) convert() (*clickhouse.ClickhouseConfig_Kafka, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	r := &clickhouse.ClickhouseConfig_Kafka{}
+
+	{
+		key := fmt.Sprintf("SECURITY_PROTOCOL_%v", strings.Replace(m.SecurityProtocol.ValueString(), "\"", "", -1))
+		securityProtocol := clickhouse.ClickhouseConfig_Kafka_SecurityProtocol_value[key]
+		r.SecurityProtocol = clickhouse.ClickhouseConfig_Kafka_SecurityProtocol(securityProtocol)
+	}
+	{
+		key := fmt.Sprintf("SASL_MECHANISM_%v", strings.Replace(m.SaslMechanism.ValueString(), "\"", "", -1))
+		SaslMechanism := clickhouse.ClickhouseConfig_Kafka_SaslMechanism_value[key]
+		r.SaslMechanism = clickhouse.ClickhouseConfig_Kafka_SaslMechanism(SaslMechanism)
+	}
+	if v := m.SaslUsername; !v.IsUnknown() && v.ValueString() != "" {
+		r.SaslUsername = wrapperspb.String(v.ValueString())
+	}
+	if v := m.SaslPassword; !v.IsUnknown() && v.ValueString() != "" {
+		r.SaslPassword = wrapperspb.String(v.ValueString())
+	}
+	if v := m.EnableSslCertificateVerification; !v.IsNull() {
+		r.EnableSslCertificateVerification = wrapperspb.Bool(v.ValueBool())
+	}
+	if v := m.MaxPoolIntervalMs; !v.IsUnknown() && v.ValueString() != "" {
+		duration, err := time.ParseDuration(v.ValueString())
+		if err != nil {
+			diags.AddAttributeError(path.Root("kafka"), "failed to parse max_pool_interval_ms", err.Error())
+		}
+		r.MaxPollIntervalMs = durationpb.New(duration)
+	}
+	if v := m.SessionTimeoutMs; !v.IsUnknown() && v.ValueString() != "" {
+		duration, err := time.ParseDuration(v.ValueString())
+		if err != nil {
+			diags.AddAttributeError(path.Root("kafka"), "failed to parse session_timeout_ms", err.Error())
+		}
+		r.SessionTimeoutMs = durationpb.New(duration)
+	}
+
+	return r, diags
 }
