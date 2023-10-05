@@ -122,6 +122,17 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
 		}
 	]
   }
+
+  access {
+	data_services = ["transfer"]
+
+	ipv4_cidr_blocks = [
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		}
+	]
+  }
 }
 `, m.ProjectId.ValueString(),
 		m.Name.ValueString(),
@@ -160,6 +171,21 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
 		enable_ssl_certificate_verification = false
 		session_timeout_ms = "1m0s"
 	}
+  }
+
+  access {
+	data_services = ["transfer"]
+
+	ipv4_cidr_blocks = [
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		},
+		{
+			value = "11.0.0.0/8"
+			description = "Office in Cupertino"
+		}
+	]
   }
 
   access {
