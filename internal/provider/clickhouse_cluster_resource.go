@@ -1109,12 +1109,12 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 			Optional:   true,
 			Computed:   true,
 			Validators: []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
+			PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 		},
 		"sasl_mechanism": schema.StringAttribute{
 			Optional:      true,
 			Computed:      true,
 			Validators:    []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 		},
 		"sasl_username": schema.StringAttribute{
 			Optional: true,
