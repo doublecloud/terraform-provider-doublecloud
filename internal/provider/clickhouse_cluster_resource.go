@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -1109,7 +1108,6 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 			Optional:      true,
 			Computed:      true,
 			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 		},
 		"sasl_mechanism": schema.StringAttribute{
 			Optional:   true,
@@ -1125,7 +1123,6 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 		},
 		"enable_ssl_certificate_verification": schema.BoolAttribute{
 			Optional:      true,
-			PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
 		},
 		"max_poll_interval_ms": schema.StringAttribute{
 			Optional: true,
