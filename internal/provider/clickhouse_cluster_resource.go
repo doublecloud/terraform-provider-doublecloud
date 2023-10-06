@@ -1105,9 +1105,9 @@ func clickhouseConfigSchemaBlock() schema.Block {
 func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"security_protocol": schema.StringAttribute{
-			Optional:      true,
-			Computed:      true,
-			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
+			Optional:   true,
+			Computed:   true,
+			Validators: []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
 		},
 		"sasl_mechanism": schema.StringAttribute{
 			Optional:   true,
@@ -1122,7 +1122,7 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 			Sensitive: true,
 		},
 		"enable_ssl_certificate_verification": schema.BoolAttribute{
-			Optional:      true,
+			Optional: true,
 		},
 		"max_poll_interval_ms": schema.StringAttribute{
 			Optional: true,
