@@ -1106,15 +1106,15 @@ func clickhouseConfigSchemaBlock() schema.Block {
 func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"security_protocol": schema.StringAttribute{
-			Optional:   true,
-			Computed:   true,
-			Validators: []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
+			Optional:      true,
+			Computed:      true,
+			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
 			PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 		},
 		"sasl_mechanism": schema.StringAttribute{
-			Optional:      true,
-			Computed:      true,
-			Validators:    []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
+			Optional:   true,
+			Computed:   true,
+			Validators: []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
 		},
 		"sasl_username": schema.StringAttribute{
 			Optional: true,
