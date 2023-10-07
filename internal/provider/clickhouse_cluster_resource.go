@@ -1109,7 +1109,7 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 			Optional:      true,
 			Computed:      true,
 			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"sasl_mechanism": schema.StringAttribute{
 			Optional:   true,
@@ -1125,7 +1125,7 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 		},
 		"enable_ssl_certificate_verification": schema.BoolAttribute{
 			Optional:      true,
-			PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
+			PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 		},
 		"max_poll_interval_ms": schema.StringAttribute{
 			Optional: true,
