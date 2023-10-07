@@ -55,9 +55,18 @@ func TestAccKafkaClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccKafkaId, "name", testAccKafkaName),
 					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.disk_size", "34359738368"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "schema_registry.enabled", "false"),
+
 					resource.TestCheckResourceAttr(testAccKafkaId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "access.ipv4_cidr_blocks.0.description", "Office in Berlin"),
+
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "connection_info.connection_string"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "connection_info.user", "admin"),
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "connection_info.password"),
+
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "private_connection_info.connection_string"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "private_connection_info.user", "admin"),
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "private_connection_info.password"),
 				),
 			},
 			// Update and Read testing
