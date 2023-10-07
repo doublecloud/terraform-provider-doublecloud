@@ -1146,7 +1146,7 @@ func (m *clickhouseConfigKafka) parse(r *clickhouse.ClickhouseConfig_Kafka) diag
 	m.SecurityProtocol = types.StringValue(strings.TrimPrefix(r.GetSecurityProtocol().String(), "SECURITY_PROTOCOL_"))
 	m.SaslMechanism = types.StringValue(strings.TrimPrefix(r.GetSaslMechanism().String(), "SASL_MECHANISM_"))
 	if v := r.GetSaslUsername(); v != nil {
-		m.SaslMechanism = types.StringValue(v.String())
+		m.SaslUsername = types.StringValue(v.String())
 	}
 	if v := r.GetSaslPassword(); v != nil {
 		m.SaslPassword = types.StringValue(v.String())
