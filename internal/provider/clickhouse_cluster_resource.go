@@ -1109,12 +1109,13 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 			Optional:      true,
 			Computed:      true,
 			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"sasl_mechanism": schema.StringAttribute{
-			Optional:   true,
-			Computed:   true,
-			Validators: []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
+			Optional:      true,
+			Computed:      true,
+			Validators:    []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
+			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"sasl_username": schema.StringAttribute{
 			Optional: true,
@@ -1125,7 +1126,8 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 		},
 		"enable_ssl_certificate_verification": schema.BoolAttribute{
 			Optional:      true,
-			PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
+			Computed:      true,
+			PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 		},
 		"max_poll_interval_ms": schema.StringAttribute{
 			Optional: true,
@@ -1146,10 +1148,10 @@ func (m *clickhouseConfigKafka) parse(r *clickhouse.ClickhouseConfig_Kafka) diag
 	m.SecurityProtocol = types.StringValue(strings.TrimPrefix(r.GetSecurityProtocol().String(), "SECURITY_PROTOCOL_"))
 	m.SaslMechanism = types.StringValue(strings.TrimPrefix(r.GetSaslMechanism().String(), "SASL_MECHANISM_"))
 	if v := r.GetSaslUsername(); v != nil {
-		m.SaslUsername = types.StringValue(v.String())
+		m.SaslUsername = types.StringValue(v.GetValue())
 	}
 	if v := r.GetSaslPassword(); v != nil {
-		m.SaslPassword = types.StringValue(v.String())
+		m.SaslPassword = types.StringValue(v.GetValue())
 	}
 	if v := r.GetEnableSslCertificateVerification(); v != nil {
 		m.EnableSslCertificateVerification = types.BoolValue(v.GetValue())
