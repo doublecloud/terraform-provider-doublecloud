@@ -57,7 +57,8 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.resource_preset_id", "s1-c2-m4"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.disk_size", "34359738368"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.log_level", "LOG_LEVEL_INFORMATION"),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.security_protocol", "SSL"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.security_protocol", "PLAINTEXT"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.security_protocol", "PLAINTEXT"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.session_timeout_ms", "15s"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
@@ -73,8 +74,11 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.disk_size", "51539607552"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.log_level", "LOG_LEVEL_TRACE"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.max_connections", "120"),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.security_protocol", "PLAINTEXT"),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.enable_ssl_certificate_verification", "false"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.security_protocol", "SASL_SSL"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_mechanism", "SCRAM_SHA_512"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_username", "admin"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_password", "Traffic3-Mushiness-Chariot"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.enable_ssl_certificate_verification", "true"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.session_timeout_ms", "1m0s"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.1.value", "11.0.0.0/8"),
@@ -107,7 +111,7 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
 	log_level = "LOG_LEVEL_INFORMATION"
 
 	kafka {
-		security_protocol = "SSL"
+		security_protocol = "PLAINTEXT"
 		session_timeout_ms = "15s"
 	}
   }
@@ -156,8 +160,11 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
 	max_connections = 120
 
 	kafka {
-		security_protocol = "PLAINTEXT"
-		enable_ssl_certificate_verification = false
+		security_protocol = "SASL_SSL"
+		sasl_mechanism = "SCRAM_SHA_512"
+		sasl_username = "admin"
+		sasl_password = "Traffic3-Mushiness-Chariot"
+		enable_ssl_certificate_verification = true
 		session_timeout_ms = "1m0s"
 	}
   }
