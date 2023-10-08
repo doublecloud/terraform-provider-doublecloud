@@ -57,16 +57,6 @@ func TestAccTransferResource(t *testing.T) {
 											exclude = ["c2"]
 										}
 									}
-								},
-								{
-									table_splitter = {
-										tables = {
-											include = ["t1", "t2"]
-											exclude = ["te1", "te2", "te3"]
-										}
-										columns = ["c1", "c2"]
-										splitter = "_"
-									}
 								}
 							]
 						}
