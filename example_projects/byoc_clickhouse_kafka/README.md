@@ -1,6 +1,6 @@
-# Example terraform to create a transfer from PostgreSQL to ClickHouse
+# Example terraform to create a ClickHouse and Apache Kafka in BYOC
 
-The example in this directory illustrates how to describe ClickHouse and Apache Kafka with BYOC over AWS account.
+The example in this directory illustrates how to create ClickHouse and Apache Kafka with BYOC in user's AWS account with configured KafkaEngine in Clickhouse.
 
 Before running `terraform apply`, replace the variables and values in the Terraform files with the appropriate ones to enable access to databases in your environment.
 
