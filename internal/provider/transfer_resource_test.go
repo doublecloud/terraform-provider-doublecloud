@@ -66,7 +66,7 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testTransferResource, "target"),
 					resource.TestCheckResourceAttr(testTransferResource, "type", "SNAPSHOT_ONLY"),
 					resource.TestCheckResourceAttr(testTransferResource, "activated", "false"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "3"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.include.0", "t1"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.exclude.0", "t2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.keys.0", "pk_field_1"),
