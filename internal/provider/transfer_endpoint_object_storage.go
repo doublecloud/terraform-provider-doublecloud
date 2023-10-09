@@ -739,11 +739,9 @@ func (m *endpointObjectStorageResultSchema) convert(r *endpoint.ObjectStorageDat
 
 	if m.DataSchema != nil {
 		schema := &endpoint.DataSchema{}
-		if schema != nil {
-			diags.Append(m.DataSchema.convert(schema)...)
-			r.Schema = &endpoint.ObjectStorageDataSchema_DataSchema{
-				DataSchema: schema,
-			}
+		diags.Append(m.DataSchema.convert(schema)...)
+		r.Schema = &endpoint.ObjectStorageDataSchema_DataSchema{
+			DataSchema: schema,
 		}
 	}
 
