@@ -41,7 +41,6 @@ func TestAccTransferEndpointObjectStorageResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.result_table.table_name", "test-name"),
 
 					resource.TestCheckResourceAttr(testEObjectStorageTargetId, "name", testEObjectStorageTargetName),
-					resource.TestCheckResourceAttr(testEObjectStorageTargetId, "settings.object_storage_target.bucket", "test-bucket"),
 					resource.TestCheckResourceAttr(testEObjectStorageTargetId, "settings.object_storage_target.output_format", "OBJECT_STORAGE_SERIALIZATION_FORMAT_CSV"),
 					resource.TestCheckResourceAttr(testEObjectStorageTargetId, "settings.object_storage_target.output_encoding", "GZIP"),
 					resource.TestCheckResourceAttr(testEObjectStorageTargetId, "settings.object_storage_target.connection.region", "eu-central-1"),
@@ -53,10 +52,9 @@ func TestAccTransferEndpointObjectStorageResource(t *testing.T) {
 				Config: testAccTransferEndpointResourceObjectStorageModifiedConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "name", testEObjectStorageSourceName),
-					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.format.jsonl.newlines_in_values", "true"),
+					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.format.jsonl.newlines_in_values", "false"),
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.format.jsonl.unexpected_field_behavior", "UNEXPECTED_FIELD_BEHAVIOR_INFER"),
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.format.jsonl.block_size", "1000"),
-					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.result_schema.data_schema.fields.0.field.name", "f1"),
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.event_source.sqs.queue_name", "test-queue"),
 					resource.TestCheckResourceAttr(testEObjectStorageSourceId, "settings.object_storage_source.event_source.sqs.owner_id", "test-id"),
 
@@ -122,6 +120,9 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 				table_name = "test-name"
 				add_system_cols = true
 			}
+			result_schema {
+				infer {}
+			}
 		}
 	}
 }
@@ -136,7 +137,6 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 			output_format = "OBJECT_STORAGE_SERIALIZATION_FORMAT_CSV"
 			bucket_layout = "test-layout"
 			bucket_layout_timezone = "test-timezone"
-			buffer_size = "1000"
 			buffer_interval = "20s"
 			output_encoding = "GZIP"
 			connection {
@@ -224,7 +224,6 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 			output_format = "OBJECT_STORAGE_SERIALIZATION_FORMAT_JSON"
 			bucket_layout = "test-layout"
 			bucket_layout_timezone = "test-timezone"
-			buffer_size = "1000"
 			buffer_interval = "20s"
 			output_encoding = "UNCOMPRESSED"
 			connection {

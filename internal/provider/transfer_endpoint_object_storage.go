@@ -6,8 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -154,15 +152,7 @@ type endpointObjectStorageConnection struct {
 func endpointObjetStorageDataSchemaJsonFieldsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"json_fields": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-		},
-	}
-}
-
-func endpointObjectStorageResultSchemaInferSchema() schema.Block {
-	return schema.SingleNestedBlock{
-		Attributes: map[string]schema.Attribute{
-			"infer": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"json_fields": schema.StringAttribute{Optional: true},
 		},
 	}
 }
@@ -170,7 +160,9 @@ func endpointObjectStorageResultSchemaInferSchema() schema.Block {
 func endpointObjectStorageResultSchemaSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Blocks: map[string]schema.Block{
-			"infer":       endpointObjectStorageResultSchemaInferSchema(),
+			"infer": schema.SingleNestedBlock{
+				MarkdownDescription: "Automatically infer schema",
+			},
 			"data_schema": endpointObjectStorageDataSchemaSchema(),
 		},
 	}
@@ -196,7 +188,7 @@ func transferEndpointObjectStorageUnexpectedFieldBehaviorValidator() validator.S
 func transferEndpointObjectStorageSourceSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"path_pattern": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"path_pattern": schema.StringAttribute{Optional: true},
 		},
 		Blocks: map[string]schema.Block{
 			"format":        endpointObjectStorageSourceFormatSchema(),
@@ -204,21 +196,21 @@ func transferEndpointObjectStorageSourceSchema() schema.Block {
 			"result_schema": endpointObjectStorageResultSchemaSchema(),
 			"provider": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"bucket":                schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"aws_access_key_id":     schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"aws_secret_access_key": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"path_prefix":           schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"endpoint":              schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"region":                schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+					"bucket":                schema.StringAttribute{Optional: true},
+					"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
+					"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
+					"path_prefix":           schema.StringAttribute{Optional: true},
+					"endpoint":              schema.StringAttribute{Optional: true},
+					"region":                schema.StringAttribute{Optional: true},
+					"use_ssl":               schema.BoolAttribute{Optional: true},
+					"verify_ssl_cert":       schema.BoolAttribute{Optional: true},
 				},
 			},
 			"result_table": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"table_namespace": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"table_name":      schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"add_system_cols": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+					"table_namespace": schema.StringAttribute{Optional: true},
+					"table_name":      schema.StringAttribute{Optional: true},
+					"add_system_cols": schema.BoolAttribute{Optional: true},
 				},
 			},
 		},
@@ -233,14 +225,14 @@ func endpointObjectStorageSourceFormatSchema() schema.Block {
 			"avro":    schema.SingleNestedBlock{},
 			"jsonl": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"newlines_in_values": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+					"newlines_in_values": schema.BoolAttribute{Optional: true},
 					"unexpected_field_behavior": schema.StringAttribute{
 						Optional:      true,
 						Computed:      true,
 						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:    []validator.String{transferEndpointObjectStorageUnexpectedFieldBehaviorValidator()},
 					},
-					"block_size": schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+					"block_size": schema.Int64Attribute{Optional: true},
 				},
 			},
 		},
@@ -250,13 +242,13 @@ func endpointObjectStorageSourceFormatSchema() schema.Block {
 func endpointObjectStorageSourceFormatCsvSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"delimiter":          schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"quote_char":         schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"escape_char":        schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"encoding":           schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"double_quote":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"newlines_in_values": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"block_size":         schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"delimiter":          schema.StringAttribute{Optional: true},
+			"quote_char":         schema.StringAttribute{Optional: true},
+			"escape_char":        schema.StringAttribute{Optional: true},
+			"encoding":           schema.StringAttribute{Optional: true},
+			"double_quote":       schema.BoolAttribute{Optional: true},
+			"newlines_in_values": schema.BoolAttribute{Optional: true},
+			"block_size":         schema.Int64Attribute{Optional: true},
 		},
 		Blocks: map[string]schema.Block{
 			"additional_options": endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema(),
@@ -271,11 +263,11 @@ func endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema() schema.Block 
 			"null_values":                schema.ListAttribute{ElementType: types.StringType, Optional: true},
 			"true_values":                schema.ListAttribute{ElementType: types.StringType, Optional: true},
 			"false_values":               schema.ListAttribute{ElementType: types.StringType, Optional: true},
-			"decimal_point":              schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"strings_can_be_null":        schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"quoted_strings_can_be_null": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"decimal_point":              schema.StringAttribute{Optional: true},
+			"strings_can_be_null":        schema.BoolAttribute{Optional: true},
+			"quoted_strings_can_be_null": schema.BoolAttribute{Optional: true},
 			"include_columns":            schema.ListAttribute{ElementType: types.StringType, Optional: true},
-			"include_missing_columns":    schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"include_missing_columns":    schema.BoolAttribute{Optional: true},
 			"timestamp_parsers":          schema.ListAttribute{ElementType: types.StringType, Optional: true},
 		},
 	}
@@ -284,9 +276,9 @@ func endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema() schema.Block 
 func endpointObjectStorageSourceFormatCsvAdvancedOptionsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"skip_rows":                 schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"skip_rows_after_names":     schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"autogenerate_column_names": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"skip_rows":                 schema.Int64Attribute{Optional: true},
+			"skip_rows_after_names":     schema.Int64Attribute{Optional: true},
+			"autogenerate_column_names": schema.BoolAttribute{Optional: true},
 			"column_names":              schema.ListAttribute{ElementType: types.StringType, Optional: true},
 		},
 	}
@@ -297,14 +289,14 @@ func endpointObjectStorageSourceEventSourceSchema() schema.Block {
 		Blocks: map[string]schema.Block{
 			"sqs": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"queue_name":            schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"owner_id":              schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"aws_access_key_id":     schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"aws_secret_access_key": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"endpoint":              schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"region":                schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+					"queue_name":            schema.StringAttribute{Optional: true},
+					"owner_id":              schema.StringAttribute{Optional: true},
+					"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
+					"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
+					"endpoint":              schema.StringAttribute{Optional: true},
+					"region":                schema.StringAttribute{Optional: true},
+					"use_ssl":               schema.BoolAttribute{Optional: true},
+					"verify_ssl_cert":       schema.BoolAttribute{Optional: true},
 				},
 			},
 			"sns":     schema.SingleNestedBlock{},
@@ -316,19 +308,19 @@ func endpointObjectStorageSourceEventSourceSchema() schema.Block {
 func transferEndpointObjectStorageTargetSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"bucket":             schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"service_account_id": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"bucket":             schema.StringAttribute{Optional: true},
+			"service_account_id": schema.StringAttribute{Optional: true},
 			"output_format": schema.StringAttribute{
 				Optional:      true,
 				Computed:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:    []validator.String{transferEndpointObjectStorageOutputFormatValidator()},
 			},
-			"bucket_layout":          schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"bucket_layout_timezone": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"bucket_layout":          schema.StringAttribute{Optional: true, Computed: true},
+			"bucket_layout_timezone": schema.StringAttribute{Optional: true, Computed: true},
 			"bucket_layout_column":   schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"buffer_size":            schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"buffer_interval":        schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"buffer_interval":        schema.StringAttribute{Optional: true},
 			"output_encoding": schema.StringAttribute{
 				Optional:      true,
 				Computed:      true,
@@ -346,12 +338,12 @@ func transferEndpointObjectStorageTargetSchema() schema.Block {
 func endpointObjectStorageTargetConnectionSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"aws_access_key_id":     schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"aws_secret_access_key": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"endpoint":              schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"region":                schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"aws_access_key_id":     schema.StringAttribute{Optional: true},
+			"aws_secret_access_key": schema.StringAttribute{Optional: true},
+			"endpoint":              schema.StringAttribute{Optional: true},
+			"region":                schema.StringAttribute{Optional: true},
+			"use_ssl":               schema.BoolAttribute{Optional: true},
+			"verify_ssl_cert":       schema.BoolAttribute{Optional: true},
 		},
 	}
 }
@@ -359,7 +351,7 @@ func endpointObjectStorageTargetConnectionSchema() schema.Block {
 func endpointObjectStorageTargetSerializerConfigSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"any_as_string": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"any_as_string": schema.BoolAttribute{Optional: true},
 		},
 	}
 }
@@ -419,12 +411,38 @@ func (m *endpointObjectStorageSourceSettings) convert() (*transfer.EndpointSetti
 func (m *endpointObjectStorageSourceSettings) parse(e *endpoint.ObjectStorageSource) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.PathPattern = types.StringValue(e.PathPattern)
-	diags.Append(m.Provider.parse(e.Provider)...)
-	diags.Append(m.Format.parse(e.Format)...)
-	diags.Append(m.ResultTable.parse(e.ResultTable)...)
-	diags.Append(m.ResultSchema.parse(e.ResultSchema)...)
-	diags.Append(m.EventSource.parse(e.EventSource)...)
+	m.PathPattern = types.StringValue(e.GetPathPattern())
+
+	if v := e.GetProvider(); v != nil {
+		if m.Provider == nil {
+			m.Provider = &endpointObjectStorageProvider{}
+		}
+		diags.Append(m.Provider.parse(v)...)
+	}
+	if v := e.GetFormat(); v != nil {
+		if m.Format == nil {
+			m.Format = &endpointObjectStorageFormat{}
+		}
+		diags.Append(m.Format.parse(v)...)
+	}
+	if v := e.GetResultTable(); v != nil {
+		if m.ResultTable == nil {
+			m.ResultTable = &endpointObjectStorageResultTable{}
+		}
+		diags.Append(m.ResultTable.parse(v)...)
+	}
+	if v := e.GetResultSchema(); v != nil {
+		if m.ResultSchema == nil {
+			m.ResultSchema = &endpointObjectStorageResultSchema{}
+		}
+		diags.Append(m.ResultSchema.parse(v)...)
+	}
+	if v := e.GetEventSource(); v != nil {
+		if m.EventSource == nil {
+			m.EventSource = &endpointObjectStorageEventSource{}
+		}
+		diags.Append(m.EventSource.parse(v)...)
+	}
 
 	return diags
 }
@@ -464,14 +482,18 @@ func (m *endpointObjectStorageProvider) convert() (*endpoint.ObjectStorageProvid
 func (m *endpointObjectStorageProvider) parse(e *endpoint.ObjectStorageProvider) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.Bucket = types.StringValue(e.Bucket)
-	m.AwsAccessKeyId = types.StringValue(e.AwsAccessKeyId)
-	m.AwsSecretAccessKey = types.StringValue(e.AwsSecretAccessKey)
-	m.PathPrefix = types.StringValue(e.PathPrefix)
-	m.Endpoint = types.StringValue(e.Endpoint)
-	m.Region = types.StringValue(e.Region)
-	m.UseSSL = types.BoolValue(e.UseSsl)
-	m.VerifySSLCert = types.BoolValue(e.VerifySslCert)
+	m.Bucket = types.StringValue(e.GetBucket())
+	if v := e.GetAwsAccessKeyId(); len(v) > 0 {
+		m.AwsAccessKeyId = types.StringValue(v)
+	}
+	if v := e.GetAwsSecretAccessKey(); len(v) > 0 {
+		m.AwsSecretAccessKey = types.StringValue(v)
+	}
+	m.PathPrefix = types.StringValue(e.GetPathPrefix())
+	m.Endpoint = types.StringValue(e.GetEndpoint())
+	m.Region = types.StringValue(e.GetRegion())
+	m.UseSSL = types.BoolValue(e.GetUseSsl())
+	m.VerifySSLCert = types.BoolValue(e.GetVerifySslCert())
 
 	return diags
 }
@@ -553,20 +575,26 @@ func (m *endpointObjectStorageFormat) parse(e *endpoint.ObjectStorageReaderForma
 	var diags diag.Diagnostics
 
 	if v := e.GetCsv(); v != nil {
-		m.Csv = &endpointObjectStorageFormatCSV{}
-		m.Csv.Delimiter = types.StringValue(v.Delimiter)
-		m.Csv.QuoteChar = types.StringValue(v.QuoteChar)
-		m.Csv.EscapeChar = types.StringValue(v.EscapeChar)
-		m.Csv.Encoding = types.StringValue(v.Encoding)
-		m.Csv.DoubleQuote = types.BoolValue(v.DoubleQuote)
-		m.Csv.NewlinesInValues = types.BoolValue(v.NewlinesInValues)
-		m.Csv.BlockSize = types.Int64Value(v.BlockSize)
+		if m.Csv == nil {
+			m.Csv = &endpointObjectStorageFormatCSV{}
+		}
+		m.Csv.Delimiter = types.StringValue(v.GetDelimiter())
+		m.Csv.QuoteChar = types.StringValue(v.GetQuoteChar())
+		m.Csv.EscapeChar = types.StringValue(v.GetEscapeChar())
+		m.Csv.Encoding = types.StringValue(v.GetEncoding())
+		m.Csv.DoubleQuote = types.BoolValue(v.GetDoubleQuote())
+		m.Csv.NewlinesInValues = types.BoolValue(v.GetNewlinesInValues())
+		m.Csv.BlockSize = types.Int64Value(v.GetBlockSize())
 		if additionalOptions := v.GetAdditionalOptions(); additionalOptions != nil {
-			m.Csv.AdditionalReaderOptions = &endpointObjectStorageFormatCSVAdditionalReaderOptions{}
+			if m.Csv.AdditionalReaderOptions == nil {
+				m.Csv.AdditionalReaderOptions = &endpointObjectStorageFormatCSVAdditionalReaderOptions{}
+			}
 			diags.Append(m.Csv.AdditionalReaderOptions.parse(additionalOptions)...)
 		}
 		if advancedOptions := v.GetAdvancedOptions(); advancedOptions != nil {
-			m.Csv.AdvancedOptions = &endpointObjectStorageFormatCSVAdvancedOptions{}
+			if m.Csv.AdvancedOptions == nil {
+				m.Csv.AdvancedOptions = &endpointObjectStorageFormatCSVAdvancedOptions{}
+			}
 			diags.Append(m.Csv.AdvancedOptions.parse(advancedOptions)...)
 		}
 	}
@@ -578,9 +606,9 @@ func (m *endpointObjectStorageFormat) parse(e *endpoint.ObjectStorageReaderForma
 	}
 	if v := e.GetJsonl(); v != nil {
 		m.Jsonl = &endpointObjectStorageFormatJsonl{}
-		m.Jsonl.NewlinesInValues = types.BoolValue(v.NewlinesInValues)
-		m.Jsonl.UnexpectedFieldBehavior = types.StringValue(v.UnexpectedFieldBehavior.String())
-		m.Jsonl.BlockSize = types.Int64Value(v.BlockSize)
+		m.Jsonl.NewlinesInValues = types.BoolValue(v.GetNewlinesInValues())
+		m.Jsonl.UnexpectedFieldBehavior = types.StringValue(v.GetUnexpectedFieldBehavior().String())
+		m.Jsonl.BlockSize = types.Int64Value(v.GetBlockSize())
 	}
 
 	return diags
@@ -589,10 +617,10 @@ func (m *endpointObjectStorageFormat) parse(e *endpoint.ObjectStorageReaderForma
 func (m *endpointObjectStorageFormatCSVAdvancedOptions) parse(e *endpoint.ObjectStorageReaderFormat_Csv_AdvancedOptions) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.AutogenerateColumnNames = types.BoolValue(e.AutogenerateColumnNames)
-	m.ColumnNames = convertSliceToTFStrings(e.ColumnNames)
-	m.SkipRows = types.Int64Value(e.SkipRowsAfterNames)
-	m.SkipRowsAfterNames = types.Int64Value(e.SkipRowsAfterNames)
+	m.AutogenerateColumnNames = types.BoolValue(e.GetAutogenerateColumnNames())
+	m.ColumnNames = convertSliceToTFStrings(e.GetColumnNames())
+	m.SkipRows = types.Int64Value(e.GetSkipRows())
+	m.SkipRowsAfterNames = types.Int64Value(e.GetSkipRowsAfterNames())
 
 	return diags
 }
@@ -619,15 +647,15 @@ func (m *endpointObjectStorageFormatCSVAdvancedOptions) convert() (*endpoint.Obj
 func (m *endpointObjectStorageFormatCSVAdditionalReaderOptions) parse(e *endpoint.ObjectStorageReaderFormat_Csv_AdditionalReaderOptions) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.IncludeMissingColumns = types.BoolValue(e.IncludeMissingColumns)
-	m.StringsCanBeNull = types.BoolValue(e.StringsCanBeNull)
-	m.QuotedStringsCanBeNull = types.BoolValue(e.QuotedStringsCanBeNull)
-	m.NullValues = convertSliceToTFStrings(e.NullValues)
-	m.FalseValues = convertSliceToTFStrings(e.FalseValues)
-	m.TrueValues = convertSliceToTFStrings(e.TrueValues)
-	m.IncludeColumns = convertSliceToTFStrings(e.IncludeColumns)
-	m.TimestampParsers = convertSliceToTFStrings(e.TimestampParsers)
-	m.DecimalPoint = types.StringValue(e.DecimalPoint)
+	m.IncludeMissingColumns = types.BoolValue(e.GetIncludeMissingColumns())
+	m.StringsCanBeNull = types.BoolValue(e.GetStringsCanBeNull())
+	m.QuotedStringsCanBeNull = types.BoolValue(e.GetQuotedStringsCanBeNull())
+	m.NullValues = convertSliceToTFStrings(e.GetNullValues())
+	m.FalseValues = convertSliceToTFStrings(e.GetFalseValues())
+	m.TrueValues = convertSliceToTFStrings(e.GetTrueValues())
+	m.IncludeColumns = convertSliceToTFStrings(e.GetIncludeColumns())
+	m.TimestampParsers = convertSliceToTFStrings(e.GetTimestampParsers())
+	m.DecimalPoint = types.StringValue(e.GetDecimalPoint())
 
 	return diags
 }
@@ -669,9 +697,9 @@ func (m *endpointObjectStorageFormatCSVAdditionalReaderOptions) convert() (*endp
 func (m *endpointObjectStorageResultTable) parse(e *endpoint.ObjectStorageResultTable) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.AddSystemCols = types.BoolValue(e.AddSystemCols)
-	m.TableName = types.StringValue(e.TableName)
-	m.TableNamespace = types.StringValue(e.TableNamespace)
+	m.AddSystemCols = types.BoolValue(e.GetAddSystemCols())
+	m.TableName = types.StringValue(e.GetTableName())
+	m.TableNamespace = types.StringValue(e.GetTableNamespace())
 
 	return diags
 }
@@ -694,13 +722,14 @@ func (m *endpointObjectStorageResultTable) convert() (*endpoint.ObjectStorageRes
 
 func (m *endpointObjectStorageResultSchema) parse(e *endpoint.ObjectStorageDataSchema) diag.Diagnostics {
 	var diags diag.Diagnostics
-
-	if e.GetInfer() != nil {
+	if v := e.GetInfer(); v != nil {
 		m.Infer = &endpointObjectStorageResultSchemaInfer{}
+		m.DataSchema = nil
 	}
 	if v := e.GetDataSchema(); v != nil {
 		m.DataSchema = &endpointObjectStorageDataSchema{}
 		diags.Append(m.DataSchema.parse(v)...)
+		m.Infer = nil
 	}
 	return diags
 }
@@ -709,11 +738,17 @@ func (m *endpointObjectStorageResultSchema) convert(r *endpoint.ObjectStorageDat
 	var diags diag.Diagnostics
 
 	if m.DataSchema != nil {
-		schema := r.GetDataSchema()
-		diags.Append(m.DataSchema.convert(schema)...)
-		r.Schema = &endpoint.ObjectStorageDataSchema_DataSchema{
-			DataSchema: schema,
+		schema := &endpoint.DataSchema{}
+		if schema != nil {
+			diags.Append(m.DataSchema.convert(schema)...)
+			r.Schema = &endpoint.ObjectStorageDataSchema_DataSchema{
+				DataSchema: schema,
+			}
 		}
+	}
+
+	if m.Infer != nil {
+		r.Schema = &endpoint.ObjectStorageDataSchema_Infer{}
 	}
 
 	return diags
@@ -773,22 +808,43 @@ func (m *endpointObjectStorageEventSource) parse(e *endpoint.ObjectStorageEventS
 	var diags diag.Diagnostics
 
 	if v := e.GetSqs(); v != nil {
-		m.SQS = &endpointObjectStorageEventSourceSQS{}
-		m.SQS.QueueName = types.StringValue(v.QueueName)
-		m.SQS.OwnerID = types.StringValue(v.OwnerId)
-		m.SQS.AwsAccessKeyId = types.StringValue(v.AwsAccessKeyId)
-		m.SQS.AwsSecretAccessKey = types.StringValue(v.AwsSecretAccessKey)
-		m.SQS.Endpoint = types.StringValue(v.Endpoint)
-		m.SQS.Region = types.StringValue(v.Region)
-		m.SQS.UseSSL = types.BoolValue(v.UseSsl)
-		m.SQS.VerifySSLCert = types.BoolValue(v.VerifySslCert)
-
+		if m.SQS == nil {
+			m.SQS = &endpointObjectStorageEventSourceSQS{}
+		}
+		if name := v.GetQueueName(); name != "" {
+			m.SQS.QueueName = types.StringValue(name)
+		}
+		if id := v.GetOwnerId(); id != "" {
+			m.SQS.OwnerID = types.StringValue(id)
+		}
+		if keyID := v.GetAwsAccessKeyId(); keyID != "" {
+			m.SQS.AwsAccessKeyId = types.StringValue(keyID)
+		}
+		if key := v.GetAwsSecretAccessKey(); key != "" {
+			m.SQS.AwsSecretAccessKey = types.StringValue(key)
+		}
+		if endpoint := v.GetEndpoint(); endpoint != "" {
+			m.SQS.Endpoint = types.StringValue(endpoint)
+		}
+		if region := v.GetRegion(); region != "" {
+			m.SQS.Region = types.StringValue(region)
+		}
+		if use := v.GetUseSsl(); use {
+			m.SQS.UseSSL = types.BoolValue(use)
+		}
+		if verify := v.GetVerifySslCert(); verify {
+			m.SQS.VerifySSLCert = types.BoolValue(verify)
+		}
 	}
 	if v := e.GetSns(); v != nil {
-		m.SNS = &endpointObjectStorageEventSourceSNS{}
+		if m.SNS == nil {
+			m.SNS = &endpointObjectStorageEventSourceSNS{}
+		}
 	}
 	if v := e.GetPubSub(); v != nil {
-		m.PubSub = &endpointObjectStorageEventSourcePubSub{}
+		if m.PubSub == nil {
+			m.PubSub = &endpointObjectStorageEventSourcePubSub{}
+		}
 	}
 
 	return diags
@@ -798,7 +854,6 @@ func (m *endpointObjectStorageEventSource) convert() (*endpoint.ObjectStorageEve
 	var diags diag.Diagnostics
 
 	event := endpoint.ObjectStorageEventSource{}
-
 	if v := m.SQS; v != nil {
 		sqs := endpoint.ObjectStorageEventSource_Sqs{Sqs: &endpoint.ObjectStorageEventSource_SQS{}}
 		if v := m.SQS.QueueName; !v.IsNull() {
@@ -848,22 +903,26 @@ func (m *endpointObjectStorageEventSource) convert() (*endpoint.ObjectStorageEve
 func (m *endpointObjectStorageTargetSettings) parse(e *endpoint.ObjectStorageTarget) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.Bucket = types.StringValue(e.Bucket)
-	m.BucketLayout = types.StringValue(e.BucketLayout)
-	m.BucketLayoutColumn = types.StringValue(e.BucketLayoutColumn)
-	m.BucketLayoutTimezone = types.StringValue(e.BucketLayoutTimezone)
-	m.BufferInterval = types.StringValue(e.BufferInterval)
-	m.BufferSize = types.StringValue(e.BufferSize)
-	m.ServiceAccountID = types.StringValue(e.ServiceAccountId)
-	m.OutputFormat = types.StringValue(e.OutputFormat.String())
-	m.OutputEncoding = types.StringValue(e.OutputEncoding.String())
+	m.Bucket = types.StringValue(e.GetBucket())
+	m.BucketLayout = types.StringValue(e.GetBucketLayout())
+	m.BucketLayoutColumn = types.StringValue(e.GetBucketLayoutColumn())
+	m.BucketLayoutTimezone = types.StringValue(e.GetBucketLayoutTimezone())
+	m.BufferInterval = types.StringValue(e.GetBufferInterval())
+	m.BufferSize = types.StringValue(e.GetBufferSize())
+	m.ServiceAccountID = types.StringValue(e.GetServiceAccountId())
+	m.OutputFormat = types.StringValue(e.GetOutputFormat().String())
+	m.OutputEncoding = types.StringValue(e.GetOutputEncoding().String())
 
 	if v := e.GetConnection(); v != nil {
-		m.Connection = &endpointObjectStorageConnection{}
+		if m.Connection == nil {
+			m.Connection = &endpointObjectStorageConnection{}
+		}
 		diags.Append(m.Connection.parse(v)...)
 	}
 	if v := e.GetSerializerConfig(); v != nil {
-		m.SerializerConfig = &endpointObjectStorageSerializerConfig{}
+		if m.SerializerConfig == nil {
+			m.SerializerConfig = &endpointObjectStorageSerializerConfig{}
+		}
 		diags.Append(m.SerializerConfig.parse(v)...)
 	}
 
@@ -877,7 +936,6 @@ func (m *endpointObjectStorageTargetSettings) convert() (*transfer.EndpointSetti
 	if v := m.Bucket; !v.IsNull() {
 		settings.ObjectStorageTarget.Bucket = v.ValueString()
 	}
-
 	if v := m.BucketLayout; !v.IsNull() {
 		settings.ObjectStorageTarget.BucketLayout = v.ValueString()
 	}
@@ -919,12 +977,16 @@ func (m *endpointObjectStorageTargetSettings) convert() (*transfer.EndpointSetti
 func (m *endpointObjectStorageConnection) parse(e *endpoint.ObjectStorageConnection) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.AwsAccessKeyId = types.StringValue(e.AwsAccessKeyId)
-	m.AwsSecretAccessKey = types.StringValue(e.AwsSecretAccessKey)
-	m.Endpoint = types.StringValue(e.Endpoint)
-	m.Region = types.StringValue(e.Region)
-	m.UseSSL = types.BoolValue(e.UseSsl)
-	m.VerifySSLCert = types.BoolValue(e.VerifySslCert)
+	if v := e.GetAwsAccessKeyId(); len(v) > 0 {
+		m.AwsAccessKeyId = types.StringValue(v)
+	}
+	if v := e.GetAwsSecretAccessKey(); len(v) > 0 {
+		m.AwsSecretAccessKey = types.StringValue(v)
+	}
+	m.Endpoint = types.StringValue(e.GetEndpoint())
+	m.Region = types.StringValue(e.GetRegion())
+	m.UseSSL = types.BoolValue(e.GetUseSsl())
+	m.VerifySSLCert = types.BoolValue(e.GetVerifySslCert())
 
 	return diags
 }
@@ -958,7 +1020,7 @@ func (m *endpointObjectStorageConnection) convert() (*endpoint.ObjectStorageConn
 func (m *endpointObjectStorageSerializerConfig) parse(e *endpoint.ObjectStorageSerializerConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	m.AnyAsString = types.BoolValue(e.AnyAsString)
+	m.AnyAsString = types.BoolValue(e.GetAnyAsString())
 	return diags
 }
 

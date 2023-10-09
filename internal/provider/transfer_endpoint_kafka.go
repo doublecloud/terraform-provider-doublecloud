@@ -228,7 +228,6 @@ func (m *transferParserGeneric) convert(r *endpoint.GenericParserCommon) diag.Di
 	r.AddRestColumn = m.AddRestColumn.ValueBool()
 
 	return diags
-
 }
 
 type transferParserSchema struct {
@@ -338,6 +337,9 @@ func (m *transferParserSchemaFields) parse(e *endpoint.FieldList) diag.Diagnosti
 	for i := range flds {
 		if len(m.Fields) <= i {
 			m.Fields = append(m.Fields, new(transferParserSchemaFieldsField))
+		}
+		if m.Fields[i] == nil {
+			m.Fields[i] = new(transferParserSchemaFieldsField)
 		}
 		diags.Append(m.Fields[i].parse(flds[i])...)
 	}
@@ -465,11 +467,13 @@ type endpointSerializer struct {
 	Debezium *endpointSerializerDebezium `tfsdk:"debezium"`
 }
 
-type endpointSerializerAuto struct{}
-type endpointSerializerJSON struct{}
-type endpointSerializerDebezium struct {
-	Parameter *[]endpointSerializerDebeziumParameter `tfsdk:"parameter"`
-}
+type (
+	endpointSerializerAuto     struct{}
+	endpointSerializerJSON     struct{}
+	endpointSerializerDebezium struct {
+		Parameter *[]endpointSerializerDebeziumParameter `tfsdk:"parameter"`
+	}
+)
 
 type endpointSerializerDebeziumParameter struct {
 	Key   types.String `tfsdk:"key"`
@@ -688,7 +692,9 @@ func convertSerializer(m *endpointSerializer) (*endpoint.Serializer, diag.Diagno
 		}
 		s.Serializer = &endpoint.Serializer_SerializerDebezium{
 			SerializerDebezium: &endpoint.SerializerDebezium{
-				SerializerParameters: parameters}}
+				SerializerParameters: parameters,
+			},
+		}
 	}
 	if s.Serializer == nil {
 		diags.AddError("unknown kafka_target.serializer", "specify one of blocks: auto, json or debezium")
