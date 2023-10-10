@@ -477,9 +477,11 @@ func updateClickhouseCluster(m *clickhouseClusterModel) (*clickhouse.UpdateClust
 	diags.Append(d...)
 	rq.ClickhouseConfig = config
 
-	access, d := m.Access.convert()
-	diags.Append(d...)
-	rq.Access = access
+	if m.Access != nil {
+		access, d := m.Access.convert()
+		diags.Append(d...)
+		rq.Access = access
+	}
 
 	return rq, diags
 }
