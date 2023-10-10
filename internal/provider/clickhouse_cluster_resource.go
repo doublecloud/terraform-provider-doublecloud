@@ -564,6 +564,9 @@ func (m *clickhouseClusterModel) parse(rs *clickhouse.Cluster) diag.Diagnostics 
 	}
 	diags.Append(m.Config.parse(rs.ClickhouseConfig)...)
 	if access := rs.GetAccess(); access != nil {
+		if m.Access == nil {
+			m.Access = new(AccessModel)
+		}
 		diags.Append(m.Access.parse(access)...)
 	}
 
