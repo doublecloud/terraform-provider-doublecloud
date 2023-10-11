@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgen "github.com/doublecloud/go-sdk/gen/kafka"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -21,6 +18,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgen "github.com/doublecloud/go-sdk/gen/kafka"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -46,7 +47,7 @@ type KafkaClusterModel struct {
 	Name                  types.String         `tfsdk:"name"`
 	Description           types.String         `tfsdk:"description"`
 	Version               types.String         `tfsdk:"version"`
-	Resources             KafkaResourcesModel  `tfsdk:"resources"`
+	Resources             *KafkaResourcesModel `tfsdk:"resources"`
 	NetworkId             types.String         `tfsdk:"network_id"`
 	SchemaRegistry        *schemaRegistryModel `tfsdk:"schema_registry"`
 	Access                *AccessModel         `tfsdk:"access"`
@@ -358,7 +359,23 @@ func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadReques
 	data.Description = types.StringValue(rs.Description)
 	data.CloudType = types.StringValue(rs.CloudType)
 	data.RegionID = types.StringValue(rs.RegionId)
+	data.NetworkId = types.StringValue(rs.NetworkId)
 	data.Version = types.StringValue(rs.Version)
+	data.Resources = &KafkaResourcesModel{
+		Kafka: KafkaResourcesKafkaModel{
+			ResourcePresetId: types.StringValue(rs.GetResources().GetKafka().GetResourcePresetId()),
+			DiskSize:         types.Int64Value(rs.GetResources().GetKafka().GetDiskSize().GetValue()),
+			BrokerCount:      types.Int64Value(rs.GetResources().GetKafka().GetBrokerCount().GetValue()),
+			ZoneCount:        types.Int64Value(rs.GetResources().GetKafka().GetZoneCount().GetValue()),
+		},
+	}
+
+	if access := rs.GetAccess(); access != nil {
+		if data.Access == nil {
+			data.Access = new(AccessModel)
+		}
+		diag.Append(data.Access.parse(access)...)
+	}
 
 	if rs.SchemaRegistryConfig != nil {
 		data.SchemaRegistry = &schemaRegistryModel{Enabled: types.BoolValue(rs.SchemaRegistryConfig.Enabled)}
