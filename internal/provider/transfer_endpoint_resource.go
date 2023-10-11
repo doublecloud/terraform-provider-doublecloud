@@ -21,8 +21,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TransferEndpointResource{}
-var _ resource.ResourceWithImportState = &TransferEndpointResource{}
+var (
+	_ resource.Resource                = &TransferEndpointResource{}
+	_ resource.ResourceWithImportState = &TransferEndpointResource{}
+)
 
 func NewTransferEndpointResource() resource.Resource {
 	return &TransferEndpointResource{}
@@ -47,17 +49,19 @@ type endpointSettings struct {
 	PostgresSource          *endpointPostgresSourceSettings                  `tfsdk:"postgres_source"`
 	MysqlSource             *endpointMysqlSourceSettings                     `tfsdk:"mysql_source"`
 	MongoSource             *endpointMongoSourceSettings                     `tfsdk:"mongo_source"`
+	ObjectStorageSource     *endpointObjectStorageSourceSettings             `tfsdk:"object_storage_source"`
 	S3Source                *endpointS3SourceSettings                        `tfsdk:"s3_source"`
 	LinkedinAdsSource       *endpointLinkedinAdsSourceSettings               `tfsdk:"linkedinads_source"`
 	AWSCloudTrailSource     *endpointAWSCloudTrailSourceSettings             `tfsdk:"aws_cloudtrail_source"`
 	GoogleAdsSource         *transferEndpointGoogleAdsSourceSettings         `tfsdk:"googleads_source"`
 	FacebookMarketingSource *transferEndpointFacebookMarketingSourceSettings `tfsdk:"facebookmarketing_source"`
 
-	ClickhouseTarget *endpointClickhouseTargetSettings `tfsdk:"clickhouse_target"`
-	KafkaTarget      *endpointKafkaTargetSettings      `tfsdk:"kafka_target"`
-	PostgresTarget   *endpointPostgresTargetSettings   `tfsdk:"postgres_target"`
-	MysqlTarget      *endpointMysqlTargetSettings      `tfsdk:"mysql_target"`
-	MongoTarget      *endpointMongoTargetSettings      `tfsdk:"mongo_target"`
+	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
+	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
+	PostgresTarget      *endpointPostgresTargetSettings      `tfsdk:"postgres_target"`
+	MysqlTarget         *endpointMysqlTargetSettings         `tfsdk:"mysql_target"`
+	MongoTarget         *endpointMongoTargetSettings         `tfsdk:"mongo_target"`
+	ObjectStorageTarget *endpointObjectStorageTargetSettings `tfsdk:"object_storage_target"`
 }
 
 func (r *TransferEndpointResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -107,17 +111,19 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"postgres_source":          transferEndpointPostgresSourceSchema(),
 					"mysql_source":             transferEndpointMysqlSourceSchema(),
 					"mongo_source":             transferEndpointMongoSourceSchema(),
+					"object_storage_source":    transferEndpointObjectStorageSourceSchema(),
 					"s3_source":                transferEndpointS3SourceSchema(),
 					"linkedinads_source":       endpointLinkedinAdsSourceSettingsSchema(),
 					"aws_cloudtrail_source":    endpointAWSCloudTrailSourceSettingsSchema(),
 					"googleads_source":         transferEndpointGoogleAdsSourceSettingsSchema(),
 					"facebookmarketing_source": transferEndpointFacebookMarketingSourceSettingsSchema(),
 
-					"clickhouse_target": transferEndpointChTargetSchema(),
-					"kafka_target":      transferEndpointKafkaTargetSchema(),
-					"postgres_target":   transferEndpointPostgresTargetSchema(),
-					"mysql_target":      transferEndpointMysqlTargetSchema(),
-					"mongo_target":      transferEndpointMongoTargetSchema(),
+					"clickhouse_target":     transferEndpointChTargetSchema(),
+					"kafka_target":          transferEndpointKafkaTargetSchema(),
+					"postgres_target":       transferEndpointPostgresTargetSchema(),
+					"mysql_target":          transferEndpointMysqlTargetSchema(),
+					"mongo_target":          transferEndpointMongoTargetSchema(),
+					"object_storage_target": transferEndpointObjectStorageTargetSchema(),
 				},
 			},
 		},
@@ -336,7 +342,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		s, d := kafkaSourceEndpointSettings(m.Settings.KafkaSource)
 		if d.HasError() {
 			diag.Append(d...)
-
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
@@ -344,7 +349,6 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		s, d := postgresSourceEndpointSettings(m.Settings.PostgresSource)
 		if d.HasError() {
 			diag.Append(d...)
-
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
@@ -357,6 +361,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 	}
 	if m.Settings.MongoSource != nil {
 		s, d := m.Settings.MongoSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.ObjectStorageSource != nil {
+		s, d := m.Settings.ObjectStorageSource.convert()
 		if d.HasError() {
 			diag.Append(d...)
 		}
@@ -429,6 +440,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 	}
 	if m.Settings.MongoTarget != nil {
 		s, d := m.Settings.MongoTarget.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.ObjectStorageTarget != nil {
+		s, d := m.Settings.ObjectStorageTarget.convert()
 		if d.HasError() {
 			diag.Append(d...)
 		}
@@ -521,6 +539,18 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.MongoTarget = &endpointMongoTargetSettings{}
 		}
 		diag.Append(data.Settings.MongoTarget.parse(settings)...)
+	}
+	if settings := e.Settings.GetObjectStorageSource(); settings != nil {
+		if data.Settings.ObjectStorageSource == nil {
+			data.Settings.ObjectStorageSource = &endpointObjectStorageSourceSettings{}
+		}
+		diag.Append(data.Settings.ObjectStorageSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetObjectStorageTarget(); settings != nil {
+		if data.Settings.ObjectStorageTarget == nil {
+			data.Settings.ObjectStorageTarget = &endpointObjectStorageTargetSettings{}
+		}
+		diag.Append(data.Settings.ObjectStorageTarget.parse(settings)...)
 	}
 	if settings := e.Settings.GetS3Source(); settings != nil {
 		if data.Settings.S3Source == nil {
