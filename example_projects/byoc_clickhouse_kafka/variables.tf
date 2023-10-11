@@ -1,6 +1,5 @@
 variable "project_id" {
   type        = string
-  default     = "dogfood"
   description = "ID of the DoubleCloud project in which to create resources"
 }
 
