@@ -117,6 +117,7 @@ Optional:
 - `background_move_pool_size` (Number)
 - `background_pool_size` (Number)
 - `background_schedule_pool_size` (Number)
+- `kafka` (Block, Optional) (see [below for nested schema](#nestedblock--config--kafka))
 - `keep_alive_timeout` (String)
 - `log_level` (String)
 - `mark_cache_size` (Number)
@@ -157,6 +158,20 @@ Optional:
 - `zookeeper_log_enabled` (Boolean)
 - `zookeeper_log_retention_size` (Number)
 - `zookeeper_log_retention_time` (String)
+
+<a id="nestedblock--config--kafka"></a>
+### Nested Schema for `config.kafka`
+
+Optional:
+
+- `enable_ssl_certificate_verification` (Boolean)
+- `max_poll_interval_ms` (String)
+- `sasl_mechanism` (String)
+- `sasl_password` (String, Sensitive)
+- `sasl_username` (String)
+- `security_protocol` (String)
+- `session_timeout_ms` (String)
+
 
 
 <a id="nestedblock--resources"></a>

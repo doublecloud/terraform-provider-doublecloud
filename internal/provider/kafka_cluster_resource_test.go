@@ -6,9 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
 )
 
 var (
@@ -25,7 +26,7 @@ func TestAccKafkaClusterResource(t *testing.T) {
 		CloudType: types.StringValue("aws"),
 		NetworkId: types.StringValue(testNetworkId),
 
-		Resources: KafkaResourcesModel{
+		Resources: &KafkaResourcesModel{
 			Kafka: KafkaResourcesKafkaModel{
 				ResourcePresetId: types.StringValue("s1-c2-m4"),
 				DiskSize:         types.Int64Value(34359738368),
@@ -41,6 +42,9 @@ func TestAccKafkaClusterResource(t *testing.T) {
 
 	m2 := m
 	m2.Name = types.StringValue("terraform-kafka-changed")
+	r1 := *m.Resources
+	r2 := r1
+	m2.Resources = &r2
 	m2.Resources.Kafka.DiskSize = types.Int64Value(51539607552)
 
 	resource.Test(t, resource.TestCase{
@@ -55,9 +59,18 @@ func TestAccKafkaClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccKafkaId, "name", testAccKafkaName),
 					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.disk_size", "34359738368"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "schema_registry.enabled", "false"),
+
 					resource.TestCheckResourceAttr(testAccKafkaId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "access.ipv4_cidr_blocks.0.description", "Office in Berlin"),
+
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "connection_info.connection_string"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "connection_info.user", "admin"),
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "connection_info.password"),
+
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "private_connection_info.connection_string"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "private_connection_info.user", "admin"),
+					resource.TestCheckResourceAttrSet(testAccKafkaId, "private_connection_info.password"),
 				),
 			},
 			// Update and Read testing

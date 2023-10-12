@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
-	dcsdk "github.com/doublecloud/go-sdk"
-	dcgen "github.com/doublecloud/go-sdk/gen/kafka"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -19,6 +18,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	"github.com/doublecloud/go-genproto/doublecloud/kafka/v1"
+	dcsdk "github.com/doublecloud/go-sdk"
+	dcgen "github.com/doublecloud/go-sdk/gen/kafka"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -37,17 +40,19 @@ type KafkaClusterResource struct {
 }
 
 type KafkaClusterModel struct {
-	Id             types.String         `tfsdk:"id"`
-	ProjectID      types.String         `tfsdk:"project_id"`
-	CloudType      types.String         `tfsdk:"cloud_type"`
-	RegionID       types.String         `tfsdk:"region_id"`
-	Name           types.String         `tfsdk:"name"`
-	Description    types.String         `tfsdk:"description"`
-	Version        types.String         `tfsdk:"version"`
-	Resources      KafkaResourcesModel  `tfsdk:"resources"`
-	NetworkId      types.String         `tfsdk:"network_id"`
-	SchemaRegistry *schemaRegistryModel `tfsdk:"schema_registry"`
-	Access         *AccessModel         `tfsdk:"access"`
+	Id                    types.String         `tfsdk:"id"`
+	ProjectID             types.String         `tfsdk:"project_id"`
+	CloudType             types.String         `tfsdk:"cloud_type"`
+	RegionID              types.String         `tfsdk:"region_id"`
+	Name                  types.String         `tfsdk:"name"`
+	Description           types.String         `tfsdk:"description"`
+	Version               types.String         `tfsdk:"version"`
+	Resources             *KafkaResourcesModel `tfsdk:"resources"`
+	NetworkId             types.String         `tfsdk:"network_id"`
+	SchemaRegistry        *schemaRegistryModel `tfsdk:"schema_registry"`
+	Access                *AccessModel         `tfsdk:"access"`
+	ConnectionInfo        types.Object         `tfsdk:"connection_info"`
+	PrivateConnectionInfo types.Object         `tfsdk:"private_connection_info"`
 }
 
 type schemaRegistryModel struct {
@@ -121,6 +126,16 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 				Computed:            true,
 				MarkdownDescription: "Version of Apache Kafka",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
+			"connection_info": schema.SingleNestedAttribute{
+				Computed:      true,
+				Attributes:    kafkaConnectionInfoResSchema(),
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+			},
+			"private_connection_info": schema.SingleNestedAttribute{
+				Computed:      true,
+				Attributes:    kafkaConnectionInfoResSchema(),
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -268,6 +283,36 @@ func (r *KafkaClusterResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 	data.Version = types.StringValue(cluster.Version)
+	if info := cluster.GetConnectionInfo(); info != nil {
+		o, d := types.ObjectValue(map[string]attr.Type{
+			"connection_string": types.StringType,
+			"user":              types.StringType,
+			"password":          types.StringType,
+		},
+			map[string]attr.Value{
+				"connection_string": types.StringValue(info.GetConnectionString()),
+				"user":              types.StringValue(info.GetUser()),
+				"password":          types.StringValue(info.GetPassword()),
+			},
+		)
+		resp.Diagnostics.Append(d...)
+		data.ConnectionInfo = o
+	}
+	if info := cluster.GetPrivateConnectionInfo(); info != nil {
+		o, d := types.ObjectValue(map[string]attr.Type{
+			"connection_string": types.StringType,
+			"user":              types.StringType,
+			"password":          types.StringType,
+		},
+			map[string]attr.Value{
+				"connection_string": types.StringValue(info.GetConnectionString()),
+				"user":              types.StringValue(info.GetUser()),
+				"password":          types.StringValue(info.GetPassword()),
+			},
+		)
+		resp.Diagnostics.Append(d...)
+		data.PrivateConnectionInfo = o
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("doublecloud_kafka_cluster has been created: %s", op.ResourceId()))
 
@@ -279,7 +324,10 @@ func getKafkaClusterResourceRequest(m *KafkaClusterModel) (*kafka.GetClusterRequ
 	if m.Id == types.StringNull() {
 		return nil, diag.Diagnostics{diag.NewErrorDiagnostic("Unknown identifier", "missed one of required fields: cluster_id or name")}
 	}
-	return &kafka.GetClusterRequest{ClusterId: m.Id.ValueString()}, nil
+	return &kafka.GetClusterRequest{
+		ClusterId: m.Id.ValueString(),
+		Sensitive: true,
+	}, nil
 }
 
 func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -311,10 +359,59 @@ func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadReques
 	data.Description = types.StringValue(rs.Description)
 	data.CloudType = types.StringValue(rs.CloudType)
 	data.RegionID = types.StringValue(rs.RegionId)
+	data.NetworkId = types.StringValue(rs.NetworkId)
 	data.Version = types.StringValue(rs.Version)
+	data.Resources = &KafkaResourcesModel{
+		Kafka: KafkaResourcesKafkaModel{
+			ResourcePresetId: types.StringValue(rs.GetResources().GetKafka().GetResourcePresetId()),
+			DiskSize:         types.Int64Value(rs.GetResources().GetKafka().GetDiskSize().GetValue()),
+			BrokerCount:      types.Int64Value(rs.GetResources().GetKafka().GetBrokerCount().GetValue()),
+			ZoneCount:        types.Int64Value(rs.GetResources().GetKafka().GetZoneCount().GetValue()),
+		},
+	}
+
+	if access := rs.GetAccess(); access != nil {
+		if data.Access == nil {
+			data.Access = new(AccessModel)
+		}
+		diag.Append(data.Access.parse(access)...)
+	}
 
 	if rs.SchemaRegistryConfig != nil {
 		data.SchemaRegistry = &schemaRegistryModel{Enabled: types.BoolValue(rs.SchemaRegistryConfig.Enabled)}
+	} else {
+		data.SchemaRegistry = nil
+	}
+
+	if info := rs.GetConnectionInfo(); info != nil {
+		o, d := types.ObjectValue(map[string]attr.Type{
+			"connection_string": types.StringType,
+			"user":              types.StringType,
+			"password":          types.StringType,
+		},
+			map[string]attr.Value{
+				"connection_string": types.StringValue(info.GetConnectionString()),
+				"user":              types.StringValue(info.GetUser()),
+				"password":          types.StringValue(info.GetPassword()),
+			},
+		)
+		resp.Diagnostics.Append(d...)
+		data.ConnectionInfo = o
+	}
+	if info := rs.GetPrivateConnectionInfo(); info != nil {
+		o, d := types.ObjectValue(map[string]attr.Type{
+			"connection_string": types.StringType,
+			"user":              types.StringType,
+			"password":          types.StringType,
+		},
+			map[string]attr.Value{
+				"connection_string": types.StringValue(info.GetConnectionString()),
+				"user":              types.StringValue(info.GetUser()),
+				"password":          types.StringValue(info.GetPassword()),
+			},
+		)
+		resp.Diagnostics.Append(d...)
+		data.PrivateConnectionInfo = o
 	}
 
 	// Save updated data into Terraform state
@@ -417,4 +514,24 @@ func (r *KafkaClusterResource) Delete(ctx context.Context, req resource.DeleteRe
 
 func (r *KafkaClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func kafkaConnectionInfoResSchema() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"connection_string": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "String to use in clients",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"user": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Apache Kafka® user",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"password": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Password for Apache Kafka® user",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+	}
 }

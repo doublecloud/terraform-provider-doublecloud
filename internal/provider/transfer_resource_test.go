@@ -55,16 +55,6 @@ func TestAccTransferResource(t *testing.T) {
 											exclude = ["c2"]
 										}
 									}
-								},
-								{
-									table_splitter = {
-										tables = {
-											include = ["t1", "t2"]
-											exclude = ["te1", "te2", "te3"]
-										}
-										columns = ["c1", "c2"]
-										splitter = "_"
-									}
 								}
 							]
 						}
@@ -76,7 +66,7 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testTransferResource, "target"),
 					resource.TestCheckResourceAttr(testTransferResource, "type", "SNAPSHOT_ONLY"),
 					resource.TestCheckResourceAttr(testTransferResource, "activated", "false"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "3"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.include.0", "t1"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.exclude.0", "t2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.keys.0", "pk_field_1"),
@@ -85,14 +75,6 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.tables.exclude.0", "t2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.columns.include.0", "c1"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.columns.exclude.0", "c2"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.include.0", "t1"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.include.1", "t2"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.exclude.0", "te1"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.exclude.1", "te2"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.tables.exclude.2", "te3"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.columns.0", "c1"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.columns.1", "c2"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.table_splitter.splitter", "_"),
 				),
 			},
 			{

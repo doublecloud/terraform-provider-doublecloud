@@ -110,6 +110,9 @@ func (d *NetworkDataSource) getNetworkIdByName(ctx context.Context, m *NetworkDa
 			return diags
 		}
 	}
+	if it.Error() != nil {
+		diags.AddError("iterator has failed", it.Error().Error())
+	}
 	diags.AddError("network not found", fmt.Sprintf("network with name `%v` haven't found", m.Name.ValueString()))
 
 	return diags

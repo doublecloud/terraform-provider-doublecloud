@@ -218,6 +218,9 @@ func (d *ClickhouseDataSource) Read(ctx context.Context, req datasource.ReadRequ
 				break
 			}
 		}
+		if it.Error() != nil {
+			resp.Diagnostics.AddError("iterator has failed", it.Error().Error())
+		}
 		if data.Id == types.StringNull() {
 			resp.Diagnostics.AddError("cluster not found", fmt.Sprintf("clickhouse cluster `%v` haven't found", data.Name.ValueString()))
 			return
