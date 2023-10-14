@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/doublecloud/go-genproto v0.0.0-20230929140239-39308db3590f
-	github.com/doublecloud/go-sdk v0.0.0-20230922155224-1f2515f72401
+	github.com/doublecloud/go-sdk v0.0.0-20231014183522-514306ea6ce4
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
