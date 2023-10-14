@@ -462,6 +462,9 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 	data.Name = types.StringValue(e.Name)
 	data.ProjectID = types.StringValue(e.ProjectId)
 	data.Description = types.StringValue(e.Description)
+	if data.Settings == nil {
+		data.Settings = new(endpointSettings)
+	}
 
 	if settings := e.Settings.GetClickhouseTarget(); settings != nil {
 

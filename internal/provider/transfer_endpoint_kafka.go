@@ -723,6 +723,10 @@ func kafkaTargetEndpointSettings(m *endpointKafkaTargetSettings) (*transfer.Endp
 func parseTransferEndpointKafkaConnection(e *endpoint.KafkaConnectionOptions, m *endpointKafkaConnectionOptions) {
 	if e == nil {
 		m = nil
+		return
+	}
+	if m == nil {
+		m = new(endpointKafkaConnectionOptions)
 	}
 
 	if cluster_id := e.GetClusterId(); cluster_id != "" {
@@ -761,6 +765,9 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 	if e.Serializer == nil {
 		c.Serializer = nil
 	} else {
+		if c.Serializer == nil {
+			c.Serializer = new(endpointSerializer)
+		}
 		if auto := e.Serializer.GetSerializerAuto(); auto != nil {
 			c.Serializer.Auto = &endpointSerializerAuto{}
 		}
@@ -784,6 +791,9 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 	if e.TopicSettings == nil {
 		c.TopicSettings = nil
 	} else {
+		if c.TopicSettings == nil {
+			c.TopicSettings = new(endpointKafkaTopicSettings)
+		}
 		if prefix := e.TopicSettings.GetTopicPrefix(); prefix != "" {
 			c.TopicSettings.TopicPrefix = types.StringValue(prefix)
 		}
