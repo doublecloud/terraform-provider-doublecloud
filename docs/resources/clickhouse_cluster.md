@@ -180,6 +180,7 @@ Optional:
 Optional:
 
 - `clickhouse` (Block, Optional) (see [below for nested schema](#nestedblock--resources--clickhouse))
+- `dedicated_keeper` (Block, Optional) (see [below for nested schema](#nestedblock--resources--dedicated_keeper))
 
 <a id="nestedblock--resources--clickhouse"></a>
 ### Nested Schema for `resources.clickhouse`
@@ -190,5 +191,15 @@ Optional:
 - `replica_count` (Number) Number of hosts per shard.
 - `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
 - `shard_count` (Number) Number of shards in the cluster.
+
+
+<a id="nestedblock--resources--dedicated_keeper"></a>
+### Nested Schema for `resources.dedicated_keeper`
+
+Optional:
+
+- `disk_size` (Number) Volume of the storage available to a host, in bytes.
+- `replica_count` (Number) Number of keeper hosts.
+- `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
 
 

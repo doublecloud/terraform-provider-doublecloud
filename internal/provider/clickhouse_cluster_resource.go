@@ -46,6 +46,7 @@ type clickhouseClusterModel struct {
 
 type clickhouseClusterResources struct {
 	Clickhouse *clickhouseClusterResourcesClickhouse `tfsdk:"clickhouse"`
+	Keeper     *clickhouseClusterResourcesKeeper     `tfsdk:"dedicated_keeper"`
 }
 
 func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, diag.Diagnostics) {
@@ -72,9 +73,28 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 		if v := m.Clickhouse.ShardCount; !v.IsNull() {
 			r.Clickhouse.ShardCount = wrapperspb.Int64(v.ValueInt64())
 		}
-		return &r, diags
 	}
-	diags.AddError("missed block clickhouse", "specify clickhouse block in resources block")
+	if r.Clickhouse == nil {
+		diags.AddError("missed block clickhouse", "specify clickhouse block in resources block")
+	}
+	if v := m.Keeper; v != nil {
+		r.DedicatedKeeper = &clickhouse.ClusterResources_Keeper{}
+		if v := m.Keeper.ResourcePresetId; !v.IsNull() {
+			r.DedicatedKeeper.ResourcePresetId = v.ValueString()
+		} else {
+			diags.AddError("missed resource_preset_id", "keeper resource_preset_id must be set")
+		}
+		if v := m.Keeper.DiskSize; !v.IsNull() {
+			r.DedicatedKeeper.DiskSize = wrapperspb.Int64(v.ValueInt64())
+		} else {
+			diags.AddError("missed disk_size", "keeper disk_size must be set")
+		}
+		if v := m.Keeper.ReplicaCount; !v.IsNull() {
+			r.DedicatedKeeper.ReplicaCount = wrapperspb.Int64(v.ValueInt64())
+		} else {
+			diags.AddError("missed replica_count", "keeper replica count must be set")
+		}
+	}
 
 	return &r, diags
 }
@@ -84,6 +104,12 @@ type clickhouseClusterResourcesClickhouse struct {
 	DiskSize         types.Int64  `tfsdk:"disk_size"`
 	ReplicaCount     types.Int64  `tfsdk:"replica_count"`
 	ShardCount       types.Int64  `tfsdk:"shard_count"`
+}
+
+type clickhouseClusterResourcesKeeper struct {
+	ResourcePresetId types.String `tfsdk:"resource_preset_id"`
+	DiskSize         types.Int64  `tfsdk:"disk_size"`
+	ReplicaCount     types.Int64  `tfsdk:"replica_count"`
 }
 
 type clickhouseConfig struct {
@@ -331,6 +357,24 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 								Computed:            true,
 								Default:             int64default.StaticInt64(1),
 								MarkdownDescription: "Number of shards in the cluster.",
+							},
+						},
+					},
+					"dedicated_keeper": schema.SingleNestedBlock{
+						Attributes: map[string]schema.Attribute{
+							"resource_preset_id": schema.StringAttribute{
+								Optional:            true,
+								MarkdownDescription: "ID of the preset for computational resources available to a host (CPU, memory, etc.).",
+							},
+							"disk_size": schema.Int64Attribute{
+								Optional:            true,
+								MarkdownDescription: "Volume of the storage available to a host, in bytes.",
+							},
+							"replica_count": schema.Int64Attribute{
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(1),
+								MarkdownDescription: "Number of keeper hosts.",
 							},
 						},
 					},
@@ -586,6 +630,13 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 	m.Clickhouse.DiskSize = types.Int64Value(rs.Clickhouse.DiskSize.GetValue())
 	m.Clickhouse.ReplicaCount = types.Int64Value(rs.Clickhouse.ReplicaCount.GetValue())
 	m.Clickhouse.ShardCount = types.Int64Value(rs.Clickhouse.ShardCount.GetValue())
+
+	if v := rs.GetDedicatedKeeper(); v != nil {
+		m.Keeper = new(clickhouseClusterResourcesKeeper)
+		m.Keeper.ResourcePresetId = types.StringValue(v.ResourcePresetId)
+		m.Keeper.DiskSize = types.Int64Value(v.DiskSize.GetValue())
+		m.Keeper.ReplicaCount = types.Int64Value(v.ReplicaCount.GetValue())
+	}
 
 	return diags
 }
