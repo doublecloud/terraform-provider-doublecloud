@@ -632,10 +632,19 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 	m.Clickhouse.ShardCount = types.Int64Value(rs.Clickhouse.ShardCount.GetValue())
 
 	if v := rs.GetDedicatedKeeper(); v != nil {
-		m.Keeper = new(clickhouseClusterResourcesKeeper)
-		m.Keeper.ResourcePresetId = types.StringValue(v.ResourcePresetId)
-		m.Keeper.DiskSize = types.Int64Value(v.DiskSize.GetValue())
-		m.Keeper.ReplicaCount = types.Int64Value(v.ReplicaCount.GetValue())
+		// temporary fix
+		// server should respond with `nil` structure in case of unused keepers
+		// This if-clause needed for handle situation with current empty structure
+		if v.GetDiskSize().GetValue() == 0 || v.GetReplicaCount().GetValue() == 0 {
+			m.Keeper = nil
+		} else {
+			m.Keeper = new(clickhouseClusterResourcesKeeper)
+			m.Keeper.ResourcePresetId = types.StringValue(v.ResourcePresetId)
+			m.Keeper.DiskSize = types.Int64Value(v.DiskSize.GetValue())
+			m.Keeper.ReplicaCount = types.Int64Value(v.ReplicaCount.GetValue())
+		}
+	} else {
+		m.Keeper = nil
 	}
 
 	return diags
