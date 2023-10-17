@@ -30,6 +30,7 @@ type DoubleCloudProvider struct {
 type DoubleCloudProviderModel struct {
 	AuthorizedKey types.String `tfsdk:"authorized_key"`
 	Endpoint      types.String `tfsdk:"endpoint"`
+	TokenURL      types.String `tfsdk:"token_url"`
 }
 
 type Config struct {
@@ -82,6 +83,10 @@ func (p *DoubleCloudProvider) Schema(ctx context.Context, req provider.SchemaReq
 				MarkdownDescription: "API endpoint",
 				Optional:            true,
 			},
+			"token_url": schema.StringAttribute{
+				MarkdownDescription: "URL for token resolver",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -106,6 +111,9 @@ func configureCredentials(data *DoubleCloudProviderModel) (dc.Credentials, error
 	}
 	if err != nil {
 		return nil, err
+	}
+	if data.Endpoint.ValueString() != "" {
+		os.Setenv("DOUBLE_CLOUD_TOKEN_URL", data.TokenURL.ValueString())
 	}
 	return dc.ServiceAccountKey(key)
 }

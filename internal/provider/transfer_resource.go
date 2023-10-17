@@ -352,7 +352,7 @@ func (m *transferResourceModel) parse(t *transfer.Transfer) diag.Diagnostics {
 	m.Target = types.StringValue(t.GetTarget().GetId())
 	m.Type = types.StringValue(t.GetType().String())
 
-	if t.GetTransformation() != nil {
+	if t.GetTransformation() != nil && len(t.GetTransformation().GetTransformers()) > 0 {
 		if m.Transformation == nil {
 			m.Transformation = new(transferTransformation)
 		}
