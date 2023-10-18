@@ -414,6 +414,8 @@ func (m *endpointObjectStorageSourceSettings) parse(e *endpoint.ObjectStorageSou
 
 	if v := e.GetPathPattern(); v != "" {
 		m.PathPattern = types.StringValue(v)
+	} else {
+		m.PathPattern = types.StringNull()
 	}
 	if v := e.GetProvider(); v != nil {
 		if m.Provider == nil {
