@@ -1,5 +1,5 @@
 resource "doublecloud_transfer_endpoint" "nlb-s3-s32ch-source" {
-  name       = "nlb-s3-s32ch-source"
+  name       = var.transfer_source_name
   project_id = var.project_id
   settings {
     object_storage_source {
@@ -29,8 +29,8 @@ resource "doublecloud_transfer_endpoint" "nlb-s3-s32ch-source" {
       }
       result_table {
         add_system_cols = true
-        table_name      = "nlb_access_logs"
-        table_namespace = "aws"
+        table_name      = var.transfer_source_table_name
+        table_namespace = var.transfer_source_table_namespace
       }
       result_schema {
         data_schema {
@@ -201,7 +201,7 @@ resource "doublecloud_transfer_endpoint" "nlb-s3-s32ch-source" {
 }
 
 resource "doublecloud_transfer_endpoint" "nlb-ch-s32ch-target" {
-  name       = "nlb-ch-s32ch-target"
+  name       = var.transfer_target_name
   project_id = var.project_id
   settings {
     clickhouse_target {
@@ -223,7 +223,7 @@ resource "doublecloud_transfer_endpoint" "nlb-ch-s32ch-target" {
 }
 
 resource "doublecloud_transfer" "nlb-logs-s32ch" {
-  name       = "nlb-logs-s32ch"
+  name       = var.transfer_name
   project_id = var.project_id
   source     = doublecloud_transfer_endpoint.nlb-s3-s32ch-source.id
   target     = doublecloud_transfer_endpoint.nlb-ch-s32ch-target.id

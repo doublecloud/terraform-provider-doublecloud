@@ -86,6 +86,24 @@ variable "aws_account_id" {
   description = "AWS Account ID to use for S3 bucket creation"
 }
 
+variable "network_name" {
+  type        = string
+  default     = "nlb-example-network"
+  description = "Name for the network created in DoubleCloud"
+}
+
+variable "clickhouse_cluster_name" {
+  type        = string
+  default     = "nlb-logs-clickhouse-cluster"
+  description = "Name for the managed ClickHouse cluster created in DoubleCloud"
+}
+
+variable "clickhouse_cluster_resource_preset" {
+  type        = string
+  default     = "s1-c2-m4"
+  description = "Specs for the managed ClickHouse cluster created in DoubleCloud"
+}
+
 # Transfer needed varibales
 variable "aws_access_key_id" {
   type        = string
@@ -101,5 +119,35 @@ variable "aws_access_key_secret" {
 variable "endpoint" {
   type        = string
   default     = ""
-  description = "Endpoint to connect for fetching S3 objects"
+  description = "Endpoint to connect for fetching S3 objects, leave empty for AWS"
+}
+
+variable "transfer_source_name" {
+  type        = string
+  default     = "nlb-s3-s32ch-source"
+  description = "Name of the source endpoint for the DoubleCloud transfer"
+}
+
+variable "transfer_source_table_name" {
+  type        = string
+  default     = "nlb_access_logs"
+  description = "Name for the resulting table in the destination endpoint"
+}
+
+variable "transfer_source_table_namespace" {
+  type        = string
+  default     = "aws"
+  description = "Name for the resulting db schema in the destination endpoint"
+}
+
+variable "transfer_target_name" {
+  type        = string
+  default     = "nlb-ch-s32ch-target"
+  description = "Name of the target endpoint for the Doublecloud transfer"
+}
+
+variable "transfer_name" {
+  type        = string
+  default     = "nlb-logs-s32ch"
+  description = "DoubleCloud transfer name"
 }

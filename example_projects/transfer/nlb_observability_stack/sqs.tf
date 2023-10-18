@@ -9,7 +9,7 @@ resource "aws_sqs_queue" "nlb_logs_queue" {
       "Effect": "Allow",
       "Principal": "*",
       "Action": "sqs:SendMessage",
-      "Resource": "arn:aws:sqs:*:*:s3-nlb-logs-queue",
+      "Resource": "arn:aws:sqs:*:*:${var.sqs_name}",
       "Condition": {
         "ArnEquals": { "aws:SourceArn": "${aws_s3_bucket.nlb_logs.arn}" }
       }
