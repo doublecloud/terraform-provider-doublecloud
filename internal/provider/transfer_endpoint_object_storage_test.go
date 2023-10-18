@@ -139,6 +139,7 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 			bucket_layout_timezone = "test-timezone"
 			buffer_interval = "20s"
 			output_encoding = "GZIP"
+			buffer_size = "268 MB"
 			connection {
 				aws_access_key_id = "test-key-id"
 				aws_secret_access_key = "test secret"
@@ -221,6 +222,7 @@ resource "doublecloud_transfer_endpoint" %[2]q {
 		object_storage_target {
 			bucket = "test-bucket"
 			service_account_id = "test-id"
+			buffer_size = "268 MB"
 			output_format = "OBJECT_STORAGE_SERIALIZATION_FORMAT_JSON"
 			bucket_layout = "test-layout"
 			bucket_layout_timezone = "test-timezone"

@@ -33,3 +33,4 @@ provider "doublecloud" {
 
 - `authorized_key` (String, Sensitive) Path to authorized key
 - `endpoint` (String) API endpoint
+- `token_url` (String) URL for token resolver

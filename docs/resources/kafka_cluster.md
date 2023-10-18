@@ -66,7 +66,9 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 
 ### Read-Only
 
+- `connection_info` (Attributes) (see [below for nested schema](#nestedatt--connection_info))
 - `id` (String) Cluster Id
+- `private_connection_info` (Attributes) (see [below for nested schema](#nestedatt--private_connection_info))
 
 <a id="nestedblock--access"></a>
 ### Nested Schema for `access`
@@ -127,5 +129,25 @@ Required:
 Optional:
 
 - `enabled` (Boolean)
+
+
+<a id="nestedatt--connection_info"></a>
+### Nested Schema for `connection_info`
+
+Read-Only:
+
+- `connection_string` (String) String to use in clients
+- `password` (String) Password for Apache Kafka® user
+- `user` (String) Apache Kafka® user
+
+
+<a id="nestedatt--private_connection_info"></a>
+### Nested Schema for `private_connection_info`
+
+Read-Only:
+
+- `connection_string` (String) String to use in clients
+- `password` (String) Password for Apache Kafka® user
+- `user` (String) Apache Kafka® user
 
 

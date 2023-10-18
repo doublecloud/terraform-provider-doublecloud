@@ -86,6 +86,8 @@ Optional:
 - `mongo_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target))
 - `mysql_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source))
 - `mysql_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_target))
+- `object_storage_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source))
+- `object_storage_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_target))
 - `postgres_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source))
 - `postgres_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_target))
 - `s3_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--s3_source))
@@ -791,6 +793,238 @@ Optional:
 - `ca_certificate` (String) X.509 certificate of the certificate authority which issued the server's certificate, in PEM format. When CA certificate is specified TLS is used to connect to the server
 
 
+
+
+
+<a id="nestedblock--settings--object_storage_source"></a>
+### Nested Schema for `settings.object_storage_source`
+
+Optional:
+
+- `event_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--event_source))
+- `format` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format))
+- `path_pattern` (String)
+- `provider` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--provider))
+- `result_schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_schema))
+- `result_table` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_table))
+
+<a id="nestedblock--settings--object_storage_source--event_source"></a>
+### Nested Schema for `settings.object_storage_source.event_source`
+
+Optional:
+
+- `pub_sub` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--event_source--pub_sub))
+- `sns` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--event_source--sns))
+- `sqs` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--event_source--sqs))
+
+<a id="nestedblock--settings--object_storage_source--event_source--pub_sub"></a>
+### Nested Schema for `settings.object_storage_source.event_source.pub_sub`
+
+
+<a id="nestedblock--settings--object_storage_source--event_source--sns"></a>
+### Nested Schema for `settings.object_storage_source.event_source.sns`
+
+
+<a id="nestedblock--settings--object_storage_source--event_source--sqs"></a>
+### Nested Schema for `settings.object_storage_source.event_source.sqs`
+
+Optional:
+
+- `aws_access_key_id` (String, Sensitive)
+- `aws_secret_access_key` (String, Sensitive)
+- `endpoint` (String)
+- `owner_id` (String)
+- `queue_name` (String)
+- `region` (String)
+- `use_ssl` (Boolean)
+- `verify_ssl_cert` (Boolean)
+
+
+
+<a id="nestedblock--settings--object_storage_source--format"></a>
+### Nested Schema for `settings.object_storage_source.format`
+
+Optional:
+
+- `avro` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--avro))
+- `csv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--csv))
+- `jsonl` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--jsonl))
+- `parquet` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--parquet))
+
+<a id="nestedblock--settings--object_storage_source--format--avro"></a>
+### Nested Schema for `settings.object_storage_source.format.avro`
+
+
+<a id="nestedblock--settings--object_storage_source--format--csv"></a>
+### Nested Schema for `settings.object_storage_source.format.csv`
+
+Optional:
+
+- `additional_options` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--csv--additional_options))
+- `advanced_options` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--csv--advanced_options))
+- `block_size` (Number)
+- `delimiter` (String)
+- `double_quote` (Boolean)
+- `encoding` (String)
+- `escape_char` (String)
+- `newlines_in_values` (Boolean)
+- `quote_char` (String)
+
+<a id="nestedblock--settings--object_storage_source--format--csv--additional_options"></a>
+### Nested Schema for `settings.object_storage_source.format.csv.additional_options`
+
+Optional:
+
+- `decimal_point` (String)
+- `false_values` (List of String)
+- `include_columns` (List of String)
+- `include_missing_columns` (Boolean)
+- `null_values` (List of String)
+- `quoted_strings_can_be_null` (Boolean)
+- `strings_can_be_null` (Boolean)
+- `timestamp_parsers` (List of String)
+- `true_values` (List of String)
+
+
+<a id="nestedblock--settings--object_storage_source--format--csv--advanced_options"></a>
+### Nested Schema for `settings.object_storage_source.format.csv.advanced_options`
+
+Optional:
+
+- `autogenerate_column_names` (Boolean)
+- `column_names` (List of String)
+- `skip_rows` (Number)
+- `skip_rows_after_names` (Number)
+
+
+
+<a id="nestedblock--settings--object_storage_source--format--jsonl"></a>
+### Nested Schema for `settings.object_storage_source.format.jsonl`
+
+Optional:
+
+- `block_size` (Number)
+- `newlines_in_values` (Boolean)
+- `unexpected_field_behavior` (String)
+
+
+<a id="nestedblock--settings--object_storage_source--format--parquet"></a>
+### Nested Schema for `settings.object_storage_source.format.parquet`
+
+
+
+<a id="nestedblock--settings--object_storage_source--provider"></a>
+### Nested Schema for `settings.object_storage_source.provider`
+
+Optional:
+
+- `aws_access_key_id` (String, Sensitive)
+- `aws_secret_access_key` (String, Sensitive)
+- `bucket` (String)
+- `endpoint` (String)
+- `path_prefix` (String)
+- `region` (String)
+- `use_ssl` (Boolean)
+- `verify_ssl_cert` (Boolean)
+
+
+<a id="nestedblock--settings--object_storage_source--result_schema"></a>
+### Nested Schema for `settings.object_storage_source.result_schema`
+
+Optional:
+
+- `data_schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_schema--data_schema))
+- `infer` (Block, Optional) Automatically infer schema (see [below for nested schema](#nestedblock--settings--object_storage_source--result_schema--infer))
+
+<a id="nestedblock--settings--object_storage_source--result_schema--data_schema"></a>
+### Nested Schema for `settings.object_storage_source.result_schema.data_schema`
+
+Optional:
+
+- `fields` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_schema--data_schema--fields))
+- `json_fields` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_schema--data_schema--json_fields))
+
+<a id="nestedblock--settings--object_storage_source--result_schema--data_schema--fields"></a>
+### Nested Schema for `settings.object_storage_source.result_schema.data_schema.fields`
+
+Optional:
+
+- `field` (Block List) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_schema--data_schema--fields--field))
+
+<a id="nestedblock--settings--object_storage_source--result_schema--data_schema--fields--field"></a>
+### Nested Schema for `settings.object_storage_source.result_schema.data_schema.fields.field`
+
+Optional:
+
+- `key` (Boolean)
+- `name` (String)
+- `path` (String)
+- `required` (Boolean)
+- `type` (String)
+
+
+
+<a id="nestedblock--settings--object_storage_source--result_schema--data_schema--json_fields"></a>
+### Nested Schema for `settings.object_storage_source.result_schema.data_schema.json_fields`
+
+Optional:
+
+- `json_fields` (String)
+
+
+
+<a id="nestedblock--settings--object_storage_source--result_schema--infer"></a>
+### Nested Schema for `settings.object_storage_source.result_schema.infer`
+
+
+
+<a id="nestedblock--settings--object_storage_source--result_table"></a>
+### Nested Schema for `settings.object_storage_source.result_table`
+
+Optional:
+
+- `add_system_cols` (Boolean)
+- `table_name` (String)
+- `table_namespace` (String)
+
+
+
+<a id="nestedblock--settings--object_storage_target"></a>
+### Nested Schema for `settings.object_storage_target`
+
+Optional:
+
+- `bucket` (String)
+- `bucket_layout` (String)
+- `bucket_layout_column` (String)
+- `bucket_layout_timezone` (String)
+- `buffer_interval` (String)
+- `buffer_size` (String)
+- `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_target--connection))
+- `output_encoding` (String)
+- `output_format` (String)
+- `serializer_config` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_target--serializer_config))
+- `service_account_id` (String)
+
+<a id="nestedblock--settings--object_storage_target--connection"></a>
+### Nested Schema for `settings.object_storage_target.connection`
+
+Optional:
+
+- `aws_access_key_id` (String)
+- `aws_secret_access_key` (String)
+- `endpoint` (String)
+- `region` (String)
+- `use_ssl` (Boolean)
+- `verify_ssl_cert` (Boolean)
+
+
+<a id="nestedblock--settings--object_storage_target--serializer_config"></a>
+### Nested Schema for `settings.object_storage_target.serializer_config`
+
+Optional:
+
+- `any_as_string` (Boolean)
 
 
 
