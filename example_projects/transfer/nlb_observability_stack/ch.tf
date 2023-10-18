@@ -2,7 +2,7 @@ resource "doublecloud_clickhouse_cluster" "nlb-logs-clickhouse-cluster" {
   project_id = var.project_id
   name       = var.clickhouse_cluster_name
   region_id  = var.region
-  cloud_type = "aws"
+  cloud_type = var.cloud_type
   network_id = resource.doublecloud_network.nlb-network.id
 
   resources {
@@ -13,17 +13,12 @@ resource "doublecloud_clickhouse_cluster" "nlb-logs-clickhouse-cluster" {
     }
   }
 
-  config {
-    log_level       = "LOG_LEVEL_TRACE"
-    max_connections = 120
-  }
-
   access {
     data_services = ["transfer"]
     ipv4_cidr_blocks = [
       {
-        value       = "10.0.0.0/8"
-        description = "Office in Berlin"
+        value       = var.ipv4_cidr
+        description = "VPC CIDR"
       }
     ]
   }
