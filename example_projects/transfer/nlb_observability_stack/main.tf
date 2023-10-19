@@ -13,8 +13,6 @@ terraform {
 
 provider "doublecloud" {
   authorized_key = file("authorized_key.json")
-  endpoint       = var.service_account_endpoint != null ? var.service_account_endpoint : null
-  token_url      = var.service_account_token_endpoint != null ? var.service_account_token_endpoint : null
 }
 
 provider "aws" {

@@ -43,18 +43,6 @@ variable "project_id" {
   description = "ID of the DoubleCloud project in which to create resources"
 }
 
-variable "service_account_endpoint" {
-  type        = string
-  default     = null
-  description = "DoubleCloud endpoint for service account key authentication"
-}
-
-variable "service_account_token_endpoint" {
-  type        = string
-  default     = null
-  description = "DoubleCloud token verification endpoint"
-}
-
 variable "cloud_type" {
   type        = string
   default     = "aws"
