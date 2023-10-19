@@ -110,7 +110,7 @@ variable "endpoint" {
 
 variable "transfer_source_name" {
   type        = string
-  default     = "nlb-s3-s32ch-source-1"
+  default     = "nlb-s3-s32ch-source"
   description = "Name of the source endpoint for the DoubleCloud transfer"
 }
 
@@ -134,6 +134,6 @@ variable "transfer_target_name" {
 
 variable "transfer_name" {
   type        = string
-  default     = "nlb-logs-s32ch-2"
+  default     = "nlb-logs-s32ch"
   description = "DoubleCloud transfer name"
 }
