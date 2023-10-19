@@ -1,6 +1,6 @@
 # AWS resource needed variables
 variable "tags" {
-  type = map(string)
+  type        = map(string)
   description = "Tags for AWS resources"
 }
 
@@ -14,9 +14,10 @@ variable "bucket_prefix" {
   description = "Bucket prefix for NLB logs in S3 bucket"
 }
 
-variable "nlb_name" {
-  type        = string
-  description = "Name of the load balancer to enable acces logs for"
+variable "bucket_encrypted" {
+  type        = bool
+  default     = true
+  description = "Set if bucket should be server side encrpyted"
 }
 
 variable "sqs_name" {
@@ -36,21 +37,6 @@ variable "region" {
   description = "Region where to create S3 bucket"
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "ID of the VPC the NLB is tied to"
-}
-
-variable "fqdn" {
-  type        = string
-  description = "DNS name associated with the NLB"
-}
-
-variable "subnet_ids" {
-  type        = list(string)
-  description = "Subnet ID's for NLB"
-}
-
 # DC resource needed variables
 variable "project_id" {
   type        = string
@@ -59,11 +45,13 @@ variable "project_id" {
 
 variable "service_account_endpoint" {
   type        = string
+  default     = null
   description = "DoubleCloud endpoint for service account key authentication"
 }
 
 variable "service_account_token_endpoint" {
   type        = string
+  default     = null
   description = "DoubleCloud token verification endpoint"
 }
 
@@ -122,7 +110,7 @@ variable "endpoint" {
 
 variable "transfer_source_name" {
   type        = string
-  default     = "nlb-s3-s32ch-source"
+  default     = "nlb-s3-s32ch-source-1"
   description = "Name of the source endpoint for the DoubleCloud transfer"
 }
 
@@ -146,6 +134,6 @@ variable "transfer_target_name" {
 
 variable "transfer_name" {
   type        = string
-  default     = "nlb-logs-s32ch"
+  default     = "nlb-logs-s32ch-2"
   description = "DoubleCloud transfer name"
 }

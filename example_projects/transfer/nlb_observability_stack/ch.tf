@@ -13,6 +13,11 @@ resource "doublecloud_clickhouse_cluster" "nlb-logs-clickhouse-cluster" {
     }
   }
 
+  config {
+    log_level       = "LOG_LEVEL_INFORMATION"
+    max_connections = 120
+  }
+
   access {
     data_services = ["transfer"]
     ipv4_cidr_blocks = [
@@ -24,13 +29,9 @@ resource "doublecloud_clickhouse_cluster" "nlb-logs-clickhouse-cluster" {
   }
 }
 
-
 data "doublecloud_clickhouse" "nlb-logs-clickhouse" {
   project_id = var.project_id
   id         = doublecloud_clickhouse_cluster.nlb-logs-clickhouse-cluster.id
-  depends_on = [
-    resource.doublecloud_clickhouse_cluster.nlb-logs-clickhouse-cluster,
-  ]
 }
 
 

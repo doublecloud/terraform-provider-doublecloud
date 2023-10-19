@@ -15,17 +15,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "nlb_logs" {
-  bucket = aws_s3_bucket.nlb_logs.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "nlb_logs_default_encryption" {
+  count  = var.bucket_encrypted ? 1 : 0
   bucket = aws_s3_bucket.nlb_logs.id
 
   rule {

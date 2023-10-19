@@ -1,5 +1,5 @@
 resource "aws_sqs_queue" "nlb_logs_queue" {
-  name = var.sqs_name
+  name   = var.sqs_name
   policy = <<POLICY
 {
   "Version": "2012-10-17",

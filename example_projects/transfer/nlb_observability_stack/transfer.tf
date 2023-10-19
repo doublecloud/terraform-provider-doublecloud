@@ -11,7 +11,7 @@ resource "doublecloud_transfer_endpoint" "nlb-s3-s32ch-source" {
         region                = var.region
         endpoint              = var.endpoint
         use_ssl               = true
-        verify_ssl_cert       = false
+        verify_ssl_cert       = true
       }
       format {
         csv {
@@ -194,10 +194,6 @@ resource "doublecloud_transfer_endpoint" "nlb-s3-s32ch-source" {
       }
     }
   }
-  depends_on = [
-    resource.doublecloud_clickhouse_cluster.nlb-logs-clickhouse-cluster,
-    data.doublecloud_clickhouse.nlb-logs-clickhouse
-  ]
 }
 
 resource "doublecloud_transfer_endpoint" "nlb-ch-s32ch-target" {
@@ -216,10 +212,6 @@ resource "doublecloud_transfer_endpoint" "nlb-ch-s32ch-target" {
       }
     }
   }
-  depends_on = [
-    resource.doublecloud_clickhouse_cluster.nlb-logs-clickhouse-cluster,
-    data.doublecloud_clickhouse.nlb-logs-clickhouse
-  ]
 }
 
 resource "doublecloud_transfer" "nlb-logs-s32ch" {
@@ -229,8 +221,4 @@ resource "doublecloud_transfer" "nlb-logs-s32ch" {
   target     = doublecloud_transfer_endpoint.nlb-ch-s32ch-target.id
   type       = "INCREMENT_ONLY"
   activated  = false
-  depends_on = [
-    resource.doublecloud_clickhouse_cluster.nlb-logs-clickhouse-cluster,
-    data.doublecloud_clickhouse.nlb-logs-clickhouse
-  ]
 }
