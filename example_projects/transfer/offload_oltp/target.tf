@@ -24,7 +24,7 @@ resource "doublecloud_network" "network" {
 
 resource "doublecloud_clickhouse_cluster" "dwh" {
   project_id  = var.project_id
-  name        = "dwg"
+  name        = "dwh"
   region_id   = "eu-central-1"
   cloud_type  = "aws"
   network_id  = doublecloud_network.network.id
@@ -60,7 +60,7 @@ data "doublecloud_clickhouse" "dwh" {
 }
 
 resource "doublecloud_transfer_endpoint" "dwh-target" {
-  name = "dwh-target"
+  name       = "dwh-target"
   project_id = var.project_id
   settings {
     clickhouse_target {

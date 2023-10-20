@@ -12,11 +12,10 @@ And what we need to add some analytical capabilities here:
 
 First of all let’s take a look how to organize code between stages, I do prefer a module + several root here, so we can tweak it a bit easier.
 
-Let’s start with a [`m](http://main.tf)ain.tf`, usually it contains providers definition, nothing more:
+Let’s start with a `main.tf`, usually it contains providers definition, nothing more:
 
 ```hcl
 provider "doublecloud" {
-  endpoint       = "api.double.cloud:443"
   authorized_key = file(var.dc-token)
 }
 provider "aws" {
@@ -35,8 +34,7 @@ module "byoc" {
   source  = "doublecloud/doublecloud-byoc/aws"
   version = "1.0.3"
 
-  doublecloud_controlplane_account_id = data.aws_caller_identity.self.account_id
-  ipv4_cidr                           = "10.10.0.0/16"
+  ipv4_cidr = "10.10.0.0/16"
 }
 
 resource "doublecloud_clickhouse_cluster" "dwh" {
@@ -99,7 +97,7 @@ Once we have clickhouse we can start designing our data pipes.
 
 First let`s make postgres-to-clickhouse:
 
-```jsx
+```hcl
 resource "doublecloud_transfer_endpoint" "pg-source" {
   name = "sample-pg2ch-source"
   project_id = var.project_id
@@ -130,9 +128,9 @@ resource "doublecloud_transfer" "pg2ch" {
 }
 ```
 
-This create a simple replication pipeline between your exist postgres and newly created DWH clickhouse cluster.
+This creates a simple replication pipeline between your exist postgres and newly created DWH clickhouse cluster.
 
-As you can see a lot of stuff here actually cames as variables, so it’s quite easy to prepare different stages, simple add `stage_name.tfvars` and run `terraform apply` with it:
+As you can see a lot of stuff here actually comes as variables, so it’s quite easy to prepare different stages, simple add `stage_name.tfvars` and run `terraform apply` with it:
 
 ```hcl
 variable "dc-token" {
@@ -141,7 +139,6 @@ variable "dc-token" {
 variable "profile" {
   description = "Name of AWS profile"
 }
-
 variable "vpc_id" {
   description = "VPC ID of exist infra to peer with"
 }
@@ -165,7 +162,7 @@ variable "postgres_password" {
 }
 ```
 
-That’s it. You data stack is ready to consume. As next steps just setup your own visualization connection:
+That’s it. Your data stack is ready to consume. As next steps just setup your own visualization connection:
 
 ```hcl
 resource "doublecloud_workbook" "k8s-logs-viewer" {
