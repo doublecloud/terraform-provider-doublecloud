@@ -406,7 +406,6 @@ func (r *WorkbookResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diag...)
 		return
 	}
-
 	rs, err := r.svc.Update(ctx, rq)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update", err.Error())
@@ -417,7 +416,6 @@ func (r *WorkbookResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.AddError("failed to update", err.Error())
 		return
 	}
-
 	err = op.Wait(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update", err.Error())
