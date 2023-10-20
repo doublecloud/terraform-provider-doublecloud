@@ -315,6 +315,14 @@ func (r *WorkbookResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
+	exist, err := r.svc.Get(ctx, &visualization.GetWorkbookRequest{
+		WorkbookId: data.Id.ValueString(),
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("failed to read workbook", err.Error())
+		return
+	}
+	data.Config = types.StringValue(exist.Workbook.Config.GetStringValue())
 	// TODO: support json comparison with null values
 
 	// Save updated data into Terraform state
@@ -406,6 +414,7 @@ func (r *WorkbookResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diag...)
 		return
 	}
+
 	rs, err := r.svc.Update(ctx, rq)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update", err.Error())
