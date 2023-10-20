@@ -27,7 +27,7 @@ This will just enable you usage for certain envs, like here it’s AWS and  [Dou
 
 First thing we need to do - is create our storage, for this example we will use [Clickhouse](https://clickhouse.com/).
 
-To enable clickhouse we need to create a network were to put it. For this example I choose [BYOA](https://double.cloud/blog/posts/2022/12/bring-your-own-account/) network, so it can be easily peered with exist infra.
+To enable clickhouse we need to create a network were to put it. For this example I choose [BYOC](https://double.cloud/blog/posts/2022/12/bring-your-own-account/) network, so it can be easily peered with exist infra.
 
 ```hcl
 module "byoc" {
