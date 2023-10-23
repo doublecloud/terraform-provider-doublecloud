@@ -193,7 +193,9 @@ func transferEndpointChTargetSchema() schema.Block {
 }
 
 func chTargetEndpointSettings(m *endpointClickhouseTargetSettings) (*transfer.EndpointSettings_ClickhouseTarget, diag.Diagnostics) {
-	settings := &transfer.EndpointSettings_ClickhouseTarget{ClickhouseTarget: &endpoint.ClickhouseTarget{}}
+	settings := &transfer.EndpointSettings_ClickhouseTarget{ClickhouseTarget: &endpoint.ClickhouseTarget{
+		MigrationOptions: &endpoint.ClickhouseMigrationOptions{AddNewColumns: true},
+	}}
 	var diag diag.Diagnostics
 
 	if !m.ClickhouseClusterName.IsUnknown() {
