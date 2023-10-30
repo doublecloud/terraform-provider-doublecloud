@@ -55,6 +55,7 @@ type endpointSettings struct {
 	AWSCloudTrailSource     *endpointAWSCloudTrailSourceSettings             `tfsdk:"aws_cloudtrail_source"`
 	GoogleAdsSource         *transferEndpointGoogleAdsSourceSettings         `tfsdk:"googleads_source"`
 	FacebookMarketingSource *transferEndpointFacebookMarketingSourceSettings `tfsdk:"facebookmarketing_source"`
+	SnowflakeSource         *endpointSnowflakeSourceSettings                 `tfsdk:"snowflake_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -117,6 +118,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"aws_cloudtrail_source":    endpointAWSCloudTrailSourceSettingsSchema(),
 					"googleads_source":         transferEndpointGoogleAdsSourceSettingsSchema(),
 					"facebookmarketing_source": transferEndpointFacebookMarketingSourceSettingsSchema(),
+					"snowflake_source":         endpointSnowflakeSourceSettingsSchema(),
 
 					"clickhouse_target":     transferEndpointChTargetSchema(),
 					"kafka_target":          transferEndpointKafkaTargetSchema(),
@@ -408,6 +410,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 			Settings: &transfer.EndpointSettings_FacebookMarketingSource{FacebookMarketingSource: result},
 		}, diag
 	}
+	if m.Settings.SnowflakeSource != nil {
+		result := new(endpoint_airbyte.SnowflakeSource)
+		diag.Append(m.Settings.SnowflakeSource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_SnowflakeSource{SnowflakeSource: result},
+		}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -585,7 +594,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 		}
 		diag.Append(data.Settings.FacebookMarketingSource.parse(settings)...)
 	}
-
+	if settings := e.Settings.GetSnowflakeSource(); settings != nil {
+		if data.Settings.SnowflakeSource == nil {
+			data.Settings.SnowflakeSource = &endpointSnowflakeSourceSettings{}
+		}
+		diag.Append(data.Settings.SnowflakeSource.parse(settings)...)
+	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")
 	}
