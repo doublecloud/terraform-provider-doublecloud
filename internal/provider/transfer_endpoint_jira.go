@@ -28,16 +28,15 @@ type endpointJiraSourceSettings struct {
 func endpointJiraSourceSettingsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"api_token":  schema.StringAttribute{Optional: true, Sensitive: true},
-			"domain":     schema.StringAttribute{Optional: true},
-			"email":      schema.StringAttribute{Optional: true},
+			"api_token":  schema.StringAttribute{Required: true, Sensitive: true},
+			"domain":     schema.StringAttribute{Required: true},
+			"email":      schema.StringAttribute{Required: true},
 			"projects":   schema.ListAttribute{ElementType: types.StringType, Optional: true},
 			"start_date": schema.StringAttribute{Optional: true},
 			"issues_stream_expand_with": schema.ListAttribute{
-				ElementType:         types.StringType,
-				Optional:            true,
-				MarkdownDescription: "`breakdowns` request parameter",
-				Validators:          []validator.List{listvalidator.ValueStringsAre(stringvalidator.OneOf(transferEndpointJiraSourceIssuesStreamExpandWithOneofValues()...))},
+				ElementType: types.StringType,
+				Optional:    true,
+				Validators:  []validator.List{listvalidator.ValueStringsAre(stringvalidator.OneOf(transferEndpointJiraSourceIssuesStreamExpandWithOneofValues()...))},
 			},
 			"enable_experimental_streams": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
 		},
@@ -61,10 +60,12 @@ func transferEndpointJiraSourceIssuesStreamExpandWithOneofValues() []string {
 func (s *endpointJiraSourceSettings) parse(e *endpoint_airbyte.JiraSource) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	s.ApiToken = types.StringValue(e.GetApiToken())
+	if e.GetApiToken() != "" {
+		s.ApiToken = types.StringValue(e.GetApiToken())
+	}
 	s.Domain = types.StringValue(e.GetDomain())
 	s.Email = types.StringValue(e.GetEmail())
-	s.Projects = toTypesStringSlice(e.GetProjects())
+	s.Projects = convertSliceToTFStrings(e.GetProjects())
 	s.StartDate = types.StringValue(e.GetStartDate())
 	s.EnableExperimentalStreams = types.BoolValue(e.GetEnableExperimentalStreams())
 	if expands := e.GetIssuesStreamExpandWith(); len(expands) > 0 {
@@ -89,31 +90,9 @@ func transferEndpointJiraSourceIssuesStreamExpandWithToEnum(v string) (endpoint_
 	key := strings.ToUpper(v)
 	result, ok := endpoint_airbyte.JiraSource_Expand_value[key]
 	if !ok {
-		return endpoint_airbyte.JiraSource_EXPAND_UNSPECIFIED, diag.NewAttributeErrorDiagnostic(path.Root("fields"), "unknown Field enum value", fmt.Sprintf("%q (enum key %q)", v, key))
+		return endpoint_airbyte.JiraSource_EXPAND_UNSPECIFIED, diag.NewAttributeErrorDiagnostic(path.Root("issues_stream_expand_with"), "unknown Field enum value", fmt.Sprintf("%q (enum key %q)", v, key))
 	}
 	return endpoint_airbyte.JiraSource_Expand(result), nil
-}
-
-func toTypesStringSlice(values []string) []types.String {
-	if len(values) == 0 {
-		return nil
-	}
-	result := make([]types.String, len(values))
-	for i, value := range values {
-		result[i] = types.StringValue(value)
-	}
-	return result
-}
-
-func toStringSlice(values []types.String) []string {
-	if len(values) == 0 {
-		return nil
-	}
-	result := make([]string, len(values))
-	for i, value := range values {
-		result[i] = value.String()
-	}
-	return result
 }
 
 func (s *endpointJiraSourceSettings) convert(r *endpoint_airbyte.JiraSource) diag.Diagnostics {
@@ -122,7 +101,7 @@ func (s *endpointJiraSourceSettings) convert(r *endpoint_airbyte.JiraSource) dia
 	r.ApiToken = s.ApiToken.ValueString()
 	r.Domain = s.Domain.ValueString()
 	r.Email = s.Email.ValueString()
-	r.Projects = toStringSlice(s.Projects)
+	r.Projects = convertSliceTFStrings(s.Projects)
 	r.StartDate = s.StartDate.ValueString()
 	if len(s.IssuesStreamExpandWith) > 0 {
 		r.IssuesStreamExpandWith = make([]endpoint_airbyte.JiraSource_Expand, len(s.IssuesStreamExpandWith))
