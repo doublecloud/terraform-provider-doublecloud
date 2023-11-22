@@ -56,6 +56,7 @@ type endpointSettings struct {
 	GoogleAdsSource         *transferEndpointGoogleAdsSourceSettings         `tfsdk:"googleads_source"`
 	FacebookMarketingSource *transferEndpointFacebookMarketingSourceSettings `tfsdk:"facebookmarketing_source"`
 	SnowflakeSource         *endpointSnowflakeSourceSettings                 `tfsdk:"snowflake_source"`
+	JiraSource              *endpointJiraSourceSettings                      `tfsdk:"jira_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -119,6 +120,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"googleads_source":         transferEndpointGoogleAdsSourceSettingsSchema(),
 					"facebookmarketing_source": transferEndpointFacebookMarketingSourceSettingsSchema(),
 					"snowflake_source":         endpointSnowflakeSourceSettingsSchema(),
+					"jira_source":              endpointJiraSourceSettingsSchema(),
 
 					"clickhouse_target":     transferEndpointChTargetSchema(),
 					"kafka_target":          transferEndpointKafkaTargetSchema(),
@@ -417,6 +419,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 			Settings: &transfer.EndpointSettings_SnowflakeSource{SnowflakeSource: result},
 		}, diag
 	}
+	if m.Settings.JiraSource != nil {
+		result := new(endpoint_airbyte.JiraSource)
+		diag.Append(m.Settings.JiraSource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_JiraSource{JiraSource: result},
+		}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -599,6 +608,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.SnowflakeSource = &endpointSnowflakeSourceSettings{}
 		}
 		diag.Append(data.Settings.SnowflakeSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetJiraSource(); settings != nil {
+		if data.Settings.JiraSource == nil {
+			data.Settings.JiraSource = &endpointJiraSourceSettings{}
+		}
+		diag.Append(data.Settings.JiraSource.parse(settings)...)
 	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")
