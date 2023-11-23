@@ -28,9 +28,9 @@ type endpointJiraSourceSettings struct {
 func endpointJiraSourceSettingsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"api_token":  schema.StringAttribute{Required: true, Sensitive: true},
-			"domain":     schema.StringAttribute{Required: true},
-			"email":      schema.StringAttribute{Required: true},
+			"api_token":  schema.StringAttribute{Optional: true, Sensitive: true},
+			"domain":     schema.StringAttribute{Optional: true},
+			"email":      schema.StringAttribute{Optional: true},
 			"projects":   schema.ListAttribute{ElementType: types.StringType, Optional: true},
 			"start_date": schema.StringAttribute{Optional: true},
 			"issues_stream_expand_with": schema.ListAttribute{
