@@ -454,7 +454,7 @@ type endpointKafkaTargetSettings struct {
 type endpointKafkaTopicSettings struct {
 	Topic              *endpointKafkaTargetTopic        `tfsdk:"topic"`
 	TopicPrefix        types.String                     `tfsdk:"topic_prefix"`
-	TopicConfigEntries []*endpointKafkaTopicConfigEntry `tfsdk:"topic_config_entries"`
+	TopicConfigEntries *[]endpointKafkaTopicConfigEntry `tfsdk:"topic_config_entries"`
 }
 
 type endpointKafkaTopicConfigEntry struct {
@@ -662,11 +662,13 @@ func convertKafkaTargetTopicSettings(m *endpointKafkaTopicSettings) (*endpoint.K
 			TopicPrefix: m.TopicPrefix.ValueString(),
 		}
 	}
-	for _, entry := range m.TopicConfigEntries {
-		settings.TopicConfigEntries = append(settings.TopicConfigEntries, &endpoint.TopicConfigEntry{
-			ConfigName:  entry.ConfigName.ValueString(),
-			ConfigValue: entry.ConfigValue.ValueString(),
-		})
+	if m.TopicConfigEntries != nil {
+		for _, entry := range *m.TopicConfigEntries {
+			settings.TopicConfigEntries = append(settings.TopicConfigEntries, &endpoint.TopicConfigEntry{
+				ConfigName:  entry.ConfigName.ValueString(),
+				ConfigValue: entry.ConfigValue.ValueString(),
+			})
+		}
 	}
 	if settings.TopicSettings == nil {
 		diags.AddError("unknown kafka_target.topic_settings", "specify oneof: topic block or topic_prefix attribut")
@@ -822,14 +824,14 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 			}
 		}
 		if len(e.TopicSettings.TopicConfigEntries) != 0 {
-			p := make([]*endpointKafkaTopicConfigEntry, len(e.TopicSettings.TopicConfigEntries))
+			p := make([]endpointKafkaTopicConfigEntry, len(e.TopicSettings.TopicConfigEntries))
 			for i, entry := range e.TopicSettings.TopicConfigEntries {
-				p[i] = &endpointKafkaTopicConfigEntry{
+				p[i] = endpointKafkaTopicConfigEntry{
 					ConfigName:  types.StringValue(entry.ConfigName),
 					ConfigValue: types.StringValue(entry.ConfigValue),
 				}
 			}
-			c.TopicSettings.TopicConfigEntries = p
+			c.TopicSettings.TopicConfigEntries = &p
 		}
 	}
 
