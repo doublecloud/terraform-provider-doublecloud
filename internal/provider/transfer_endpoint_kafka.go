@@ -585,6 +585,12 @@ func transferEndpointKafkaTargetTopicSettingsSchemaBlock() schema.Block {
 		},
 		Blocks: map[string]schema.Block{
 			"topic": transferEndpointKafkaTargetTopicSchema(),
+			"topic_config_entries": schema.ListNestedBlock{NestedObject: schema.NestedBlockObject{
+				Attributes: map[string]schema.Attribute{
+					"config_name":  schema.StringAttribute{Required: true},
+					"config_value": schema.StringAttribute{Required: true},
+				},
+			}},
 		},
 	}
 }
