@@ -32,6 +32,8 @@ github.com/doublecloud/go-genproto v0.0.0-20231021040559-a5056e78e70e h1:ZVy8Gbs
 github.com/doublecloud/go-genproto v0.0.0-20231021040559-a5056e78e70e/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-genproto v0.0.0-20231121040546-08fc6b1bd32c h1:TExVAru3JZ4dV/w107x0S7SXL2pOJ57Tf/BOhS6lYVs=
 github.com/doublecloud/go-genproto v0.0.0-20231121040546-08fc6b1bd32c/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
+github.com/doublecloud/go-genproto v0.0.0-20231125040531-70fc01655daa h1:YctZ5ih6iYPdQok2SPWmXuzFSPK4t7HKYc4fVUY76lk=
+github.com/doublecloud/go-genproto v0.0.0-20231125040531-70fc01655daa/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-sdk v0.0.0-20231023084120-70d098991817 h1:bWB2YV7sVsn2B00GDAW+kQOnvzUspAT72gxr5K6YhrI=
 github.com/doublecloud/go-sdk v0.0.0-20231023084120-70d098991817/go.mod h1:sw62d/bLkJVAmKwjekCxnRr6xwBSJPuhLzQE8WcxWgc=
 github.com/emirpasic/gods v1.12.0 h1:QAUIPSaCu4G+POclxeqb3F+WPpdKqFGlw36+yOzGlrg=
