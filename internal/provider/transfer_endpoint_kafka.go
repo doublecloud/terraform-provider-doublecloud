@@ -796,6 +796,7 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 						Value: types.StringValue(debezium.SerializerParameters[i].Value),
 					}
 				}
+				c.Serializer.Debezium.Parameter = &p
 			}
 		}
 	}
@@ -809,12 +810,6 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 		if prefix := e.TopicSettings.GetTopicPrefix(); prefix != "" {
 			c.TopicSettings.TopicPrefix = types.StringValue(prefix)
 		}
-		for _, entry := range e.TopicSettings.TopicConfigEntries {
-			c.TopicSettings.TopicConfigEntries = append(c.TopicSettings.TopicConfigEntries, &endpointKafkaTopicConfigEntry{
-				ConfigName:  types.StringValue(entry.ConfigName),
-				ConfigValue: types.StringValue(entry.ConfigValue),
-			})
-		}
 		if topic := e.TopicSettings.GetTopic(); topic != nil {
 			if c.TopicSettings.Topic == nil {
 				c.TopicSettings.Topic = &endpointKafkaTargetTopic{}
@@ -825,6 +820,16 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 			if topic.SaveTxOrder {
 				c.TopicSettings.Topic.SaveTxOrder = types.BoolValue(topic.SaveTxOrder)
 			}
+		}
+		if len(e.TopicSettings.TopicConfigEntries) != 0 {
+			p := make([]*endpointKafkaTopicConfigEntry, len(e.TopicSettings.TopicConfigEntries))
+			for i, entry := range e.TopicSettings.TopicConfigEntries {
+				p[i] = &endpointKafkaTopicConfigEntry{
+					ConfigName:  types.StringValue(entry.ConfigName),
+					ConfigValue: types.StringValue(entry.ConfigValue),
+				}
+			}
+			c.TopicSettings.TopicConfigEntries = p
 		}
 	}
 
