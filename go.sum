@@ -34,8 +34,16 @@ github.com/doublecloud/go-genproto v0.0.0-20231121040546-08fc6b1bd32c h1:TExVAru
 github.com/doublecloud/go-genproto v0.0.0-20231121040546-08fc6b1bd32c/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-genproto v0.0.0-20231125040531-70fc01655daa h1:YctZ5ih6iYPdQok2SPWmXuzFSPK4t7HKYc4fVUY76lk=
 github.com/doublecloud/go-genproto v0.0.0-20231125040531-70fc01655daa/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
+github.com/doublecloud/go-genproto v0.0.0-20231204141502-c40c6048d6d7 h1:od+LBIfhpC417VWuU5p4HH48uM8vNYvFspKwzwc+8II=
+github.com/doublecloud/go-genproto v0.0.0-20231204141502-c40c6048d6d7/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
+github.com/doublecloud/go-genproto v0.0.0-20231204203656-5182fd49050e h1:tGY2kkqLrU1YlbZSkjH5NoQ3LRjNs9m0UNTMFPXg4sk=
+github.com/doublecloud/go-genproto v0.0.0-20231204203656-5182fd49050e/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-sdk v0.0.0-20231023084120-70d098991817 h1:bWB2YV7sVsn2B00GDAW+kQOnvzUspAT72gxr5K6YhrI=
 github.com/doublecloud/go-sdk v0.0.0-20231023084120-70d098991817/go.mod h1:sw62d/bLkJVAmKwjekCxnRr6xwBSJPuhLzQE8WcxWgc=
+github.com/doublecloud/go-sdk v0.0.0-20231204143616-9d17042652a6 h1:Vs+DA+/I/iPCZzOycurU5fiEMWi9hjW4mmsIsNzKYr0=
+github.com/doublecloud/go-sdk v0.0.0-20231204143616-9d17042652a6/go.mod h1:u3TFgYDGayktQxULpbhDdr/VlsGH/M0pbQ45/RakyLM=
+github.com/doublecloud/go-sdk v0.0.0-20231204203856-90b12ab5c47c h1:E1zpoTEkFNm+r/3KOrFcnIcPSwZYIjYrebjqW1vukVM=
+github.com/doublecloud/go-sdk v0.0.0-20231204203856-90b12ab5c47c/go.mod h1:V4kRC+OGRl0EbRqWVffHsC5Vk5lTR74IIpvc5T2euk4=
 github.com/emirpasic/gods v1.12.0 h1:QAUIPSaCu4G+POclxeqb3F+WPpdKqFGlw36+yOzGlrg=
 github.com/emirpasic/gods v1.12.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=

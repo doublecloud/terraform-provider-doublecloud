@@ -642,7 +642,7 @@ func kafkaSourceEndpointSettings(m *endpointKafkaSourceSettings) (*transfer.Endp
 		settings.KafkaSource.Auth = new(endpoint.KafkaAuth)
 		diags.Append(m.Auth.convert(settings.KafkaSource.Auth)...)
 	}
-	settings.KafkaSource.TopicName = m.TopicName.ValueString()
+	settings.KafkaSource.TopicNames = []string{m.TopicName.ValueString()}
 	if m.Parser != nil {
 		settings.KafkaSource.Parser = new(endpoint.Parser)
 		diags.Append(m.Parser.convert(settings.KafkaSource.Parser)...)
