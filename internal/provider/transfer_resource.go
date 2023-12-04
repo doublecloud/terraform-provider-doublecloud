@@ -434,8 +434,8 @@ func transferRuntimeSchema() schema.Attribute {
 		Attributes: map[string]schema.Attribute{
 			"dedicated": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"vpc_id": schema.StringAttribute{Required: false},
-					"flavor": schema.StringAttribute{Required: false, Validators: []validator.String{transferRuntimeFlavorValidator()}},
+					"vpc_id": schema.StringAttribute{Optional: true},
+					"flavor": schema.StringAttribute{Required: true, Validators: []validator.String{transferRuntimeFlavorValidator()}},
 				},
 				Optional: true,
 			},
