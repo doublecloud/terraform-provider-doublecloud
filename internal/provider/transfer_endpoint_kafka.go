@@ -452,8 +452,14 @@ type endpointKafkaTargetSettings struct {
 }
 
 type endpointKafkaTopicSettings struct {
-	Topic       *endpointKafkaTargetTopic `tfsdk:"topic"`
-	TopicPrefix types.String              `tfsdk:"topic_prefix"`
+	Topic              *endpointKafkaTargetTopic        `tfsdk:"topic"`
+	TopicPrefix        types.String                     `tfsdk:"topic_prefix"`
+	TopicConfigEntries *[]endpointKafkaTopicConfigEntry `tfsdk:"topic_config_entries"`
+}
+
+type endpointKafkaTopicConfigEntry struct {
+	ConfigName  types.String `tfsdk:"config_name"`
+	ConfigValue types.String `tfsdk:"config_value"`
 }
 
 type endpointKafkaTargetTopic struct {
@@ -579,6 +585,12 @@ func transferEndpointKafkaTargetTopicSettingsSchemaBlock() schema.Block {
 		},
 		Blocks: map[string]schema.Block{
 			"topic": transferEndpointKafkaTargetTopicSchema(),
+			"topic_config_entries": schema.ListNestedBlock{NestedObject: schema.NestedBlockObject{
+				Attributes: map[string]schema.Attribute{
+					"config_name":  schema.StringAttribute{Required: true},
+					"config_value": schema.StringAttribute{Required: true},
+				},
+			}},
 		},
 	}
 }
@@ -654,6 +666,14 @@ func convertKafkaTargetTopicSettings(m *endpointKafkaTopicSettings) (*endpoint.K
 	if m.Topic == nil && !m.TopicPrefix.IsNull() {
 		settings.TopicSettings = &endpoint.KafkaTargetTopicSettings_TopicPrefix{
 			TopicPrefix: m.TopicPrefix.ValueString(),
+		}
+	}
+	if m.TopicConfigEntries != nil {
+		for _, entry := range *m.TopicConfigEntries {
+			settings.TopicConfigEntries = append(settings.TopicConfigEntries, &endpoint.TopicConfigEntry{
+				ConfigName:  entry.ConfigName.ValueString(),
+				ConfigValue: entry.ConfigValue.ValueString(),
+			})
 		}
 	}
 	if settings.TopicSettings == nil {
@@ -784,6 +804,7 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 						Value: types.StringValue(debezium.SerializerParameters[i].Value),
 					}
 				}
+				c.Serializer.Debezium.Parameter = &p
 			}
 		}
 	}
@@ -807,6 +828,16 @@ func parseTransferEndpointKafkaTarget(ctx context.Context, e *endpoint.KafkaTarg
 			if topic.SaveTxOrder {
 				c.TopicSettings.Topic.SaveTxOrder = types.BoolValue(topic.SaveTxOrder)
 			}
+		}
+		if len(e.TopicSettings.TopicConfigEntries) != 0 {
+			p := make([]endpointKafkaTopicConfigEntry, len(e.TopicSettings.TopicConfigEntries))
+			for i, entry := range e.TopicSettings.TopicConfigEntries {
+				p[i] = endpointKafkaTopicConfigEntry{
+					ConfigName:  types.StringValue(entry.ConfigName),
+					ConfigValue: types.StringValue(entry.ConfigValue),
+				}
+			}
+			c.TopicSettings.TopicConfigEntries = &p
 		}
 	}
 
