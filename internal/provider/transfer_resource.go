@@ -102,6 +102,7 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "Activation of transfer",
 			},
 			"transformation": transferTransformationSchema(),
+			"runtime":        transferRuntimeSchema(),
 		},
 	}
 }
