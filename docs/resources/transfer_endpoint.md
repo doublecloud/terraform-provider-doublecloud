@@ -79,6 +79,7 @@ Optional:
 - `clickhouse_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target))
 - `facebookmarketing_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--facebookmarketing_source))
 - `googleads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--googleads_source))
+- `jira_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--jira_source))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
 - `linkedinads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source))
@@ -91,6 +92,7 @@ Optional:
 - `postgres_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source))
 - `postgres_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_target))
 - `s3_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--s3_source))
+- `snowflake_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--snowflake_source))
 
 <a id="nestedblock--settings--aws_cloudtrail_source"></a>
 ### Nested Schema for `settings.aws_cloudtrail_source`
@@ -287,6 +289,20 @@ Optional:
 - `query` (String)
 - `table_name` (String)
 
+
+
+<a id="nestedblock--settings--jira_source"></a>
+### Nested Schema for `settings.jira_source`
+
+Optional:
+
+- `api_token` (String, Sensitive)
+- `domain` (String)
+- `email` (String)
+- `enable_experimental_streams` (Boolean)
+- `issues_stream_expand_with` (List of String)
+- `projects` (List of String)
+- `start_date` (String)
 
 
 <a id="nestedblock--settings--kafka_source"></a>
@@ -552,6 +568,7 @@ Optional:
 Optional:
 
 - `topic` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target--topic_settings--topic))
+- `topic_config_entries` (Block List) (see [below for nested schema](#nestedblock--settings--kafka_target--topic_settings--topic_config_entries))
 - `topic_prefix` (String) Analogue of the Debezium setting database.server.name. Messages will be sent to topic with name <topic_prefix>.<schema>.<table_name>.
 
 <a id="nestedblock--settings--kafka_target--topic_settings--topic"></a>
@@ -561,6 +578,15 @@ Optional:
 
 - `save_tx_order` (Boolean) Save transactions order. Not to split events queue into separate per-table queues.
 - `topic_name` (String) Topic name
+
+
+<a id="nestedblock--settings--kafka_target--topic_settings--topic_config_entries"></a>
+### Nested Schema for `settings.kafka_target.topic_settings.topic_config_entries`
+
+Required:
+
+- `config_name` (String)
+- `config_value` (String)
 
 
 
@@ -1207,5 +1233,47 @@ Optional:
 - `path_prefix` (String)
 - `use_ssl` (Boolean)
 - `verify_ssl_cert` (Boolean)
+
+
+
+<a id="nestedblock--settings--snowflake_source"></a>
+### Nested Schema for `settings.snowflake_source`
+
+Optional:
+
+- `credentials` (Block, Optional) (see [below for nested schema](#nestedblock--settings--snowflake_source--credentials))
+- `database` (String)
+- `host` (String)
+- `jdbc_url_params` (String)
+- `role` (String)
+- `schema` (String)
+- `warehouse` (String)
+
+<a id="nestedblock--settings--snowflake_source--credentials"></a>
+### Nested Schema for `settings.snowflake_source.credentials`
+
+Optional:
+
+- `basic_auth` (Block, Optional) (see [below for nested schema](#nestedblock--settings--snowflake_source--credentials--basic_auth))
+- `oauth` (Block, Optional) (see [below for nested schema](#nestedblock--settings--snowflake_source--credentials--oauth))
+
+<a id="nestedblock--settings--snowflake_source--credentials--basic_auth"></a>
+### Nested Schema for `settings.snowflake_source.credentials.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--settings--snowflake_source--credentials--oauth"></a>
+### Nested Schema for `settings.snowflake_source.credentials.oauth`
+
+Optional:
+
+- `access_token` (String, Sensitive)
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `refresh_token` (String, Sensitive)
 
 
