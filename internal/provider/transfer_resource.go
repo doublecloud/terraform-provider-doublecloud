@@ -126,7 +126,7 @@ func (r *TransferResource) Configure(ctx context.Context, req resource.Configure
 	r.transferService = r.sdk.Transfer().Transfer()
 }
 
-func (r *TransferResource) setActivation(ctx context.Context, m *transferResourceModel) diag.Diagnostics {
+func (r *TransferResource) setActivation(ctx context.Context, m *transferResourceModel, existTransfer *transfer.Transfer) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var dcOp *doublecloud.Operation
 	var err error
@@ -135,14 +135,19 @@ func (r *TransferResource) setActivation(ctx context.Context, m *transferResourc
 		return diags
 	}
 
-	if m.Activated.ValueBool() {
+	// we allow to terraform activation only for create transfer
+	// any edits should not lead to transfer re-activation
+	if m.Activated.ValueBool() && existTransfer == nil {
 		dcOp, err = r.transferService.Activate(ctx, &transfer.ActivateTransferRequest{
 			TransferId: m.Id.ValueString(),
 		})
-	} else {
+	} else if existTransfer != nil && existTransfer.Status == transfer.TransferStatus_RUNNING {
 		dcOp, err = r.transferService.Deactivate(ctx, &transfer.DeactivateTransferRequest{
 			TransferId: m.Id.ValueString(),
 		})
+	}
+	if dcOp == nil {
+		return diags
 	}
 
 	if err != nil {
@@ -192,7 +197,7 @@ func (r *TransferResource) Create(ctx context.Context, req resource.CreateReques
 
 	data.Id = types.StringValue(op.ResourceId())
 
-	r.setActivation(ctx, data)
+	r.setActivation(ctx, data, nil)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -236,6 +241,11 @@ func (r *TransferResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diag...)
 		return
 	}
+	existTransfer, err := r.transferService.Get(ctx, &transfer.GetTransferRequest{TransferId: rq.TransferId})
+	if err != nil {
+		resp.Diagnostics.AddError("failed to call Get", err.Error())
+		return
+	}
 
 	rs, err := r.transferService.Update(ctx, rq)
 	if err != nil {
@@ -253,7 +263,7 @@ func (r *TransferResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	r.setActivation(ctx, data)
+	r.setActivation(ctx, data, existTransfer)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
