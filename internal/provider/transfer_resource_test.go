@@ -161,7 +161,7 @@ func TestAccTransferResource(t *testing.T) {
 						}
 					}`, testProjectId)),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testTransferResource, "runtime.dedicated.flavor", "tiny"),
+					resource.TestCheckResourceAttr(testTransferResource, "runtime.dedicated.flavor", "TINY"),
 				),
 			},
 			// Delete occurs automatically
