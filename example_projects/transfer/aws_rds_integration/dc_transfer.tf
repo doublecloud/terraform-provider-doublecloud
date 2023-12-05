@@ -57,4 +57,10 @@ resource "doublecloud_transfer" "pg2ch" {
   target     = doublecloud_transfer_endpoint.dwh-target.id
   type       = "SNAPSHOT_ONLY"
   activated  = false
+  runtime = {
+    dedicated = {
+      flavor  = "TINY"
+      vpc_id = doublecloud_network.aws.id
+    }
+  }
 }
