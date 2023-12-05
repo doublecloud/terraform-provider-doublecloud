@@ -397,6 +397,18 @@ func (m *transferResourceModel) UpdateRequest() (*transfer.UpdateTransferRequest
 		r.Transformation = new(transfer.Transformation)
 		diags.Append(m.Transformation.convert(requestTypeUpdate, r.Transformation)...)
 	}
+	if m.Runtime != nil {
+		settings := &transfer.Settings{Settings: &transfer.Settings_AutoSettings{AutoSettings: &transfer.AutoSettings{}}}
+		if m.Runtime.Dedicated.VPCID.ValueString() != "" {
+			settings = &transfer.Settings{Settings: &transfer.Settings_ManualSettings{ManualSettings: &transfer.ManualSettings{
+				NetworkId: m.Runtime.Dedicated.VPCID.ValueString(),
+			}}}
+		}
+		r.Runtime = &transfer.Runtime{Runtime: &transfer.Runtime_DedicatedRuntime{DedicatedRuntime: &transfer.DedicatedRuntime{
+			Flavor:   transfer.Flavor(transfer.Flavor_value[m.Runtime.Dedicated.Flavor.ValueString()]),
+			Settings: settings,
+		}}}
+	}
 
 	return r, diags
 }
