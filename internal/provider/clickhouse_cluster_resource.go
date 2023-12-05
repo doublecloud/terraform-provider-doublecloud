@@ -9,6 +9,7 @@ import (
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
 	dcgen "github.com/doublecloud/go-sdk/gen/clickhouse"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -1166,7 +1167,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"text_log_level": schema.StringAttribute{
 				Optional:   true,
 				Computed:   true,
-				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_TRACE.String()),
+				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
 				Validators: []validator.String{clickhouseConfigLogLevelValidator()},
 			},
 
@@ -1189,6 +1190,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 		Blocks: map[string]schema.Block{
 			"kafka": clickhouseKafkaSchemaBlock(),
 		},
+		Validators: []validator.Object{objectvalidator.IsRequired()},
 	}
 }
 
