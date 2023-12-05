@@ -3,8 +3,8 @@ module github.com/doublecloud/terraform-provider-doublecloud
 go 1.20
 
 require (
-	github.com/doublecloud/go-genproto v0.0.0-20231125040531-70fc01655daa
-	github.com/doublecloud/go-sdk v0.0.0-20231023084120-70d098991817
+	github.com/doublecloud/go-genproto v0.0.0-20231204203656-5182fd49050e
+	github.com/doublecloud/go-sdk v0.0.0-20231204203856-90b12ab5c47c
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.1
 	github.com/hashicorp/terraform-plugin-docs v0.14.1

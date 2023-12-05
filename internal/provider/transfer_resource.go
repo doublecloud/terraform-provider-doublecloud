@@ -102,6 +102,7 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "Activation of transfer",
 			},
 			"transformation": transferTransformationSchema(),
+			"runtime":        transferRuntimeSchema(),
 		},
 	}
 }
@@ -324,6 +325,7 @@ type transferResourceModel struct {
 	Type           types.String            `tfsdk:"type"`
 	Activated      types.Bool              `tfsdk:"activated"`
 	Transformation *transferTransformation `tfsdk:"transformation"`
+	Runtime        *transferRuntime        `tfsdk:"runtime"`
 }
 
 type requestType int
@@ -346,6 +348,18 @@ func (m *transferResourceModel) CreateRequest() (*transfer.CreateTransferRequest
 	if m.Transformation != nil {
 		r.Transformation = new(transfer.Transformation)
 		diags.Append(m.Transformation.convert(requestTypeCreate, r.Transformation)...)
+	}
+	if m.Runtime != nil && m.Runtime.Dedicated != nil {
+		settings := &transfer.Settings{Settings: &transfer.Settings_AutoSettings{AutoSettings: &transfer.AutoSettings{}}}
+		if m.Runtime.Dedicated.VPCID.ValueString() != "" {
+			settings = &transfer.Settings{Settings: &transfer.Settings_ManualSettings{ManualSettings: &transfer.ManualSettings{
+				NetworkId: m.Runtime.Dedicated.VPCID.ValueString(),
+			}}}
+		}
+		r.Runtime = &transfer.Runtime{Runtime: &transfer.Runtime_DedicatedRuntime{DedicatedRuntime: &transfer.DedicatedRuntime{
+			Flavor:   transfer.Flavor(transfer.Flavor_value[m.Runtime.Dedicated.Flavor.ValueString()]),
+			Settings: settings,
+		}}}
 	}
 
 	return r, diags
@@ -370,6 +384,16 @@ func (m *transferResourceModel) parse(t *transfer.Transfer) diag.Diagnostics {
 	} else {
 		m.Transformation = nil
 	}
+	if t.GetRuntime().GetDedicatedRuntime() != nil {
+		m.Runtime = new(transferRuntime)
+		m.Runtime.Dedicated = new(transferDedicatedRuntime)
+		if t.GetRuntime().GetDedicatedRuntime().GetSettings().GetManualSettings().GetNetworkId() != "" {
+			m.Runtime.Dedicated.VPCID = types.StringValue(t.GetRuntime().GetDedicatedRuntime().GetSettings().GetManualSettings().GetNetworkId())
+		}
+		m.Runtime.Dedicated.Flavor = types.StringValue(t.GetRuntime().GetDedicatedRuntime().Flavor.String())
+	} else {
+		m.Runtime = nil
+	}
 
 	return diags
 }
@@ -385,6 +409,18 @@ func (m *transferResourceModel) UpdateRequest() (*transfer.UpdateTransferRequest
 		r.Transformation = new(transfer.Transformation)
 		diags.Append(m.Transformation.convert(requestTypeUpdate, r.Transformation)...)
 	}
+	if m.Runtime != nil {
+		settings := &transfer.Settings{Settings: &transfer.Settings_AutoSettings{AutoSettings: &transfer.AutoSettings{}}}
+		if m.Runtime.Dedicated.VPCID.ValueString() != "" {
+			settings = &transfer.Settings{Settings: &transfer.Settings_ManualSettings{ManualSettings: &transfer.ManualSettings{
+				NetworkId: m.Runtime.Dedicated.VPCID.ValueString(),
+			}}}
+		}
+		r.Runtime = &transfer.Runtime{Runtime: &transfer.Runtime_DedicatedRuntime{DedicatedRuntime: &transfer.DedicatedRuntime{
+			Flavor:   transfer.Flavor(transfer.Flavor_value[m.Runtime.Dedicated.Flavor.ValueString()]),
+			Settings: settings,
+		}}}
+	}
 
 	return r, diags
 }
@@ -399,6 +435,15 @@ type transferTransformation struct {
 	Transformers []transferTransformer `tfsdk:"transformers"`
 }
 
+type transferRuntime struct {
+	Dedicated *transferDedicatedRuntime `tfsdk:"dedicated"`
+}
+
+type transferDedicatedRuntime struct {
+	VPCID  types.String `tfsdk:"vpc_id"`
+	Flavor types.String `tfsdk:"flavor"`
+}
+
 func transferTransformationSchema() schema.Attribute {
 	return schema.SingleNestedAttribute{
 		Attributes: map[string]schema.Attribute{
@@ -406,6 +451,29 @@ func transferTransformationSchema() schema.Attribute {
 		},
 		Optional: true,
 	}
+}
+
+func transferRuntimeSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Attributes: map[string]schema.Attribute{
+			"dedicated": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"vpc_id": schema.StringAttribute{Optional: true},
+					"flavor": schema.StringAttribute{Required: true, Validators: []validator.String{transferRuntimeFlavorValidator()}},
+				},
+				Optional: true,
+			},
+		},
+		Optional: true,
+	}
+}
+
+func transferRuntimeFlavorValidator() validator.String {
+	names := make([]string, len(transfer.Flavor_name))
+	for i, v := range transfer.Flavor_name {
+		names[i] = v
+	}
+	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
 func (m *transferTransformation) convert(rqt requestType, r *transfer.Transformation) diag.Diagnostics {
