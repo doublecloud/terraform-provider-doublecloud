@@ -7,6 +7,7 @@ resource "doublecloud_network" "aws" {
     vpc_id       = module.doublecloud-byoc.vpc_id
     account_id   = module.doublecloud-byoc.account_id
     iam_role_arn = module.doublecloud-byoc.iam_role_arn
+    private_subnets = false
   }
 }
 
