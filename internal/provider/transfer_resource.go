@@ -377,7 +377,9 @@ func (m *transferResourceModel) parse(t *transfer.Transfer) diag.Diagnostics {
 	if t.GetRuntime().GetDedicatedRuntime() != nil {
 		m.Runtime = new(transferRuntime)
 		m.Runtime.Dedicated = new(transferDedicatedRuntime)
-		m.Runtime.Dedicated.VPCID = types.StringValue(t.GetRuntime().GetDedicatedRuntime().GetSettings().GetManualSettings().GetNetworkId())
+		if t.GetRuntime().GetDedicatedRuntime().GetSettings().GetManualSettings().GetNetworkId() != "" {
+			m.Runtime.Dedicated.VPCID = types.StringValue(t.GetRuntime().GetDedicatedRuntime().GetSettings().GetManualSettings().GetNetworkId())
+		}
 		m.Runtime.Dedicated.Flavor = types.StringValue(t.GetRuntime().GetDedicatedRuntime().Flavor.String())
 	} else {
 		m.Runtime = nil
