@@ -146,6 +146,9 @@ func (r *TransferResource) setActivation(ctx context.Context, m *transferResourc
 			TransferId: m.Id.ValueString(),
 		})
 	}
+	if dcOp == nil {
+		return diags
+	}
 
 	if err != nil {
 		diags.AddError("failed to activate", err.Error())
