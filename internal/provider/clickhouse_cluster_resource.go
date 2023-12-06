@@ -9,6 +9,7 @@ import (
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
 	dcgen "github.com/doublecloud/go-sdk/gen/clickhouse"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -65,6 +66,9 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 		} else {
 			diags.AddError("missed disk_size", "clickhouse disk_size must be set")
 		}
+		if v := m.Clickhouse.MaxDiskSize; !v.IsNull() {
+			r.Clickhouse.MaxDiskSize = wrapperspb.Int64(v.ValueInt64())
+		}
 		if v := m.Clickhouse.ReplicaCount; !v.IsNull() {
 			r.Clickhouse.ReplicaCount = wrapperspb.Int64(v.ValueInt64())
 		} else {
@@ -89,6 +93,9 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 		} else {
 			diags.AddError("missed disk_size", "keeper disk_size must be set")
 		}
+		if v := m.Keeper.MaxDiskSize; !v.IsNull() {
+			r.DedicatedKeeper.MaxDiskSize = wrapperspb.Int64(v.ValueInt64())
+		}
 		if v := m.Keeper.ReplicaCount; !v.IsNull() {
 			r.DedicatedKeeper.ReplicaCount = wrapperspb.Int64(v.ValueInt64())
 		} else {
@@ -102,6 +109,7 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 type clickhouseClusterResourcesClickhouse struct {
 	ResourcePresetId types.String `tfsdk:"resource_preset_id"`
 	DiskSize         types.Int64  `tfsdk:"disk_size"`
+	MaxDiskSize      types.Int64  `tfsdk:"max_disk_size"`
 	ReplicaCount     types.Int64  `tfsdk:"replica_count"`
 	ShardCount       types.Int64  `tfsdk:"shard_count"`
 }
@@ -109,6 +117,7 @@ type clickhouseClusterResourcesClickhouse struct {
 type clickhouseClusterResourcesKeeper struct {
 	ResourcePresetId types.String `tfsdk:"resource_preset_id"`
 	DiskSize         types.Int64  `tfsdk:"disk_size"`
+	MaxDiskSize      types.Int64  `tfsdk:"max_disk_size"`
 	ReplicaCount     types.Int64  `tfsdk:"replica_count"`
 }
 
@@ -344,7 +353,12 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
+								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
 								MarkdownDescription: "Volume of the storage available to a host, in bytes.",
+							},
+							"max_disk_size": schema.Int64Attribute{
+								Optional:            true,
+								MarkdownDescription: "Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
@@ -368,7 +382,12 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
+								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
 								MarkdownDescription: "Volume of the storage available to a host, in bytes.",
+							},
+							"max_disk_size": schema.Int64Attribute{
+								Optional:            true,
+								MarkdownDescription: "Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
@@ -630,6 +649,9 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 	m.Clickhouse.DiskSize = types.Int64Value(rs.Clickhouse.DiskSize.GetValue())
 	m.Clickhouse.ReplicaCount = types.Int64Value(rs.Clickhouse.ReplicaCount.GetValue())
 	m.Clickhouse.ShardCount = types.Int64Value(rs.Clickhouse.ShardCount.GetValue())
+	if v := rs.Clickhouse.MaxDiskSize; v != nil {
+		m.Clickhouse.MaxDiskSize = types.Int64Value(v.GetValue())
+	}
 
 	if v := rs.GetDedicatedKeeper(); v != nil {
 		// temporary fix
@@ -642,6 +664,9 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 			m.Keeper.ResourcePresetId = types.StringValue(v.ResourcePresetId)
 			m.Keeper.DiskSize = types.Int64Value(v.DiskSize.GetValue())
 			m.Keeper.ReplicaCount = types.Int64Value(v.ReplicaCount.GetValue())
+			if v := rs.Clickhouse.MaxDiskSize; v != nil {
+				m.Keeper.MaxDiskSize = types.Int64Value(v.GetValue())
+			}
 		}
 	} else {
 		m.Keeper = nil
@@ -1142,7 +1167,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"text_log_level": schema.StringAttribute{
 				Optional:   true,
 				Computed:   true,
-				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_TRACE.String()),
+				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
 				Validators: []validator.String{clickhouseConfigLogLevelValidator()},
 			},
 
@@ -1165,6 +1190,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 		Blocks: map[string]schema.Block{
 			"kafka": clickhouseKafkaSchemaBlock(),
 		},
+		Validators: []validator.Object{objectvalidator.IsRequired()},
 	}
 }
 

@@ -1,11 +1,14 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 
 	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // convertSchemaAttributes helps to convert resource schema to datasource schema.
@@ -49,5 +52,51 @@ func convertSingleNestedAttribute(attr resourceschema.SingleNestedAttribute, dia
 		Description:         attr.Description,
 		MarkdownDescription: attr.MarkdownDescription,
 		DeprecationMessage:  attr.DeprecationMessage,
+	}
+}
+
+type suppressAutoscaledDiskDiff struct{}
+
+var _ planmodifier.Int64 = &suppressAutoscaledDiskDiff{}
+
+func (*suppressAutoscaledDiskDiff) Description(context.Context) string {
+	return "suppress diff if disk size was autoscaled"
+}
+
+func (s *suppressAutoscaledDiskDiff) MarkdownDescription(ctx context.Context) string {
+	return s.Description(ctx)
+}
+
+func (*suppressAutoscaledDiskDiff) PlanModifyInt64(ctx context.Context, req planmodifier.Int64Request, rsp *planmodifier.Int64Response) {
+	// Ignore if it's creation/deletion or no diff
+	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() || req.PlanValue.Equal(req.StateValue) {
+		return
+	}
+	// Ignore scale up
+	if req.PlanValue.ValueInt64() > req.StateValue.ValueInt64() {
+		return
+	}
+
+	var maxSize types.Int64
+	diag := req.Config.GetAttribute(ctx, req.Path.ParentPath().AtName("max_disk_size"), &maxSize)
+	if diag.HasError() {
+		rsp.Diagnostics.Append(diag...)
+		return
+	}
+
+	// Autoscaling disabled, intentional disk scale down, only recreation possible.
+	if maxSize.IsNull() {
+		rsp.RequiresReplace = true
+		return
+	}
+
+	if req.StateValue.ValueInt64() <= maxSize.ValueInt64() {
+		rsp.Diagnostics.AddWarning(
+			"disk size was autoscaled",
+			fmt.Sprintf("Disk size at path %s was autoscaled, ignoring changes."+
+				"\nTo remove that warning set value of %s to %d", req.Path.String(), req.Path.String(), req.StateValue.ValueInt64()))
+		rsp.PlanValue = req.StateValue
+	} else {
+		rsp.RequiresReplace = true
 	}
 }

@@ -121,6 +121,10 @@ Required:
 - `resource_preset_id` (String)
 - `zone_count` (Number)
 
+Optional:
+
+- `max_disk_size` (Number)
+
 
 
 <a id="nestedblock--schema_registry"></a>

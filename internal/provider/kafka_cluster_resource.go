@@ -62,6 +62,7 @@ type schemaRegistryModel struct {
 type KafkaResourcesKafkaModel struct {
 	ResourcePresetId types.String `tfsdk:"resource_preset_id"`
 	DiskSize         types.Int64  `tfsdk:"disk_size"`
+	MaxDiskSize      types.Int64  `tfsdk:"max_disk_size"`
 	BrokerCount      types.Int64  `tfsdk:"broker_count"`
 	ZoneCount        types.Int64  `tfsdk:"zone_count"`
 }
@@ -145,9 +146,13 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 					"kafka": schema.SingleNestedBlock{
 						Attributes: map[string]schema.Attribute{
 							"resource_preset_id": schema.StringAttribute{Required: true},
-							"disk_size":          schema.Int64Attribute{Required: true},
-							"broker_count":       schema.Int64Attribute{Required: true},
-							"zone_count":         schema.Int64Attribute{Required: true},
+							"disk_size": schema.Int64Attribute{
+								Required:      true,
+								PlanModifiers: []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
+							},
+							"max_disk_size": schema.Int64Attribute{Optional: true},
+							"broker_count":  schema.Int64Attribute{Required: true},
+							"zone_count":    schema.Int64Attribute{Required: true},
 						},
 					},
 				},
@@ -205,6 +210,9 @@ func createKafkaClusterRequest(m *KafkaClusterModel) (*kafka.CreateClusterReques
 			BrokerCount:      wrapperspb.Int64(m.Resources.Kafka.BrokerCount.ValueInt64()),
 			ZoneCount:        wrapperspb.Int64(m.Resources.Kafka.ZoneCount.ValueInt64()),
 		},
+	}
+	if v := m.Resources.Kafka.MaxDiskSize; !v.IsNull() {
+		rq.Resources.Kafka.MaxDiskSize = wrapperspb.Int64(m.Resources.Kafka.MaxDiskSize.ValueInt64())
 	}
 
 	if m.SchemaRegistry != nil {
@@ -369,6 +377,9 @@ func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadReques
 			ZoneCount:        types.Int64Value(rs.GetResources().GetKafka().GetZoneCount().GetValue()),
 		},
 	}
+	if v := rs.GetResources().GetKafka().GetMaxDiskSize(); v != nil {
+		data.Resources.Kafka.MaxDiskSize = types.Int64Value(v.GetValue())
+	}
 
 	if access := rs.GetAccess(); access != nil {
 		if data.Access == nil {
@@ -433,6 +444,9 @@ func updateKafkaClusterRequest(m *KafkaClusterModel) (*kafka.UpdateClusterReques
 			BrokerCount:      wrapperspb.Int64(m.Resources.Kafka.BrokerCount.ValueInt64()),
 			ZoneCount:        wrapperspb.Int64(m.Resources.Kafka.ZoneCount.ValueInt64()),
 		},
+	}
+	if v := m.Resources.Kafka.MaxDiskSize; !v.IsNull() {
+		rq.Resources.Kafka.MaxDiskSize = wrapperspb.Int64(m.Resources.Kafka.MaxDiskSize.ValueInt64())
 	}
 
 	if m.SchemaRegistry != nil {
