@@ -48,12 +48,33 @@ resource "doublecloud_transfer" "sample-pg2ch" {
 
 - `activated` (Boolean) Activation of transfer
 - `description` (String) Description
+- `runtime` (Attributes) (see [below for nested schema](#nestedatt--runtime))
 - `transformation` (Attributes) (see [below for nested schema](#nestedatt--transformation))
 - `type` (String) Transfer type
 
 ### Read-Only
 
 - `id` (String) Transfer id
+
+<a id="nestedatt--runtime"></a>
+### Nested Schema for `runtime`
+
+Optional:
+
+- `dedicated` (Attributes) (see [below for nested schema](#nestedatt--runtime--dedicated))
+
+<a id="nestedatt--runtime--dedicated"></a>
+### Nested Schema for `runtime.dedicated`
+
+Required:
+
+- `flavor` (String)
+
+Optional:
+
+- `vpc_id` (String)
+
+
 
 <a id="nestedatt--transformation"></a>
 ### Nested Schema for `transformation`
