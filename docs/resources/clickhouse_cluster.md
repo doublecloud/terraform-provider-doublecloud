@@ -104,12 +104,12 @@ Optional:
 
 Optional:
 
-- `asynchronous_insert_log_enabled` (Boolean)
-- `asynchronous_insert_log_retention_size` (Number)
-- `asynchronous_insert_log_retention_time` (String)
-- `asynchronous_metric_log_enabled` (Boolean)
-- `asynchronous_metric_log_retention_size` (Number)
-- `asynchronous_metric_log_retention_time` (String)
+- `asynchronous_insert_log_enabled` (Boolean) Enable logging asynchronous inserts
+- `asynchronous_insert_log_retention_size` (Number) Maximum size of the asynchronous insert log table in bytes
+- `asynchronous_insert_log_retention_time` (String) Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`
+- `asynchronous_metric_log_enabled` (Boolean) Enable logging asynchronous metrics
+- `asynchronous_metric_log_retention_size` (Number) Maximum size of the asynchronous insert log table in bytes
+- `asynchronous_metric_log_retention_time` (String) Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`
 - `background_common_pool_size` (Number) Number of threads performing various operations (mostly garbage collection) for tables with MergeTree engines
 - `background_fetches_pool_size` (Number) Number of threads performing background fetches for replicated tables
 - `background_merges_mutations_concurrency_ratio` (Number) Ratio of the number of threads to the number of background merges and mutations that can be executed concurrently
@@ -125,52 +125,52 @@ Optional:
 - `max_connections` (Number) Maximum number of inbound client connections
 - `max_partition_size_to_drop` (Number) Maximum partition size in bytes for the MergeTree family at which a table can be deleted using the `DROP TABLE` query
 - `max_table_size_to_drop` (Number) Maximum size in bytes of a table in the MergeTree family that can be deleted using the `DROP TABLE` query
-- `metric_log_enabled` (Boolean)
-- `metric_log_retention_size` (Number)
-- `metric_log_retention_time` (String)
-- `opentelemetry_span_log_enabled` (Boolean)
-- `opentelemetry_span_log_retention_size` (Number)
-- `opentelemetry_span_log_retention_time` (String)
-- `part_log_retention_size` (Number)
-- `part_log_retention_time` (String)
-- `query_log_retention_size` (Number)
-- `query_log_retention_time` (String)
-- `query_thread_log_enabled` (Boolean)
-- `query_thread_log_retention_size` (Number)
-- `query_thread_log_retention_time` (String)
-- `query_views_log_enabled` (Boolean)
-- `query_views_log_retention_size` (Number)
-- `query_views_log_retention_time` (String)
-- `session_log_enabled` (Boolean)
-- `session_log_retention_size` (Number)
-- `session_log_retention_time` (String)
-- `text_log_enabled` (Boolean)
-- `text_log_level` (String)
-- `text_log_retention_size` (Number)
+- `metric_log_enabled` (Boolean) Enable logging metric values from the `system.metrics` and the `system.events` tables to `system.metric_log`
+- `metric_log_retention_size` (Number) Maximum size of the metric log table in bytes
+- `metric_log_retention_time` (String) Retention time of the metric log table in the duration string format, such as `2h45m`
+- `opentelemetry_span_log_enabled` (Boolean) Enable log trace and metric values from a distributed application
+- `opentelemetry_span_log_retention_size` (Number) Maximum size of the opentelemetry span log table in bytes
+- `opentelemetry_span_log_retention_time` (String) Retention time of the opentelemetry span log table in the duration string format, such as `2h45m`
+- `part_log_retention_size` (Number) Maximum size of the part log table in bytes
+- `part_log_retention_time` (String) Retention time of the part log table in the duration string format, such as `2h45m`
+- `query_log_retention_size` (Number) Maximum size of the query log table in bytes
+- `query_log_retention_time` (String) Retention time of the query log table in the duration string format, such as `2h45m`
+- `query_thread_log_enabled` (Boolean) Enable logging query threads
+- `query_thread_log_retention_size` (Number) Maximum size of the query thread log table in bytes
+- `query_thread_log_retention_time` (String) Retention time of the query thread log table in the duration string format, such as `2h45m`
+- `query_views_log_enabled` (Boolean) Enable logging query views
+- `query_views_log_retention_size` (Number) Maximum size of the query views log table in bytes
+- `query_views_log_retention_time` (String) Retention time of the query views log table in the duration string format, such as `2h45m`
+- `session_log_enabled` (Boolean) Enable logging successful and failed login/logout events
+- `session_log_retention_size` (Number) Maximum size of the session log table in bytes
+- `session_log_retention_time` (String) Retention time of the session log in the duration string format, such as `2h45m`
+- `text_log_enabled` (Boolean) Enable system logs
+- `text_log_level` (String) Level of logging, such as `ERROR` or `TRACE`
+- `text_log_retention_size` (Number) Maximum size of the text log table in bytes
 - `text_log_retention_time` (String)
 - `timezone` (String) Cluster time zone from the IANA Time Zone Database, such as `Africa/Abidjan`
 - `total_memory_profiler_step` (Number) RAM in bytes for a stack trace at each memory allocation step
 - `total_memory_tracker_sample_probability` (Number) Allows collecting and logging informaiton about random memory allocation and release with the specified probability
-- `trace_log_enabled` (Boolean)
-- `trace_log_retention_size` (Number)
-- `trace_log_retention_time` (String)
+- `trace_log_enabled` (Boolean) Enable logging stack traces collected by the query profiler
+- `trace_log_retention_size` (Number) Maximum size of the trace log table in bytes
+- `trace_log_retention_time` (String) Retention time of the trace log table in the duration string format, such as `2h45m`
 - `uncompressed_cache_size` (Number) Cache size in bytes for uncompressed data used by table engines in the MergeTree family
-- `zookeeper_log_enabled` (Boolean)
-- `zookeeper_log_retention_size` (Number)
-- `zookeeper_log_retention_time` (String)
+- `zookeeper_log_enabled` (Boolean) Enable logging parameters of requests to the ZooKeeper server and responses from it
+- `zookeeper_log_retention_size` (Number) Maximum size of the ZooKeeper log table in bytes
+- `zookeeper_log_retention_time` (String) Retention time of the ZooKeeper log table in the duration string format, such as `2h45m`
 
 <a id="nestedblock--config--kafka"></a>
 ### Nested Schema for `config.kafka`
 
 Optional:
 
-- `enable_ssl_certificate_verification` (Boolean)
-- `max_poll_interval_ms` (String)
-- `sasl_mechanism` (String)
-- `sasl_password` (String, Sensitive)
-- `sasl_username` (String)
-- `security_protocol` (String)
-- `session_timeout_ms` (String)
+- `enable_ssl_certificate_verification` (Boolean) Enable SSL certificate verification
+- `max_poll_interval_ms` (String) Maximum interval in milliseconds between making poll calls to get messages for high-level consumers
+- `sasl_mechanism` (String) SASL authentication mechanism
+- `sasl_password` (String, Sensitive) Apache Kafka® account password
+- `sasl_username` (String) Apache Kafka® account username
+- `security_protocol` (String) Security protocol used for authentication
+- `session_timeout_ms` (String) Timeout to maintain a client group session
 
 
 
