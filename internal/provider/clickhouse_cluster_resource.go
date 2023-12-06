@@ -295,50 +295,50 @@ func (r *ClickhouseClusterResource) Metadata(ctx context.Context, req resource.M
 func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Clickhouse Cluster resource",
+		MarkdownDescription: "ClickHouse Cluster resource",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "ID of the ClickHouse cluster.",
+				MarkdownDescription: "Cluster ID",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ID of the project that the ClickHouse cluster belongs to.",
+				MarkdownDescription: "ID of the project where the ClickHouse cluster is created",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"cloud_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Type of the cloud where instances should be hosted.",
+				MarkdownDescription: "Cloud provider where the cluster is created. Possible values: `aws` and `gcp`",
 				Validators:          []validator.String{cloudTypeValidator()},
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"region_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ID of the region to place instances.",
+				MarkdownDescription: "ID of the region where resources are created",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of the ClickHouse cluster.",
+				MarkdownDescription: "Cluster name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description of the ClickHouse cluster.",
+				MarkdownDescription: "Cluster description",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"version": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Version of ClickHouse DBMS.",
+				MarkdownDescription: "Version of the ClickHouse DBMS.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"network_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ID of the network that the ClickHouse cluster belongs to.",
+				MarkdownDescription: "ID of the network where the cluster is created",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},
@@ -349,12 +349,12 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 						Attributes: map[string]schema.Attribute{
 							"resource_preset_id": schema.StringAttribute{
 								Optional:            true,
-								MarkdownDescription: "ID of the preset for computational resources available to a host (CPU, memory, etc.).",
+								MarkdownDescription: "ID of the computational resources preset available to a host (CPU, memory, etc.)",
 							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
-								MarkdownDescription: "Volume of the storage available to a host, in bytes.",
+								MarkdownDescription: "Storage volume available to a host in bytes",
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
@@ -364,13 +364,13 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 								Optional:            true,
 								Computed:            true,
 								Default:             int64default.StaticInt64(1),
-								MarkdownDescription: "Number of hosts per shard.",
+								MarkdownDescription: "Number of hosts per shard",
 							},
 							"shard_count": schema.Int64Attribute{
 								Optional:            true,
 								Computed:            true,
 								Default:             int64default.StaticInt64(1),
-								MarkdownDescription: "Number of shards in the cluster.",
+								MarkdownDescription: "Number of shards in the cluster",
 							},
 						},
 					},
@@ -378,12 +378,12 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 						Attributes: map[string]schema.Attribute{
 							"resource_preset_id": schema.StringAttribute{
 								Optional:            true,
-								MarkdownDescription: "ID of the preset for computational resources available to a host (CPU, memory, etc.).",
+								MarkdownDescription: "ID of the computational resources preset available to a host (CPU, memory, etc.)",
 							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
-								MarkdownDescription: "Volume of the storage available to a host, in bytes.",
+								MarkdownDescription: "Volume of the storage available to a host, in bytes",
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
@@ -393,7 +393,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 								Optional:            true,
 								Computed:            true,
 								Default:             int64default.StaticInt64(1),
-								MarkdownDescription: "Number of keeper hosts.",
+								MarkdownDescription: "Number of keeper hosts",
 							},
 						},
 					},
@@ -1112,10 +1112,15 @@ func clickhouseConfigSchemaBlock() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"log_level": schema.StringAttribute{
-				Optional:   true,
-				Computed:   true,
-				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
-				Validators: []validator.String{clickhouseConfigLogLevelValidator()},
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
+				Validators:          []validator.String{clickhouseConfigLogLevelValidator()},
+				MarkdownDescription: "Level of logged events, such as `ERROR` or `TRACE`",
+			},
+			"max_connections": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum number of inbound client connections",
 			},
 			"max_connections":                               schema.Int64Attribute{Optional: true},
 			"max_concurrent_queries":                        schema.Int64Attribute{Optional: true},
