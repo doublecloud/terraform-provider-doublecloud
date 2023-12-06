@@ -3,12 +3,12 @@
 page_title: "doublecloud_clickhouse_cluster Resource - terraform-provider-doublecloud"
 subcategory: ""
 description: |-
-  Clickhouse Cluster resource
+  ClickHouse Cluster resource
 ---
 
 # doublecloud_clickhouse_cluster (Resource)
 
-Clickhouse Cluster resource
+ClickHouse Cluster resource
 
 ## Example Usage
 
@@ -50,20 +50,20 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 
 ### Required
 
-- `cloud_type` (String) Type of the cloud where instances should be hosted.
-- `name` (String) Name of the ClickHouse cluster.
-- `network_id` (String) ID of the network that the ClickHouse cluster belongs to.
-- `project_id` (String) ID of the project that the ClickHouse cluster belongs to.
-- `region_id` (String) ID of the region to place instances.
+- `cloud_type` (String) Cloud provider where the cluster is created. Possible values: `aws` and `gcp`
+- `name` (String) Cluster name
+- `network_id` (String) ID of the network where the cluster is created
+- `project_id` (String) ID of the project where the ClickHouse cluster is created
+- `region_id` (String) ID of the region where resources are created
 
 ### Optional
 
 - `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) (see [below for nested schema](#nestedblock--config))
-- `description` (String) Description of the ClickHouse cluster.
-- `id` (String) ID of the ClickHouse cluster.
+- `description` (String) Cluster description
+- `id` (String) Cluster ID
 - `resources` (Block, Optional) (see [below for nested schema](#nestedblock--resources))
-- `version` (String) Version of ClickHouse DBMS.
+- `version` (String) Version of the ClickHouse DBMS.
 
 <a id="nestedblock--access"></a>
 ### Nested Schema for `access`
@@ -110,21 +110,21 @@ Optional:
 - `asynchronous_metric_log_enabled` (Boolean)
 - `asynchronous_metric_log_retention_size` (Number)
 - `asynchronous_metric_log_retention_time` (String)
-- `background_common_pool_size` (Number)
-- `background_fetches_pool_size` (Number)
-- `background_merges_mutations_concurrency_ratio` (Number)
-- `background_message_broker_schedule_pool_size` (Number)
-- `background_move_pool_size` (Number)
-- `background_pool_size` (Number)
-- `background_schedule_pool_size` (Number)
+- `background_common_pool_size` (Number) Number of threads performing various operations (mostly garbage collection) for tables with MergeTree engines
+- `background_fetches_pool_size` (Number) Number of threads performing background fetches for replicated tables
+- `background_merges_mutations_concurrency_ratio` (Number) Ratio of the number of threads to the number of background merges and mutations that can be executed concurrently
+- `background_message_broker_schedule_pool_size` (Number) Number of threads for executing background message translation operations
+- `background_move_pool_size` (Number) Number of threads performing background moves of data parts for tables with MergeTree engines
+- `background_pool_size` (Number) Number of threads performing background merges and mutations for tables with MergeTree engines
+- `background_schedule_pool_size` (Number) Number of threads for background jobs for replicated tables, streams in Apache Kafka, and DNS cache updates
 - `kafka` (Block, Optional) (see [below for nested schema](#nestedblock--config--kafka))
-- `keep_alive_timeout` (String)
-- `log_level` (String)
-- `mark_cache_size` (Number)
-- `max_concurrent_queries` (Number)
-- `max_connections` (Number)
-- `max_partition_size_to_drop` (Number)
-- `max_table_size_to_drop` (Number)
+- `keep_alive_timeout` (String) Time in seconds for which ClickHouse waits for incoming requests before closing the connection
+- `log_level` (String) Level of logged events, such as `ERROR` or `TRACE`
+- `mark_cache_size` (Number) Approximate size in bytes of the mark cache used by table engines in the MergeTree family
+- `max_concurrent_queries` (Number) Maximum number of requests processed simultaneously
+- `max_connections` (Number) Maximum number of inbound client connections
+- `max_partition_size_to_drop` (Number) Maximum partition size in bytes for the MergeTree family at which a table can be deleted using the `DROP TABLE` query
+- `max_table_size_to_drop` (Number) Maximum size in bytes of a table in the MergeTree family that can be deleted using the `DROP TABLE` query
 - `metric_log_enabled` (Boolean)
 - `metric_log_retention_size` (Number)
 - `metric_log_retention_time` (String)
@@ -148,13 +148,13 @@ Optional:
 - `text_log_level` (String)
 - `text_log_retention_size` (Number)
 - `text_log_retention_time` (String)
-- `timezone` (String)
-- `total_memory_profiler_step` (Number)
-- `total_memory_tracker_sample_probability` (Number)
+- `timezone` (String) Cluster time zone from the IANA Time Zone Database, such as `Africa/Abidjan`
+- `total_memory_profiler_step` (Number) RAM in bytes for a stack trace at each memory allocation step
+- `total_memory_tracker_sample_probability` (Number) Allows collecting and logging informaiton about random memory allocation and release with the specified probability
 - `trace_log_enabled` (Boolean)
 - `trace_log_retention_size` (Number)
 - `trace_log_retention_time` (String)
-- `uncompressed_cache_size` (Number)
+- `uncompressed_cache_size` (Number) Cache size in bytes for uncompressed data used by table engines in the MergeTree family
 - `zookeeper_log_enabled` (Boolean)
 - `zookeeper_log_retention_size` (Number)
 - `zookeeper_log_retention_time` (String)
@@ -187,11 +187,11 @@ Optional:
 
 Optional:
 
-- `disk_size` (Number) Volume of the storage available to a host, in bytes.
+- `disk_size` (Number) Storage volume available to a host in bytes
 - `max_disk_size` (Number) Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.
-- `replica_count` (Number) Number of hosts per shard.
-- `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
-- `shard_count` (Number) Number of shards in the cluster.
+- `replica_count` (Number) Number of hosts per shard
+- `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
+- `shard_count` (Number) Number of shards in the cluster
 
 
 <a id="nestedblock--resources--dedicated_keeper"></a>
@@ -199,9 +199,9 @@ Optional:
 
 Optional:
 
-- `disk_size` (Number) Volume of the storage available to a host, in bytes.
+- `disk_size` (Number) Volume of the storage available to a host, in bytes
 - `max_disk_size` (Number) Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.
-- `replica_count` (Number) Number of keeper hosts.
-- `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
+- `replica_count` (Number) Number of keeper hosts
+- `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
 
 

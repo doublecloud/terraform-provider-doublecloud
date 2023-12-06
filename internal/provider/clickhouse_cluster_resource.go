@@ -1122,23 +1122,69 @@ func clickhouseConfigSchemaBlock() schema.Block {
 				Optional:            true,
 				MarkdownDescription: "Maximum number of inbound client connections",
 			},
-			"max_connections":                               schema.Int64Attribute{Optional: true},
-			"max_concurrent_queries":                        schema.Int64Attribute{Optional: true},
-			"keep_alive_timeout":                            schema.StringAttribute{Optional: true},
-			"uncompressed_cache_size":                       schema.Int64Attribute{Optional: true},
-			"mark_cache_size":                               schema.Int64Attribute{Optional: true},
-			"max_table_size_to_drop":                        schema.Int64Attribute{Optional: true},
-			"max_partition_size_to_drop":                    schema.Int64Attribute{Optional: true},
-			"timezone":                                      schema.StringAttribute{Optional: true},
-			"background_pool_size":                          schema.Int64Attribute{Optional: true},
-			"background_schedule_pool_size":                 schema.Int64Attribute{Optional: true},
-			"background_fetches_pool_size":                  schema.Int64Attribute{Optional: true},
-			"background_move_pool_size":                     schema.Int64Attribute{Optional: true},
-			"background_common_pool_size":                   schema.Int64Attribute{Optional: true},
-			"background_merges_mutations_concurrency_ratio": schema.Int64Attribute{Optional: true},
-			"total_memory_profiler_step":                    schema.Int64Attribute{Optional: true},
-			"total_memory_tracker_sample_probability":       schema.Float64Attribute{Optional: true},
-			"background_message_broker_schedule_pool_size":  schema.Int64Attribute{Optional: true},
+			"max_concurrent_queries": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum number of requests processed simultaneously",
+			},
+			"keep_alive_timeout": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Time in seconds for which ClickHouse waits for incoming requests before closing the connection",
+			},
+			"uncompressed_cache_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Cache size in bytes for uncompressed data used by table engines in the MergeTree family",
+			},
+			"mark_cache_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Approximate size in bytes of the mark cache used by table engines in the MergeTree family",
+			},
+			"max_table_size_to_drop": schema.Int64Attribute{Optional: true,
+				MarkdownDescription: "Maximum size in bytes of a table in the MergeTree family that can be deleted using the `DROP TABLE` query",
+			},
+			"max_partition_size_to_drop": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum partition size in bytes for the MergeTree family at which a table can be deleted using the `DROP TABLE` query",
+			},
+			"timezone": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Cluster time zone from the IANA Time Zone Database, such as `Africa/Abidjan`",
+			},
+			"background_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing background merges and mutations for tables with MergeTree engines",
+			},
+			"background_schedule_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads for background jobs for replicated tables, streams in Apache Kafka, and DNS cache updates",
+			},
+			"background_fetches_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing background fetches for replicated tables",
+			},
+			"background_move_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing background moves of data parts for tables with MergeTree engines",
+			},
+			"background_common_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing various operations (mostly garbage collection) for tables with MergeTree engines",
+			},
+			"background_merges_mutations_concurrency_ratio": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Ratio of the number of threads to the number of background merges and mutations that can be executed concurrently",
+			},
+			"total_memory_profiler_step": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "RAM in bytes for a stack trace at each memory allocation step",
+			},
+			"total_memory_tracker_sample_probability": schema.Float64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Allows collecting and logging informaiton about random memory allocation and release with the specified probability",
+			},
+			"background_message_broker_schedule_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads for executing background message translation operations",
+			},
 			// merge_tree, compression, ...
 			"query_log_retention_size": schema.Int64Attribute{Optional: true},
 			"query_log_retention_time": schema.StringAttribute{Optional: true},
