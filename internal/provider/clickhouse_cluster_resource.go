@@ -1270,19 +1270,19 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			},
 
 			"text_log_enabled": schema.BoolAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Enable system logs",
 			},
 			"text_log_retention_size": schema.Int64Attribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Maximum size of the text log table in bytes",
 			},
 			"text_log_retention_time": schema.StringAttribute{Optional: true},
 			"text_log_level": schema.StringAttribute{
-				Optional:   true,
-				Computed:   true,
-				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
-				Validators: []validator.String{clickhouseConfigLogLevelValidator()},
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
+				Validators:          []validator.String{clickhouseConfigLogLevelValidator()},
 				MarkdownDescription: "Level of logging, such as `ERROR` or `TRACE`",
 			},
 
@@ -1291,11 +1291,11 @@ func clickhouseConfigSchemaBlock() schema.Block {
 				MarkdownDescription: "Enable log trace and metric values from a distributed application",
 			},
 			"opentelemetry_span_log_retention_size": schema.Int64Attribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Maximum size of the opentelemetry span log table in bytes",
 			},
 			"opentelemetry_span_log_retention_time": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Retention time of the opentelemetry span log table in the duration string format, such as `2h45m`",
 			},
 
@@ -1348,40 +1348,40 @@ func clickhouseConfigSchemaBlock() schema.Block {
 func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"security_protocol": schema.StringAttribute{
-			Optional:      true,
-			Computed:      true,
-			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Optional:            true,
+			Computed:            true,
+			Validators:          []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			MarkdownDescription: "Security protocol used for authentication",
 		},
 		"sasl_mechanism": schema.StringAttribute{
-			Optional:      true,
-			Computed:      true,
-			Validators:    []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Optional:            true,
+			Computed:            true,
+			Validators:          []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			MarkdownDescription: "SASL authentication mechanism",
 		},
 		"sasl_username": schema.StringAttribute{
-			Optional: true,
+			Optional:            true,
 			MarkdownDescription: "Apache Kafka® account username",
 		},
 		"sasl_password": schema.StringAttribute{
-			Optional:  true,
-			Sensitive: true,
+			Optional:            true,
+			Sensitive:           true,
 			MarkdownDescription: "Apache Kafka® account password",
 		},
 		"enable_ssl_certificate_verification": schema.BoolAttribute{
-			Optional:      true,
-			Computed:      true,
-			PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+			Optional:            true,
+			Computed:            true,
+			PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			MarkdownDescription: "Enable SSL certificate verification",
 		},
 		"max_poll_interval_ms": schema.StringAttribute{
-			Optional: true,
+			Optional:            true,
 			MarkdownDescription: "Maximum interval in milliseconds between making poll calls to get messages for high-level consumers",
 		},
 		"session_timeout_ms": schema.StringAttribute{
-			Optional: true,
+			Optional:            true,
 			MarkdownDescription: "Timeout to maintain a client group session",
 		},
 	}
