@@ -17,35 +17,35 @@ Clickhouse data source
 
 ### Required
 
-- `project_id` (String) Project identifier
+- `project_id` (String) Project ID
 
 ### Optional
 
-- `id` (String) Cluster identifier
-- `name` (String) Name of cluster
+- `id` (String) Cluster ID
+- `name` (String) Cluster name
 
 ### Read-Only
 
-- `cloud_type` (String) Cloud type (aws, gcp, azure)
-- `connection_info` (Attributes) (see [below for nested schema](#nestedatt--connection_info))
-- `description` (String) Description of cluster
-- `private_connection_info` (Attributes) (see [below for nested schema](#nestedatt--private_connection_info))
-- `region_id` (String) Region of cluster
-- `version` (String) Version of ClickHouse DBMS
+- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
+- `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
+- `description` (String) Cluster description
+- `private_connection_info` (Attributes) Private connection info (see [below for nested schema](#nestedatt--private_connection_info))
+- `region_id` (String) Region where the cluster is located
+- `version` (String) Version of the ClickHouse DBMS
 
 <a id="nestedatt--connection_info"></a>
 ### Nested Schema for `connection_info`
 
 Read-Only:
 
-- `host` (String) Host to connect
-- `https_port` (Number) Port to connect using HTTPS protocol
-- `https_uri` (String) URI to connect using HTTPS protocol
-- `jdbc_uri` (String) URI to connect using JDBC protocol
-- `native_protocol` (String) Connection string for ClickHouse native protocol
-- `odbc_uri` (String) URI to connect using ODBC protocol
-- `password` (String) Password for ClickHouse user
-- `tcp_port_secure` (Number) Port to connect using TCP/native protocol
+- `host` (String) Host to connect to
+- `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_uri` (String) URI to connect to using the HTTPS protocol
+- `jdbc_uri` (String) URI to connect to using the JDBC protocol
+- `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `odbc_uri` (String) URI to connect to using the ODBC protocol
+- `password` (String) Password for the ClickHouse user
+- `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
 - `user` (String) ClickHouse user
 
 
@@ -54,14 +54,14 @@ Read-Only:
 
 Read-Only:
 
-- `host` (String) Host to connect
-- `https_port` (Number) Port to connect using HTTPS protocol
-- `https_uri` (String) URI to connect using HTTPS protocol
-- `jdbc_uri` (String) URI to connect using JDBC protocol
-- `native_protocol` (String) Connection string for ClickHouse native protocol
-- `odbc_uri` (String) URI to connect using ODBC protocol
-- `password` (String) Password for ClickHouse user
-- `tcp_port_secure` (Number) Port to connect using TCP/native protocol
+- `host` (String) Host to connect to
+- `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_uri` (String) URI to connect to using the HTTPS protocol
+- `jdbc_uri` (String) URI to connect to using the JDBC protocol
+- `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `odbc_uri` (String) URI to connect to using the ODBC protocol
+- `password` (String) Password for the ClickHouse user
+- `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
 - `user` (String) ClickHouse user
 
 

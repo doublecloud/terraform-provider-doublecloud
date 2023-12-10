@@ -62,7 +62,7 @@ func transferEndpointMysqlSourceSchema() schema.Block {
 				Optional:            true,
 			},
 			"service_database": schema.StringAttribute{
-				MarkdownDescription: "Database name",
+				MarkdownDescription: "Service database name",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
@@ -70,11 +70,11 @@ func transferEndpointMysqlSourceSchema() schema.Block {
 				},
 			},
 			"user": schema.StringAttribute{
-				MarkdownDescription: "User for database access",
+				MarkdownDescription: "Database user",
 				Optional:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password for database access.",
+				MarkdownDescription: "Database user password",
 				Optional:            true,
 				Sensitive:           true,
 			},
@@ -105,12 +105,12 @@ func transferEndpointMysqlConnectionSchema() schema.Block {
 			"on_premise": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
 					"hosts": schema.ListAttribute{
-						MarkdownDescription: "List of mysql hosts",
+						MarkdownDescription: "List of MySQL hosts",
 						ElementType:         types.StringType,
 						Optional:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: "Port of mysql",
+						MarkdownDescription: "MySQL port",
 						Optional:            true,
 					},
 				},
@@ -157,11 +157,11 @@ func transferEndpointMysqlTargetSchema() schema.Block {
 				Optional:            true,
 			},
 			"user": schema.StringAttribute{
-				MarkdownDescription: "User for database access",
+				MarkdownDescription: "Database user",
 				Optional:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password for database access.",
+				MarkdownDescription: "Database user password",
 				Optional:            true,
 				Sensitive:           true,
 			},
@@ -176,9 +176,10 @@ func transferEndpointMysqlTargetSchema() schema.Block {
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "SQL mode",
 			},
 			"skip_constraint_checks": schema.BoolAttribute{
-				MarkdownDescription: "Disable constraints checks",
+				MarkdownDescription: "Disable constraint checks",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -194,7 +195,7 @@ func transferEndpointMysqlTargetSchema() schema.Block {
 				},
 			},
 			"cleanup_policy": schema.StringAttribute{
-				MarkdownDescription: "Cleanup policy for activate, reactivate and reupload processes. Default is truncate.",
+				MarkdownDescription: "Cleanup policy for activating, reactivating, and reuploading processes. Default is `truncate`.",
 				Optional:            true,
 				Computed:            true,
 				Validators:          []validator.String{transferEndpointCleanupPolicyValidator()},
@@ -203,7 +204,7 @@ func transferEndpointMysqlTargetSchema() schema.Block {
 				},
 			},
 			"service_database": schema.StringAttribute{
-				MarkdownDescription: "Database schema for service table",
+				MarkdownDescription: "Database schema for the service table",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{

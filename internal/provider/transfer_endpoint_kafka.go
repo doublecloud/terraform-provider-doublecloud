@@ -194,10 +194,12 @@ func transferParserGenericSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"null_keys_allowed": schema.BoolAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Allow null keys. If false, null keys are put to unparsed data",
 			},
 			"add_rest_column": schema.BoolAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Add the `_rest` column for all unknown fields",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -296,7 +298,8 @@ func transferParserSchemaJSONSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"fields": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Fields",
 			},
 		},
 	}
@@ -528,11 +531,13 @@ func transferEndpointKafkaAuthSchemaBlock() schema.SingleNestedBlock {
 				MarkdownDescription: "Authentication with SASL",
 				Attributes: map[string]schema.Attribute{
 					"user": schema.StringAttribute{
-						Optional: true,
+						Optional:            true,
+						MarkdownDescription: "User",
 					},
 					"password": schema.StringAttribute{
-						Optional:  true,
-						Sensitive: true,
+						Optional:            true,
+						Sensitive:           true,
+						MarkdownDescription: "Password",
 					},
 					"mechanism": schema.StringAttribute{
 						Optional:      true,

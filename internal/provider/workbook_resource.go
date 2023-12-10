@@ -53,23 +53,23 @@ func (r *WorkbookResource) Schema(ctx context.Context, req resource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Workbook identifier",
+				MarkdownDescription: "Workbook ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 			},
 			"title": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Title of resource",
+				MarkdownDescription: "Resource title",
 			},
 			"config": schema.StringAttribute{
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: "Workbook configuration (json encoded)",
+				MarkdownDescription: "JSON-encoded workbook configuration",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -82,7 +82,7 @@ func (r *WorkbookResource) Schema(ctx context.Context, req resource.SchemaReques
 						},
 						"config": schema.StringAttribute{
 							Required:            true,
-							MarkdownDescription: "[Configuration of connection (json encoded)](https://double.cloud/docs/en/public-api/api-reference/visualization/configs/Connection)",
+							MarkdownDescription: "[JSON-encoded connection configuration](https://double.cloud/docs/en/public-api/api-reference/visualization/configs/Connection)",
 						},
 						"secret": schema.StringAttribute{
 							Required:            true,

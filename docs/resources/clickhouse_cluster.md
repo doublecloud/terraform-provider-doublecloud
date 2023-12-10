@@ -63,7 +63,7 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 - `description` (String) Cluster description
 - `id` (String) Cluster ID
 - `resources` (Block, Optional) (see [below for nested schema](#nestedblock--resources))
-- `version` (String) Version of the ClickHouse DBMS.
+- `version` (String) Version of the ClickHouse DBMS
 
 <a id="nestedblock--access"></a>
 ### Nested Schema for `access`
@@ -71,8 +71,8 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 Optional:
 
 - `data_services` (List of String) List of allowed services
-- `ipv4_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
-- `ipv6_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
+- `ipv4_cidr_blocks` (Attributes List) IPv4 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
+- `ipv6_cidr_blocks` (Attributes List) IPv6 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
 
 <a id="nestedatt--access--ipv4_cidr_blocks"></a>
 ### Nested Schema for `access.ipv4_cidr_blocks`
@@ -83,7 +83,7 @@ Required:
 
 Optional:
 
-- `description` (String) Description of CIDR block
+- `description` (String) CIDR block description
 
 
 <a id="nestedatt--access--ipv6_cidr_blocks"></a>
@@ -95,7 +95,7 @@ Required:
 
 Optional:
 
-- `description` (String) Description of CIDR block
+- `description` (String) CIDR block description
 
 
 
@@ -147,7 +147,7 @@ Optional:
 - `text_log_enabled` (Boolean) Enable system logs
 - `text_log_level` (String) Level of logging, such as `ERROR` or `TRACE`
 - `text_log_retention_size` (Number) Maximum size of the text log table in bytes
-- `text_log_retention_time` (String)
+- `text_log_retention_time` (String) Retention time of the text log table in the duration string format, such as `2h45m`
 - `timezone` (String) Cluster time zone from the IANA Time Zone Database, such as `Africa/Abidjan`
 - `total_memory_profiler_step` (Number) RAM in bytes for a stack trace at each memory allocation step
 - `total_memory_tracker_sample_probability` (Number) Allows collecting and logging informaiton about random memory allocation and release with the specified probability
@@ -188,7 +188,7 @@ Optional:
 Optional:
 
 - `disk_size` (Number) Storage volume available to a host in bytes
-- `max_disk_size` (Number) Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.
+- `max_disk_size` (Number) Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled
 - `replica_count` (Number) Number of hosts per shard
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
 - `shard_count` (Number) Number of shards in the cluster
@@ -199,8 +199,8 @@ Optional:
 
 Optional:
 
-- `disk_size` (Number) Volume of the storage available to a host, in bytes
-- `max_disk_size` (Number) Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.
+- `disk_size` (Number) Volume of the storage available to a host in bytes
+- `max_disk_size` (Number) Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled
 - `replica_count` (Number) Number of keeper hosts
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
 

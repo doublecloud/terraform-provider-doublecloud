@@ -10,8 +10,15 @@ import (
 func endpointLinkedinAdsSourceSettingsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"start_date":  schema.StringAttribute{Optional: true, Description: "UTC date in the format YYYY-MM-DD. Any data before this date will not be replicated. Example: 2021-05-17"},
-			"account_ids": schema.ListAttribute{ElementType: types.Int64Type, Optional: true, Description: "Account IDs separated by space, to pull the data from. Leave empty, if you want to pull the data from all associated accounts"},
+			"start_date": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "UTC date in the `YYYY-MM-DD` format. Any data before this date will not be replicated",
+			},
+			"account_ids": schema.ListAttribute{
+				ElementType:         types.Int64Type,
+				Optional:            true,
+				MarkdownDescription: "Space-separated account IDs to pull the data from. Leave empty if you want to pull data from all the associated accounts",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"credentials": endpointLinkedinAdsSourceSettingsCredentialsSchema(),
@@ -82,7 +89,7 @@ func endpointLinkedinAdsSourceSettingsCredentialsSchema() schema.Block {
 			"oauth":        endpointLinkedinAdsSourceSettingsCredentialsOAuthSchema(),
 			"access_token": endpointLinkedinAdsSourceSettingsCredentialsAccessTokenSchema(),
 		},
-		Description: "Authentication method",
+		MarkdownDescription: "Authentication method",
 	}
 }
 
@@ -130,9 +137,21 @@ func (c *endpointLinkedinAdsSourceSettingsCredentials) convert(r *endpoint_airby
 func endpointLinkedinAdsSourceSettingsCredentialsOAuthSchema() schema.Block {
 	return &schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"client_id":     schema.StringAttribute{Optional: true, Sensitive: true, Description: "The Client ID of the LinkedIn Ads developer application"},
-			"client_secret": schema.StringAttribute{Optional: true, Sensitive: true, Description: "The Client Secret for the LinkedIn Ads developer application"},
-			"refresh_token": schema.StringAttribute{Optional: true, Sensitive: true, Description: "The key to refresh the expired access token"},
+			"client_id": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Client ID of the LinkedIn Ads developer application",
+			},
+			"client_secret": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Client Secret for the LinkedIn Ads developer application",
+			},
+			"refresh_token": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Key to refresh the expired access token",
+			},
 		},
 	}
 }
@@ -168,7 +187,11 @@ func (c *endpointLinkedinAdsSourceSettingsCredentialsOAuth) convert(r *endpoint_
 func endpointLinkedinAdsSourceSettingsCredentialsAccessTokenSchema() schema.Block {
 	return &schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"access_token": schema.StringAttribute{Optional: true, Sensitive: true},
+			"access_token": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Access token",
+			},
 		},
 	}
 }

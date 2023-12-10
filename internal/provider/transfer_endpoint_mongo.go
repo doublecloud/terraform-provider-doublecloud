@@ -47,7 +47,7 @@ func transferEndpointMongoSourceSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"secondary_preferred_mode": schema.BoolAttribute{
-				MarkdownDescription: "Read mode for mongo client",
+				MarkdownDescription: "Read mode of the MongoDB client",
 				Optional:            true,
 			},
 		},
@@ -64,10 +64,12 @@ func transferEndpointMongoCollectionSchema() schema.Block {
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
 				"database_name": schema.StringAttribute{
-					Optional: true,
+					Optional:            true,
+					MarkdownDescription: "Database name",
 				},
 				"collection_name": schema.StringAttribute{
-					Optional: true,
+					Optional:            true,
+					MarkdownDescription: "Collection name",
 				},
 			},
 		},
@@ -78,28 +80,34 @@ func transferEndpointMongoConnectionSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"user": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Database user",
 			},
 			"password": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Database user password",
 			},
 			"auth_source": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Authentication database associated with the user",
 			},
 		},
 		Blocks: map[string]schema.Block{
 			"on_premise": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
 					"hosts": schema.ListAttribute{
-						ElementType: types.StringType,
-						Optional:    true,
+						ElementType:         types.StringType,
+						Optional:            true,
+						MarkdownDescription: "List of hosts",
 					},
 					"port": schema.Int64Attribute{
-						Optional: true,
+						Optional:            true,
+						MarkdownDescription: "Port",
 					},
 					"replica_set": schema.StringAttribute{
-						Optional: true,
+						Optional:            true,
+						MarkdownDescription: "Replica set",
 					},
 				},
 				Blocks: map[string]schema.Block{
@@ -114,8 +122,9 @@ func transferEndpointMongoTargetSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"database": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Database",
 			},
 			"cleanup_policy": schema.StringAttribute{
 				Optional:   true,
@@ -124,6 +133,7 @@ func transferEndpointMongoTargetSchema() schema.Block {
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Cleanup policy",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -137,7 +147,7 @@ func (m *endpointMongoConnection) convert() (*endpoint.MongoConnectionOptions, d
 	options := &endpoint.MongoConnectionOptions{}
 
 	if m == nil {
-		diags.AddError("missed connection block", "specify connection block")
+		diags.AddError("Connection block missing", "Specify a connection block")
 		return nil, diags
 	}
 

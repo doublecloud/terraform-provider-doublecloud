@@ -44,28 +44,28 @@ func (d *TransferDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Transfer identifier",
+				MarkdownDescription: "Transfer ID",
 			},
 			"name": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Name of transfer",
+				MarkdownDescription: "Transfer name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Description of transfer",
+				MarkdownDescription: "Transfer description",
 			},
 			"status": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Status of transfer",
+				MarkdownDescription: "Transfer status",
 			},
 			"type": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Type of transfer",
+				MarkdownDescription: "Transfer type",
 			},
 		},
 	}
@@ -102,7 +102,7 @@ func (d *TransferDataSource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	if data.Id == types.StringNull() && data.Name == types.StringNull() {
-		resp.Diagnostics.AddError("missing attribute", "specify one of: id or name")
+		resp.Diagnostics.AddError("Missing attribute", "Specify either `id` or `name`")
 		return
 	}
 
@@ -116,7 +116,7 @@ func (d *TransferDataSource) Read(ctx context.Context, req datasource.ReadReques
 			}
 		}
 		if data.Id == types.StringNull() {
-			resp.Diagnostics.AddError("transfer not found", fmt.Sprintf("transfer `%v` haven't found", data.Name.ValueString()))
+			resp.Diagnostics.AddError("Transfer not found", fmt.Sprintf("Transfer `%v` hasn't been found", data.Name.ValueString()))
 			return
 		}
 	}

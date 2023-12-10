@@ -78,21 +78,21 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Transfer endpoint id",
+				MarkdownDescription: "Transfer endpoint ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of endpoint",
+				MarkdownDescription: "Endpoint name",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -100,7 +100,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description of endpoint",
+				MarkdownDescription: "Endpoint description",
 				Default:             stringdefault.StaticString(""),
 			},
 		},
