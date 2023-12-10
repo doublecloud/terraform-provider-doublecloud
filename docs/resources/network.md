@@ -27,38 +27,38 @@ resource "doublecloud_network" "example-network" {
 
 ### Required
 
-- `cloud_type` (String) Cloud type (aws, gcp, azure)
-- `name` (String) Name of network
-- `project_id` (String) Project identifier
-- `region_id` (String) Region of network
+- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
+- `name` (String) Network name
+- `project_id` (String) Project ID
+- `region_id` (String) Network region
 
 ### Optional
 
 - `aws` (Attributes) (see [below for nested schema](#nestedatt--aws))
-- `description` (String) Description of network
-- `gcp` (Attributes) BYOC parameters for GCP. (see [below for nested schema](#nestedatt--gcp))
-- `ipv4_cidr_block` (String) The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.
-Required for non BYOC networks.
-For BYOC it will be read from provided VPC (AWS) or Subnetwork (GCP).
+- `description` (String) Network description
+- `gcp` (Attributes) BYOC parameters for GCP (see [below for nested schema](#nestedatt--gcp))
+- `ipv4_cidr_block` (String) Subnet IPv4 network range in CIDR notation, such as `10.0.0.0/16`.
+    Required for non-BYOC networks.
+    For BYOC, it's read from the provided VPC (AWS) or Subnetwork (GCP).
 
 ### Read-Only
 
-- `id` (String) Network identifier
-- `ipv6_cidr_block` (String) The IPv6 network range for the subnet, it is known only after creation.
-- `is_external` (Boolean) True if network was imported using BYOC.
+- `id` (String) Network ID
+- `ipv6_cidr_block` (String) Subnet IPv6 network rabge. Available only after the network is created.
+- `is_external` (Boolean) True if the network was imported using BYOC.
 
 <a id="nestedatt--aws"></a>
 ### Nested Schema for `aws`
 
 Required:
 
-- `account_id` (String) ID of the VPC owner account
-- `iam_role_arn` (String) IAM role ARN to use for resource creations
-- `vpc_id` (String) ID of the VPC
+- `account_id` (String) VPC owner account ID
+- `iam_role_arn` (String) ARN of an IAM role with permissions to create resources
+- `vpc_id` (String) VPC ID
 
 Optional:
 
-- `private_subnets` (Boolean) Create private subnets instead of default public
+- `private_subnets` (Boolean) Create private subnets instead of the default public ones
 
 
 <a id="nestedatt--gcp"></a>
@@ -66,9 +66,9 @@ Optional:
 
 Required:
 
-- `network_name` (String) Name of a network to import
-- `project_name` (String) Name of a project where is an imported network is located
+- `network_name` (String) Name of the network to import
+- `project_name` (String) Name of the project where is the imported network is located
 - `service_account_email` (String) Service account email
-- `subnetwork_name` (String) Name of a subnetwork to import
+- `subnetwork_name` (String) Name of the subnetwork to import
 
 

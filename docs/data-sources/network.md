@@ -17,15 +17,15 @@ Network data source
 
 ### Required
 
-- `name` (String) Name of network
-- `project_id` (String) Project identifier
+- `name` (String) Network name
+- `project_id` (String) Project ID
 
 ### Optional
 
-- `cloud_type` (String) Cloud type (aws, gcp, azure)
-- `description` (String) Description of network
-- `id` (String) Network identifier
+- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
+- `description` (String) Network description
+- `id` (String) Network ID
 - `ipv4_cidr_block` (String) The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.
-- `region_id` (String) Region of network
+- `region_id` (String) Network region
 
 

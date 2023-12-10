@@ -21,23 +21,29 @@ func transferEndpointGoogleAdsSourceSettingsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"customer_id": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Customer ID",
 			},
 			"start_date": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Start date",
 			},
 			"end_date": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "End date",
 			},
 			"custom_queries": schema.ListNestedAttribute{
-				NestedObject: transferEndpointGoogleAdsSourceCustomQuerySchema(),
-				Optional:     true,
+				NestedObject:        transferEndpointGoogleAdsSourceCustomQuerySchema(),
+				Optional:            true,
+				MarkdownDescription: "Custom queries",
 			},
 			"login_customer_id": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Login customer ID",
 			},
 			"conversion_window_days": schema.Float64Attribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Conversion window in days",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -110,19 +116,24 @@ func transferEndpointGoogleAdsSourceCredentialsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"developer_token": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Developer token",
 			},
 			"client_id": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Client ID",
 			},
 			"client_secret": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Client secret",
 			},
 			"access_token": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Access token",
 			},
 			"refresh_token": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Refresh token",
 			},
 		},
 	}
@@ -157,10 +168,12 @@ func transferEndpointGoogleAdsSourceCustomQuerySchema() schema.NestedAttributeOb
 	return schema.NestedAttributeObject{
 		Attributes: map[string]schema.Attribute{
 			"query": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Query",
 			},
 			"table_name": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Table name",
 			},
 		},
 	}

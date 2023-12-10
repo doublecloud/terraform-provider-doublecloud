@@ -154,7 +154,10 @@ type endpointObjectStorageConnection struct {
 func endpointObjetStorageDataSchemaJsonFieldsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"json_fields": schema.StringAttribute{Optional: true},
+			"json_fields": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "JSON field",
+			},
 		},
 	}
 }
@@ -190,7 +193,10 @@ func transferEndpointObjectStorageUnexpectedFieldBehaviorValidator() validator.S
 func transferEndpointObjectStorageSourceSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"path_pattern": schema.StringAttribute{Optional: true},
+			"path_pattern": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Path pattern",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"format":        endpointObjectStorageSourceFormatSchema(),
@@ -198,21 +204,62 @@ func transferEndpointObjectStorageSourceSchema() schema.Block {
 			"result_schema": endpointObjectStorageResultSchemaSchema(),
 			"provider": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"bucket":                schema.StringAttribute{Optional: true},
-					"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
-					"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
-					"path_prefix":           schema.StringAttribute{Optional: true},
-					"endpoint":              schema.StringAttribute{Optional: true},
-					"region":                schema.StringAttribute{Optional: true},
-					"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
-					"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
+					"bucket": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Bucket",
+					},
+					"aws_access_key_id": schema.StringAttribute{
+						Optional:            true,
+						Sensitive:           true,
+						MarkdownDescription: "Access key ID",
+					},
+					"aws_secret_access_key": schema.StringAttribute{
+						Optional:            true,
+						Sensitive:           true,
+						MarkdownDescription: "Secret access key",
+					},
+					"path_prefix": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Path prefix",
+					},
+					"endpoint": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Endpoint",
+					},
+					"region": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Region",
+					},
+					"use_ssl": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+						MarkdownDescription: "",
+					},
+					"verify_ssl_cert": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+						MarkdownDescription: "",
+					},
 				},
 			},
 			"result_table": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"table_namespace": schema.StringAttribute{Optional: true},
-					"table_name":      schema.StringAttribute{Optional: true},
-					"add_system_cols": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true)},
+					"table_namespace": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Table namespace",
+					},
+					"table_name": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Table name",
+					},
+					"add_system_cols": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(true),
+						MarkdownDescription: "Add system columns",
+					},
 				},
 			},
 		},
@@ -227,14 +274,22 @@ func endpointObjectStorageSourceFormatSchema() schema.Block {
 			"avro":    schema.SingleNestedBlock{},
 			"jsonl": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"newlines_in_values": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
+					"newlines_in_values": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+						MarkdownDescription: "Allow newline characters in values",
+					},
 					"unexpected_field_behavior": schema.StringAttribute{
 						Optional:      true,
 						Computed:      true,
 						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators:    []validator.String{transferEndpointObjectStorageUnexpectedFieldBehaviorValidator()},
 					},
-					"block_size": schema.Int64Attribute{Optional: true},
+					"block_size": schema.Int64Attribute{
+						Optional:            true,
+						MarkdownDescription: "Block size",
+					},
 				},
 			},
 		},
@@ -244,13 +299,42 @@ func endpointObjectStorageSourceFormatSchema() schema.Block {
 func endpointObjectStorageSourceFormatCsvSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"delimiter":          schema.StringAttribute{Optional: true, Computed: true},
-			"quote_char":         schema.StringAttribute{Optional: true, Computed: true},
-			"escape_char":        schema.StringAttribute{Optional: true, Computed: true},
-			"encoding":           schema.StringAttribute{Optional: true},
-			"double_quote":       schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true)},
-			"newlines_in_values": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
-			"block_size":         schema.Int64Attribute{Optional: true, Computed: true},
+			"delimiter": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Delimiter",
+			},
+			"quote_char": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Quote character",
+			},
+			"escape_char": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Escape character",
+			},
+			"encoding": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Encoding",
+			},
+			"double_quote": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
+				MarkdownDescription: "Replace double quotes with single quotes",
+			},
+			"newlines_in_values": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+				MarkdownDescription: "Allow newline characters in values",
+			},
+			"block_size": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Block size",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"additional_options": endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema(),
@@ -278,10 +362,29 @@ func endpointObjectStorageSourceFormatCsvAdditionalOptionsSchema() schema.Block 
 func endpointObjectStorageSourceFormatCsvAdvancedOptionsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"skip_rows":                 schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"skip_rows_after_names":     schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-			"autogenerate_column_names": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true)},
-			"column_names":              schema.ListAttribute{ElementType: types.StringType, Optional: true},
+			"skip_rows": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Number of rows to skip before the column names",
+			},
+			"skip_rows_after_names": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Number of rows to skip after the column names",
+			},
+			"autogenerate_column_names": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
+				MarkdownDescription: "Autogenerate column names",
+			},
+			"column_names": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				MarkdownDescription: "Names of columns to transfer",
+			},
 		},
 	}
 }
@@ -291,14 +394,43 @@ func endpointObjectStorageSourceEventSourceSchema() schema.Block {
 		Blocks: map[string]schema.Block{
 			"sqs": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"queue_name":            schema.StringAttribute{Optional: true},
-					"owner_id":              schema.StringAttribute{Optional: true},
-					"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
-					"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
-					"endpoint":              schema.StringAttribute{Optional: true},
-					"region":                schema.StringAttribute{Optional: true},
-					"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
-					"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
+					"queue_name": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Queue name",
+					},
+					"owner_id": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Owner ID",
+					},
+					"aws_access_key_id": schema.StringAttribute{
+						Optional:            true,
+						Sensitive:           true,
+						MarkdownDescription: "Access key ID",
+					},
+					"aws_secret_access_key": schema.StringAttribute{
+						Optional:            true,
+						Sensitive:           true,
+						MarkdownDescription: "Secret access key",
+					},
+					"endpoint": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Endpoint. Leave blank if you're using AWS",
+					},
+					"region": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Region",
+					},
+					"use_ssl": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+						MarkdownDescription: "",
+					},
+					"verify_ssl_cert": schema.BoolAttribute{
+						Optional: true,
+						Computed: true, Default: booldefault.StaticBool(false),
+						MarkdownDescription: "",
+					},
 				},
 			},
 			"sns":     schema.SingleNestedBlock{},
@@ -310,24 +442,46 @@ func endpointObjectStorageSourceEventSourceSchema() schema.Block {
 func transferEndpointObjectStorageTargetSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"bucket":             schema.StringAttribute{Optional: true},
-			"service_account_id": schema.StringAttribute{Optional: true},
+			"bucket": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Target bucket",
+			},
+			"service_account_id": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Service account ID",
+			},
 			"output_format": schema.StringAttribute{
 				Optional:      true,
 				Computed:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:    []validator.String{transferEndpointObjectStorageOutputFormatValidator()},
 			},
-			"bucket_layout":          schema.StringAttribute{Optional: true},
-			"bucket_layout_timezone": schema.StringAttribute{Optional: true},
-			"bucket_layout_column":   schema.StringAttribute{Optional: true},
-			"buffer_size":            schema.StringAttribute{Optional: true},
-			"buffer_interval":        schema.StringAttribute{Optional: true},
+			"bucket_layout": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Bucket layout",
+			},
+			"bucket_layout_timezone": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Bucket layout timezone",
+			},
+			"bucket_layout_column": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Bucket layout column",
+			},
+			"buffer_size": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Buffer size",
+			},
+			"buffer_interval": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Buffer interval",
+			},
 			"output_encoding": schema.StringAttribute{
-				Optional:      true,
-				Computed:      true,
-				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
-				Validators:    []validator.String{transferEndpointObjectStorageOutputEncodingValidator()},
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Validators:          []validator.String{transferEndpointObjectStorageOutputEncodingValidator()},
+				MarkdownDescription: "Output encoding",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -340,12 +494,34 @@ func transferEndpointObjectStorageTargetSchema() schema.Block {
 func endpointObjectStorageTargetConnectionSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"aws_access_key_id":     schema.StringAttribute{Optional: true},
-			"aws_secret_access_key": schema.StringAttribute{Optional: true},
-			"endpoint":              schema.StringAttribute{Optional: true},
-			"region":                schema.StringAttribute{Optional: true},
-			"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
-			"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
+			"aws_access_key_id": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Access key ID",
+			},
+			"aws_secret_access_key": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Secret access key",
+			},
+			"endpoint": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Endpoint",
+			},
+			"region": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Region",
+			},
+			"use_ssl": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+				MarkdownDescription: "",
+			},
+			"verify_ssl_cert": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+				MarkdownDescription: "",
+			},
 		},
 	}
 }
@@ -353,7 +529,12 @@ func endpointObjectStorageTargetConnectionSchema() schema.Block {
 func endpointObjectStorageTargetSerializerConfigSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"any_as_string": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
+			"any_as_string": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+				MarkdownDescription: "",
+			},
 		},
 	}
 }

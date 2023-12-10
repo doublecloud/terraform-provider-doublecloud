@@ -17,14 +17,14 @@ Network Connection datasource
 
 ### Required
 
-- `id` (String) Network Connection identifier
+- `id` (String) Network Connection ID
 
 ### Read-Only
 
 - `aws` (Attributes) AWS connection info (see [below for nested schema](#nestedatt--aws))
-- `description` (String) Description of network connection
+- `description` (String) Network connection description
 - `google` (Attributes) Google Cloud connection info (see [below for nested schema](#nestedatt--google))
-- `network_id` (String) Network identifier
+- `network_id` (String) Network ID
 
 <a id="nestedatt--aws"></a>
 ### Nested Schema for `aws`
@@ -48,8 +48,8 @@ Customer should create route to this CIDR using Peering Connection.
 - `managed_ipv6_cidr_block` (String) Managed AWS IPv6 CIDR block.
 Customer should create route to this CIDR using Peering Connection.
 - `peering_connection_id` (String) Peering Connection ID.
-- `region_id` (String) ID of the AWS region
-- `vpc_id` (String) ID of the VPC
+- `region_id` (String) AWS region ID
+- `vpc_id` (String) VPC ID
 
 
 
@@ -60,6 +60,6 @@ Read-Only:
 
 - `managed_network_url` (String) The URL of the managed GCP network
 - `name` (String) Name of this peering
-- `peer_network_url` (String) The URL of the peer network
+- `peer_network_url` (String) Peer network URL
 
 

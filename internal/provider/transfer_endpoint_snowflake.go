@@ -36,12 +36,30 @@ type endpointSnowflakeSourceCredentialsBasicAuth struct {
 func endpointSnowflakeSourceSettingsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"host":            schema.StringAttribute{Optional: true},
-			"role":            schema.StringAttribute{Optional: true},
-			"warehouse":       schema.StringAttribute{Optional: true},
-			"database":        schema.StringAttribute{Optional: true},
-			"schema":          schema.StringAttribute{Optional: true},
-			"jdbc_url_params": schema.StringAttribute{Optional: true},
+			"host": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Host",
+			},
+			"role": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Role",
+			},
+			"warehouse": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Warehouse",
+			},
+			"database": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Database",
+			},
+			"schema": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Schema",
+			},
+			"jdbc_url_params": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "JDBC URL parameters",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"credentials": transferEndpointSnowflakeSourceCredentialsSchema(),
@@ -61,8 +79,15 @@ func transferEndpointSnowflakeSourceCredentialsSchema() schema.Block {
 func transferEndpointSnowflakeSourceCredentialsBasicAuthSchema() schema.Block {
 	return &schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"username": schema.StringAttribute{Optional: true},
-			"password": schema.StringAttribute{Optional: true, Sensitive: true},
+			"username": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Username",
+			},
+			"password": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Password",
+			},
 		},
 	}
 }
@@ -70,10 +95,26 @@ func transferEndpointSnowflakeSourceCredentialsBasicAuthSchema() schema.Block {
 func transferEndpointSnowflakeSourceCredentialsOauthSchema() schema.Block {
 	return &schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"client_id":     schema.StringAttribute{Optional: true, Sensitive: true},
-			"client_secret": schema.StringAttribute{Optional: true, Sensitive: true},
-			"access_token":  schema.StringAttribute{Optional: true, Sensitive: true},
-			"refresh_token": schema.StringAttribute{Optional: true, Sensitive: true},
+			"client_id": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Client ID",
+			},
+			"client_secret": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Client secret",
+			},
+			"access_token": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Access token",
+			},
+			"refresh_token": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Refresh token",
+			},
 		},
 	}
 }

@@ -80,19 +80,19 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Cluster Id",
+				MarkdownDescription: "Cluster ID",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project Id",
+				MarkdownDescription: "Project ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"cloud_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Cloud type (aws, gcp, azure)",
+				MarkdownDescription: "Cloud provider (`aws`, `gcp`, or `azure`)",
 				Validators:          []validator.String{cloudTypeValidator()},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -100,24 +100,24 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of cluster",
+				MarkdownDescription: "Cluster name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description of cluster",
+				MarkdownDescription: "Cluster description",
 				Default:             stringdefault.StaticString(""),
 			},
 			"region_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Region of cluster",
+				MarkdownDescription: "Region where the cluster is located",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"network_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Network of cluster",
+				MarkdownDescription: "Cluster network",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -129,30 +129,45 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"connection_info": schema.SingleNestedAttribute{
-				Computed:      true,
-				Attributes:    kafkaConnectionInfoResSchema(),
-				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				Computed:            true,
+				Attributes:          kafkaConnectionInfoResSchema(),
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Public connection info",
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
-				Computed:      true,
-				Attributes:    kafkaConnectionInfoResSchema(),
-				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				Computed:            true,
+				Attributes:          kafkaConnectionInfoResSchema(),
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Private connection info",
 			},
 		},
 		Blocks: map[string]schema.Block{
 			"resources": schema.SingleNestedBlock{
-				Description: "Resources of cluster",
+				Description: "Cluster resources",
 				Blocks: map[string]schema.Block{
 					"kafka": schema.SingleNestedBlock{
 						Attributes: map[string]schema.Attribute{
-							"resource_preset_id": schema.StringAttribute{Required: true},
-							"disk_size": schema.Int64Attribute{
-								Required:      true,
-								PlanModifiers: []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
+							"resource_preset_id": schema.StringAttribute{
+								Required:            true,
+								MarkdownDescription: "Resource preset ID",
 							},
-							"max_disk_size": schema.Int64Attribute{Optional: true},
-							"broker_count":  schema.Int64Attribute{Required: true},
-							"zone_count":    schema.Int64Attribute{Required: true},
+							"disk_size": schema.Int64Attribute{
+								Required:            true,
+								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
+								MarkdownDescription: "Disk size",
+							},
+							"max_disk_size": schema.Int64Attribute{
+								Optional:            true,
+								MarkdownDescription: "Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled",
+							},
+							"broker_count": schema.Int64Attribute{
+								Required:            true,
+								MarkdownDescription: "Number of brokers",
+							},
+							"zone_count": schema.Int64Attribute{
+								Required:            true,
+								MarkdownDescription: "Number of zones",
+							},
 						},
 					},
 				},
@@ -160,12 +175,16 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 			"schema_registry": schema.SingleNestedBlock{
 				Description: "Schema Registry configuration",
 				Attributes: map[string]schema.Attribute{
-					"enabled": schema.BoolAttribute{Computed: true, Optional: true},
+					"enabled": schema.BoolAttribute{
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: "Enable the Schema Registry",
+					},
 				},
 			},
 			"access": AccessSchemaBlock(),
 		},
-		MarkdownDescription: "Kafka cluster resource",
+		MarkdownDescription: "Kafka Cluster resource",
 		Version:             0,
 	}
 }
@@ -544,7 +563,7 @@ func kafkaConnectionInfoResSchema() map[string]schema.Attribute {
 		},
 		"password": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Password for Apache Kafka® user",
+			MarkdownDescription: "Password for the Apache Kafka® user",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 	}

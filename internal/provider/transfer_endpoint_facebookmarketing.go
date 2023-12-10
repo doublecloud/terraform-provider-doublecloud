@@ -125,7 +125,7 @@ func transferEndpointFacebookMarketingSourceInsightSchema() schema.NestedAttribu
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Optional:    true,
-				Description: "The name of the insight",
+				Description: "Insight name",
 			},
 			"fields": schema.ListAttribute{
 				ElementType:         types.StringType,

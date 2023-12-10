@@ -333,7 +333,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 			"version": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Version of the ClickHouse DBMS.",
+				MarkdownDescription: "Version of the ClickHouse DBMS",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"network_id": schema.StringAttribute{
@@ -358,7 +358,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
-								MarkdownDescription: "Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.",
+								MarkdownDescription: "Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
@@ -383,11 +383,11 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
-								MarkdownDescription: "Volume of the storage available to a host, in bytes",
+								MarkdownDescription: "Volume of the storage available to a host in bytes",
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
-								MarkdownDescription: "Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.",
+								MarkdownDescription: "Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
@@ -1277,7 +1277,10 @@ func clickhouseConfigSchemaBlock() schema.Block {
 				Optional:            true,
 				MarkdownDescription: "Maximum size of the text log table in bytes",
 			},
-			"text_log_retention_time": schema.StringAttribute{Optional: true},
+			"text_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the text log table in the duration string format, such as `2h45m`",
+			},
 			"text_log_level": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,

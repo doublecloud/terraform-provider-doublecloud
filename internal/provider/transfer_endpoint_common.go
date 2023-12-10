@@ -79,11 +79,11 @@ func transferEndpointGenericParserSchema() schema.SingleNestedBlock {
 		Attributes: map[string]schema.Attribute{
 			// "data_schema": ...endpoint
 			"null_keys_allowed": schema.BoolAttribute{
-				MarkdownDescription: "Allow null keys, if no - null keys will be putted to unparsed data",
+				MarkdownDescription: "Allow null keys. If false, null keys are put to unparsed data",
 				Optional:            true,
 			},
 			"add_rest_column": schema.BoolAttribute{
-				MarkdownDescription: "Will add _rest column for all unknown fields",
+				MarkdownDescription: "Add the `_rest` column for all unknown fields",
 				Optional:            true,
 			},
 		},
@@ -95,15 +95,21 @@ func transferEndpointSerializerSchemaBlock() schema.SingleNestedBlock {
 		MarkdownDescription: "Data serialization format",
 		Blocks: map[string]schema.Block{
 			"auto": schema.SingleNestedBlock{MarkdownDescription: "Select the serialization format automatically"},
-			"json": schema.SingleNestedBlock{MarkdownDescription: "Serialize data in json format"},
+			"json": schema.SingleNestedBlock{MarkdownDescription: "Serialize data in the JSON format"},
 			"debezium": schema.SingleNestedBlock{
-				MarkdownDescription: "Serialize data in json format",
+				MarkdownDescription: "Serialize data in the JSON format",
 				Blocks: map[string]schema.Block{
 					"parameter": schema.ListNestedBlock{
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
-								"key":   schema.StringAttribute{Optional: true},
-								"value": schema.StringAttribute{Optional: true},
+								"key": schema.StringAttribute{
+									Optional:            true,
+									MarkdownDescription: "Key",
+								},
+								"value": schema.StringAttribute{
+									Optional:            true,
+									MarkdownDescription: "Value",
+								},
 							},
 						},
 					},

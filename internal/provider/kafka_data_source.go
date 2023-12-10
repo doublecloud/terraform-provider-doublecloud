@@ -59,7 +59,7 @@ func kafkaConnectionInfoSchema() map[string]schema.Attribute {
 		},
 		"password": schema.StringAttribute{
 			Optional:            true,
-			MarkdownDescription: "Password for Apache Kafka® user",
+			MarkdownDescription: "Password for the Apache Kafka® user",
 		},
 	}
 }
@@ -70,40 +70,42 @@ func (d *KafkaDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Cluster identifier",
+				MarkdownDescription: "Cluster ID",
 			},
 			"name": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Name of cluster",
+				MarkdownDescription: "Cluster name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Description of cluster",
+				MarkdownDescription: "Cluster description",
 			},
 			"region_id": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Region of cluster",
+				MarkdownDescription: "Region where the cluster is located",
 			},
 			"cloud_type": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Cloud type (aws, gcp, azure)",
+				MarkdownDescription: "Cloud provider (`aws`, `gcp`, or `azure`)",
 			},
 			"version": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Version of ClickHouse DBMS",
+				MarkdownDescription: "Version of the ClickHouse DBMS",
 			},
 			"connection_info": schema.SingleNestedAttribute{
-				Optional:   true,
-				Attributes: kafkaConnectionInfoSchema(),
+				Optional:            true,
+				Attributes:          kafkaConnectionInfoSchema(),
+				MarkdownDescription: "Public connection info",
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
-				Optional:   true,
-				Attributes: kafkaConnectionInfoSchema(),
+				Optional:            true,
+				Attributes:          kafkaConnectionInfoSchema(),
+				MarkdownDescription: "Private connection info",
 			},
 		},
 	}
