@@ -7,6 +7,8 @@ import (
 	dcsdk "github.com/doublecloud/go-sdk"
 	dclogs "github.com/doublecloud/go-sdk/gen/logs"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -32,7 +34,7 @@ type LogsExportResource struct {
 }
 
 type LogsExportResourceModel struct {
-	Id          types.String                    `tfsdk:"id"`
+	ID          types.String                    `tfsdk:"id"`
 	ProjectID   types.String                    `tfsdk:"project_id"`
 	Name        types.String                    `tfsdk:"name"`
 	Description types.String                    `tfsdk:"description"`
@@ -42,7 +44,43 @@ type LogsExportResourceModel struct {
 	Datadog *datadogLogsExportNetworkResourceModel `tfsdk:"datadog"`
 }
 
+func (m *LogsExportResourceModel) FromProtobuf(nc *logs.LogsExport) error {
+	m.ID = types.StringValue(nc.GetId())
+	m.ProjectID = types.StringValue(nc.GetProjectId())
+	m.Name = types.StringValue(nc.GetName())
+	m.Description = types.StringValue(nc.GetDescription())
+	for _, s := range nc.GetSources() {
+		m.Sources = append(m.Sources, &logExportSourceResourceModel{
+			Type: types.StringValue(s.GetType().String()),
+			ID:   types.StringValue(s.GetId()),
+		})
+	}
+	switch v := nc.Target.Target.(type) {
+	case *logs.LogsTarget_S3:
+		m.S3 = &s3LogsExportResourceModel{
+			Bucket:             types.StringValue(v.S3.Bucket),
+			BucketLayout:       types.StringValue(v.S3.BucketLayout),
+			AWSAccessKeyID:     types.StringValue(v.S3.AwsAccessKeyId),
+			AWSSecretAccessKey: types.StringValue(v.S3.AwsSecretAccessKey),
+			Region:             types.StringValue(v.S3.Region),
+			Endpoint:           types.StringValue(v.S3.Endpoint),
+			DisableSSL:         types.BoolValue(v.S3.DisableSsl),
+			SkipVerifySSLCert:  types.BoolValue(v.S3.SkipVerifySslCert),
+		}
+	case *logs.LogsTarget_Datadog:
+		m.Datadog = &datadogLogsExportNetworkResourceModel{
+			APIKey:      types.StringValue(v.Datadog.ApiKey),
+			DatadogHost: types.StringValue(v.Datadog.DatadogHost.String()),
+		}
+	default:
+		return fmt.Errorf("unknown type: %T", nc.Target.Target)
+	}
+	return nil
+}
+
 type logExportSourceResourceModel struct {
+	Type types.String `tfsdk:"bucket"`
+	ID   types.String `tfsdk:"bucket_layout"`
 }
 
 type s3LogsExportResourceModel struct {
@@ -194,27 +232,129 @@ func (l LogsExportResource) Configure(ctx context.Context, req resource.Configur
 	l.logsExportService = l.sdk.Logs().Export()
 }
 
-func (l LogsExportResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
-	//TODO implement me
-	panic("implement me")
+func (l LogsExportResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *LogsExportResourceModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	createReq := &logs.CreateExportRequest{
+		ProjectId:   data.ProjectID.ValueString(),
+		Name:        data.Name.ValueString(),
+		Description: data.Description.ValueString(),
+		Sources:     nil,
+		Target:      nil,
+	}
+	for _, s := range data.Sources {
+		createReq.Sources = append(createReq.Sources, &logs.LogSource{
+			Type: logs.LogSourceType(logs.LogSourceType_value[s.Type.ValueString()]),
+			Id:   s.ID.ValueString(),
+		})
+	}
+	switch {
+	case data.S3 != nil:
+		createReq.Target = &logs.LogsTarget{Target: &logs.LogsTarget_S3{S3: &logs.LogsTargetS3{
+			Bucket:             data.S3.Bucket.ValueString(),
+			BucketLayout:       data.S3.BucketLayout.ValueString(),
+			AwsAccessKeyId:     data.S3.AWSAccessKeyID.ValueString(),
+			AwsSecretAccessKey: data.S3.AWSSecretAccessKey.ValueString(),
+			Region:             data.S3.Region.ValueString(),
+			Endpoint:           data.S3.Endpoint.ValueString(),
+			DisableSsl:         data.S3.DisableSSL.ValueBool(),
+			SkipVerifySslCert:  data.S3.SkipVerifySSLCert.ValueBool(),
+		}}}
+	case data.Datadog != nil:
+		createReq.Target = &logs.LogsTarget{Target: &logs.LogsTarget_Datadog{Datadog: &logs.LogsTargetDatadog{
+			ApiKey:      data.Datadog.APIKey.ValueString(),
+			DatadogHost: logs.LogsTargetDatadog_DatadogHost(logs.LogsTargetDatadog_DatadogHost_value[data.Datadog.DatadogHost.ValueString()]),
+		}}}
+	default:
+		resp.Diagnostics.AddError("misconfiguration", "at least one of \"s3\" or \"datadog\" must be specified")
+		return
+	}
+	opObj, err := l.logsExportService.Create(ctx, createReq)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create", err.Error())
+		return
+	}
+
+	data.ID = types.StringValue(opObj.GetResourceId())
+
+	resp.Diagnostics.Append(getLogsExport(ctx, l.logsExportService, opObj.GetResourceId(), data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (l LogsExportResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
-	//TODO implement me
-	panic("implement me")
+func (l LogsExportResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *LogsExportResourceModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(getLogsExport(ctx, l.logsExportService, data.ID.ValueString(), data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (l LogsExportResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
-	//TODO implement me
-	panic("implement me")
+func getLogsExport(
+	ctx context.Context,
+	client *dclogs.ExportServiceClient,
+	id string,
+	data *LogsExportResourceModel,
+) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	nc, err := client.Get(ctx, &logs.GetExportRequest{Id: id})
+	if err != nil {
+		diags.AddError("Failed to get network connection", fmt.Sprintf("failed request, error: %v", err))
+		return diags
+	}
+
+	if err = data.FromProtobuf(nc); err != nil {
+		diags.AddError("Failed to get network connection", fmt.Sprintf("failed parse, error: %v", err))
+		return diags
+	}
+
+	return diags
 }
 
-func (l LogsExportResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
-	//TODO implement me
-	panic("implement me")
+func (l LogsExportResource) Update(ctx context.Context, request resource.UpdateRequest, resp *resource.UpdateResponse) {
+	resp.Diagnostics.AddError("Failed to update logs export", "logs expport don't support updates")
 }
 
-func (l LogsExportResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
-	//TODO implement me
-	panic("implement me")
+func (l LogsExportResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *LogsExportResourceModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	_, err := l.logsExportService.Delete(ctx, &logs.DeleteExportRequest{Id: data.ID.ValueString()})
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete", err.Error())
+		return
+	}
+}
+
+func (l LogsExportResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
