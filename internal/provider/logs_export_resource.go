@@ -6,7 +6,6 @@ import (
 	"github.com/doublecloud/go-genproto/doublecloud/logs/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
 	dclogs "github.com/doublecloud/go-sdk/gen/logs"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -23,6 +22,7 @@ import (
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &LogsExportResource{}
 var _ resource.ResourceWithImportState = &LogsExportResource{}
+var _ resource.ResourceWithConfigure = &LogsExportResource{}
 
 func NewLogsExportResource() resource.Resource {
 	return &LogsExportResource{}
@@ -49,6 +49,7 @@ func (m *LogsExportResourceModel) FromProtobuf(nc *logs.LogsExport) error {
 	m.ProjectID = types.StringValue(nc.GetProjectId())
 	m.Name = types.StringValue(nc.GetName())
 	m.Description = types.StringValue(nc.GetDescription())
+	m.Sources = []*logExportSourceResourceModel{}
 	for _, s := range nc.GetSources() {
 		m.Sources = append(m.Sources, &logExportSourceResourceModel{
 			Type: types.StringValue(s.GetType().String()),
@@ -79,8 +80,8 @@ func (m *LogsExportResourceModel) FromProtobuf(nc *logs.LogsExport) error {
 }
 
 type logExportSourceResourceModel struct {
-	Type types.String `tfsdk:"bucket"`
-	ID   types.String `tfsdk:"bucket_layout"`
+	Type types.String `tfsdk:"type"`
+	ID   types.String `tfsdk:"id"`
 }
 
 type s3LogsExportResourceModel struct {
@@ -99,11 +100,11 @@ type datadogLogsExportNetworkResourceModel struct {
 	DatadogHost types.String `tfsdk:"datadog_host"`
 }
 
-func (l LogsExportResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (l *LogsExportResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_logs_export"
 }
 
-func (l LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Network resource",
@@ -111,63 +112,81 @@ func (l LogsExportResource) Schema(ctx context.Context, req resource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Logs Export identifier",
+				MarkdownDescription: "Log export ID",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of logs export",
+				MarkdownDescription: "Log export name",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description of logs export",
+				MarkdownDescription: "Log export description",
 				Default:             stringdefault.StaticString(""),
+			},
+			"sources": schema.ListNestedAttribute{
+				Required: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							Required:            true,
+							MarkdownDescription: "Type of log export source",
+							PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+							Validators:          []validator.String{protoEnumValidator(logs.LogSourceType_name)},
+						},
+						"id": schema.StringAttribute{
+							Required:            true,
+							MarkdownDescription: "Resource ID",
+							PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						},
+					},
+				},
 			},
 			"s3": schema.SingleNestedAttribute{
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"bucket": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Bucket.\nName of the S3 bucket to export logs to.",
+						MarkdownDescription: "Name of the S3 bucket to export logs to",
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"bucket_layout": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Folder name\nFolder where logs will be exported. \n Can include the date as a template variable in the Go date format, such as \"2006/01/02/some_folder\".",
+						MarkdownDescription: "Folder where logs will be exported. Can include the date as a template variable in the Go date format, such as \"2006/01/02/some_folder\"",
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						Required:            false,
+						Optional:            true,
 						MarkdownDescription: "Access key ID",
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"aws_secret_access_key": schema.StringAttribute{
-						Required:            false,
+						Optional:            true,
 						MarkdownDescription: "Secret access key",
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"region": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Region\nRegion where the bucket is located.",
+						MarkdownDescription: "Region where the bucket is located",
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"endpoint": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Endpoint\nEndpoint of the S3-compatible service. Leave blank if you're using AWS.",
+						MarkdownDescription: "Endpoint of the S3-compatible service. Leave blank if you're using AWS.",
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"skip_verify_ssl_cert": schema.BoolAttribute{
 						Optional:            true,
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
-						MarkdownDescription: "Skip verifying SSL certificate\nSelect if the bucket allows self-signed certificates.",
+						MarkdownDescription: "Skip verifying SSL certificate. Enable if the bucket allows self-signed certificates",
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.RequiresReplace(),
 						},
@@ -176,7 +195,7 @@ func (l LogsExportResource) Schema(ctx context.Context, req resource.SchemaReque
 						Optional:            true,
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
-						MarkdownDescription: "Allow connections without SSL\nSelect if you're connecting to an S3-compatible service that doesn't use SSL/TLS.",
+						MarkdownDescription: "Allow connections without SSL. Enable if you're connecting to an S3-compatible service that doesn't use SSL/TLS",
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.RequiresReplace(),
 						},
@@ -190,12 +209,12 @@ func (l LogsExportResource) Schema(ctx context.Context, req resource.SchemaReque
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "API Key for Datadog",
+						MarkdownDescription: "Datadog API Key",
 					},
 					"datadog_host": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Host name for Datadog",
-						Validators:          []validator.String{datadogHostOptions()},
+						MarkdownDescription: "Datadog site. Make sure to specify the correct site because Datadog sites are independent and data isn't shared across them by default",
+						Validators:          []validator.String{protoEnumValidator(logs.LogsTargetDatadog_DatadogHost_name)},
 					},
 				},
 				Validators: []validator.Object{},
@@ -204,15 +223,7 @@ func (l LogsExportResource) Schema(ctx context.Context, req resource.SchemaReque
 	}
 }
 
-func datadogHostOptions() validator.String {
-	names := make([]string, len(logs.LogsTargetDatadog_DatadogHost_name))
-	for i, v := range logs.LogsTargetDatadog_DatadogHost_name {
-		names[i] = v
-	}
-	return stringvalidator.OneOfCaseInsensitive(names...)
-}
-
-func (l LogsExportResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (l *LogsExportResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -232,7 +243,7 @@ func (l LogsExportResource) Configure(ctx context.Context, req resource.Configur
 	l.logsExportService = l.sdk.Logs().Export()
 }
 
-func (l LogsExportResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (l *LogsExportResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *LogsExportResourceModel
 
 	// Read Terraform plan data into the model
@@ -293,7 +304,7 @@ func (l LogsExportResource) Create(ctx context.Context, req resource.CreateReque
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (l LogsExportResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (l *LogsExportResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data *LogsExportResourceModel
 
 	// Read Terraform prior state data into the model
@@ -334,11 +345,11 @@ func getLogsExport(
 	return diags
 }
 
-func (l LogsExportResource) Update(ctx context.Context, request resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (l *LogsExportResource) Update(ctx context.Context, request resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError("Failed to update logs export", "logs expport don't support updates")
 }
 
-func (l LogsExportResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (l *LogsExportResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data *LogsExportResourceModel
 
 	// Read Terraform prior state data into the model
@@ -355,6 +366,6 @@ func (l LogsExportResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 }
 
-func (l LogsExportResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (l *LogsExportResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

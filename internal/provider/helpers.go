@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -29,6 +31,14 @@ func convertSchemaAttributes(resAttrs map[string]resourceschema.Attribute, dataA
 	}
 
 	return diags
+}
+
+func protoEnumValidator(keys map[int32]string) validator.String {
+	names := make([]string, len(keys))
+	for i, v := range keys {
+		names[i] = v
+	}
+	return stringvalidator.OneOfCaseInsensitive(names...)
 }
 
 func convertStringAttribute(attr resourceschema.StringAttribute) *dataschema.StringAttribute {
