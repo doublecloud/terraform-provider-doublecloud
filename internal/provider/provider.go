@@ -158,6 +158,7 @@ func (p *DoubleCloudProvider) Resources(ctx context.Context) []func() resource.R
 		NewClickhouseClusterResource,
 		NewNetworkConnectionResource,
 		NewNetworkConnectionAccepterResource,
+		NewLogsExportResource,
 	}
 }
 
