@@ -20,15 +20,15 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &LogsExportResource{}
-var _ resource.ResourceWithImportState = &LogsExportResource{}
-var _ resource.ResourceWithConfigure = &LogsExportResource{}
+var _ resource.Resource = &LogExportResource{}
+var _ resource.ResourceWithImportState = &LogExportResource{}
+var _ resource.ResourceWithConfigure = &LogExportResource{}
 
 func NewLogsExportResource() resource.Resource {
-	return &LogsExportResource{}
+	return &LogExportResource{}
 }
 
-type LogsExportResource struct {
+type LogExportResource struct {
 	sdk               *dcsdk.SDK
 	logsExportService *dclogs.ExportServiceClient
 }
@@ -100,11 +100,11 @@ type datadogLogsExportNetworkResourceModel struct {
 	DatadogHost types.String `tfsdk:"datadog_host"`
 }
 
-func (l *LogsExportResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_logs_export"
+func (l *LogExportResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_log_export"
 }
 
-func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (l *LogExportResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Network resource",
@@ -137,7 +137,7 @@ func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequ
 					Attributes: map[string]schema.Attribute{
 						"type": schema.StringAttribute{
 							Required:            true,
-							MarkdownDescription: "Type of log export source",
+							MarkdownDescription: "Log source type",
 							PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 							Validators:          []validator.String{protoEnumValidator(logs.LogSourceType_name)},
 						},
@@ -150,7 +150,8 @@ func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequ
 				},
 			},
 			"s3": schema.SingleNestedAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "S3 destination",
 				Attributes: map[string]schema.Attribute{
 					"bucket": schema.StringAttribute{
 						Required:            true,
@@ -179,14 +180,14 @@ func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequ
 					},
 					"endpoint": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Endpoint of the S3-compatible service. Leave blank if you're using AWS.",
+						MarkdownDescription: "Endpoint of the S3-compatible service. Don't specify if you're using AWS.",
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 					},
 					"skip_verify_ssl_cert": schema.BoolAttribute{
 						Optional:            true,
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
-						MarkdownDescription: "Skip verifying SSL certificate. Enable if the bucket allows self-signed certificates",
+						MarkdownDescription: "Skip verifying SSL certificate. Set to true if the bucket allows self-signed certificates",
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.RequiresReplace(),
 						},
@@ -195,7 +196,7 @@ func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Optional:            true,
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
-						MarkdownDescription: "Allow connections without SSL. Enable if you're connecting to an S3-compatible service that doesn't use SSL/TLS",
+						MarkdownDescription: "Allow connections without SSL. Set to true if you're connecting to an S3-compatible service that doesn't use SSL/TLS",
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.RequiresReplace(),
 						},
@@ -205,7 +206,7 @@ func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"datadog": schema.SingleNestedAttribute{
 				Optional:            true,
-				MarkdownDescription: "Datadog export target",
+				MarkdownDescription: "Datadog destination",
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
 						Required:            true,
@@ -223,7 +224,7 @@ func (l *LogsExportResource) Schema(ctx context.Context, req resource.SchemaRequ
 	}
 }
 
-func (l *LogsExportResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (l *LogExportResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -243,7 +244,7 @@ func (l *LogsExportResource) Configure(ctx context.Context, req resource.Configu
 	l.logsExportService = l.sdk.Logs().Export()
 }
 
-func (l *LogsExportResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (l *LogExportResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *LogsExportResourceModel
 
 	// Read Terraform plan data into the model
@@ -304,7 +305,7 @@ func (l *LogsExportResource) Create(ctx context.Context, req resource.CreateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (l *LogsExportResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (l *LogExportResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data *LogsExportResourceModel
 
 	// Read Terraform prior state data into the model
@@ -345,11 +346,11 @@ func getLogsExport(
 	return diags
 }
 
-func (l *LogsExportResource) Update(ctx context.Context, request resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (l *LogExportResource) Update(ctx context.Context, request resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError("Failed to update logs export", "logs expport don't support updates")
 }
 
-func (l *LogsExportResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (l *LogExportResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data *LogsExportResourceModel
 
 	// Read Terraform prior state data into the model
@@ -366,6 +367,6 @@ func (l *LogsExportResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 }
 
-func (l *LogsExportResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (l *LogExportResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
