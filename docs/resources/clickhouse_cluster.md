@@ -58,11 +58,11 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 
 ### Optional
 
-- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
+- `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) (see [below for nested schema](#nestedblock--config))
 - `description` (String) Cluster description
 - `id` (String) Cluster ID
-- `resources` (Block, Optional) (see [below for nested schema](#nestedblock--resources))
+- `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
 - `version` (String) Version of the ClickHouse DBMS
 
 <a id="nestedblock--access"></a>
@@ -179,8 +179,8 @@ Optional:
 
 Optional:
 
-- `clickhouse` (Block, Optional) (see [below for nested schema](#nestedblock--resources--clickhouse))
-- `dedicated_keeper` (Block, Optional) (see [below for nested schema](#nestedblock--resources--dedicated_keeper))
+- `clickhouse` (Block, Optional) Resources available to ClickHouse hosts (see [below for nested schema](#nestedblock--resources--clickhouse))
+- `dedicated_keeper` (Block, Optional) Resources available to dedicated ClickHouse Keeper hosts (see [below for nested schema](#nestedblock--resources--dedicated_keeper))
 
 <a id="nestedblock--resources--clickhouse"></a>
 ### Nested Schema for `resources.clickhouse`
@@ -188,7 +188,7 @@ Optional:
 Optional:
 
 - `disk_size` (Number) Storage volume available to a host in bytes
-- `max_disk_size` (Number) Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled
+- `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
 - `replica_count` (Number) Number of hosts per shard
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
 - `shard_count` (Number) Number of shards in the cluster
@@ -200,7 +200,7 @@ Optional:
 Optional:
 
 - `disk_size` (Number) Volume of the storage available to a host in bytes
-- `max_disk_size` (Number) Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled
+- `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
 - `replica_count` (Number) Number of keeper hosts
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
 

@@ -158,7 +158,7 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
-								MarkdownDescription: "Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled",
+								MarkdownDescription: "Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled",
 							},
 							"broker_count": schema.Int64Attribute{
 								Required:            true,

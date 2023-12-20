@@ -87,7 +87,7 @@ func transferEndpointMysqlSourceSchema() schema.Block {
 				Optional:    true,
 			},
 			"timezone": schema.StringAttribute{
-				MarkdownDescription: "Is used for parsing timestamps for saving source timezones. Accepts values from IANA timezone database. Default: local timezone.",
+				MarkdownDescription: "Used for parsing timestamps for saving source timezones. Accepts values from the IANA timezone database. Default is the local timezone.",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -187,7 +187,7 @@ func transferEndpointMysqlTargetSchema() schema.Block {
 				},
 			},
 			"timezone": schema.StringAttribute{
-				MarkdownDescription: "Is used for parsing timestamps for saving source timezones. Accepts values from IANA timezone database. Default: local timezone.",
+				MarkdownDescription: "Used for parsing timestamps for saving source timezones. Accepts values from the IANA timezone database. Default is the local timezone.",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{

@@ -103,15 +103,15 @@ Required:
 Required:
 
 - `account_id` (String) ID of the VPC owner account
-- `ipv4_cidr_block` (String) Customer IPv4 CIDR block.
-DoubleCloud will create route to this CIDR using Peering Connection.
+- `ipv4_cidr_block` (String) Customer's IPv4 CIDR block.
+    DoubleCloud will create a route to this CIDR using the Peering Connection.
 - `region_id` (String) AWS region ID
 - `vpc_id` (String) VPC ID
 
 Optional:
 
-- `ipv6_cidr_block` (String) Customer IPv6 CIDR block.
-DoubleCloud will create route to this CIDR using Peering Connection.
+- `ipv6_cidr_block` (String) Customer's IPv6 CIDR block.
+    DoubleCloud will create a route to this CIDR using the Peering Connection.
 
 Read-Only:
 
@@ -133,6 +133,6 @@ Required:
 
 Read-Only:
 
-- `managed_network_url` (String) The URL of the managed GCP network
+- `managed_network_url` (String) URL of the managed GCP network
 
 

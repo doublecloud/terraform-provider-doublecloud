@@ -113,7 +113,7 @@ var (
 							},
 							"ipv4_cidr_block": resourceschema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "Customer IPv4 CIDR block.\nDoubleCloud will create route to this CIDR using Peering Connection.",
+								MarkdownDescription: "Customer's IPv4 CIDR block.\n    DoubleCloud will create a route to this CIDR using the Peering Connection.",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
@@ -121,7 +121,7 @@ var (
 							"ipv6_cidr_block": resourceschema.StringAttribute{
 								Optional:            true,
 								Computed:            true,
-								MarkdownDescription: "Customer IPv6 CIDR block.\nDoubleCloud will create route to this CIDR using Peering Connection.",
+								MarkdownDescription: "Customer's IPv6 CIDR block.\n    DoubleCloud will create a route to this CIDR using the Peering Connection.",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
@@ -178,7 +178,7 @@ var (
 					},
 					"managed_network_url": resourceschema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "The URL of the managed GCP network",
+						MarkdownDescription: "URL of the managed GCP network",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},

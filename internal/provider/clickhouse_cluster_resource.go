@@ -358,7 +358,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
-								MarkdownDescription: "Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled",
+								MarkdownDescription: "Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
@@ -373,6 +373,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 								MarkdownDescription: "Number of shards in the cluster",
 							},
 						},
+						MarkdownDescription: "Resources available to ClickHouse hosts",
 					},
 					"dedicated_keeper": schema.SingleNestedBlock{
 						Attributes: map[string]schema.Attribute{
@@ -387,7 +388,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
-								MarkdownDescription: "Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled",
+								MarkdownDescription: "Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
@@ -396,8 +397,10 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 								MarkdownDescription: "Number of keeper hosts",
 							},
 						},
+						MarkdownDescription: "Resources available to dedicated ClickHouse Keeper hosts",
 					},
 				},
+				MarkdownDescription: "Cluster resources",
 			},
 			"access": AccessSchemaBlock(),
 			"config": clickhouseConfigSchemaBlock(),
