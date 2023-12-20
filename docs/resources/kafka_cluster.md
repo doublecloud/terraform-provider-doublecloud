@@ -58,7 +58,7 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 
 ### Optional
 
-- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
+- `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
 - `description` (String) Cluster description
 - `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
 - `schema_registry` (Block, Optional) Schema Registry configuration (see [below for nested schema](#nestedblock--schema_registry))
@@ -123,7 +123,7 @@ Required:
 
 Optional:
 
-- `max_disk_size` (Number) Maximum storage volume the cluster can autoscale in bytes. If not set, autoscaling is disabled
+- `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
 
 
 

@@ -162,6 +162,7 @@ func AccessSchemaBlock() schema.Block {
 				MarkdownDescription: "IPv6 CIDR blocks",
 			},
 		},
+		MarkdownDescription: "Access control configuration",
 	}
 }
 

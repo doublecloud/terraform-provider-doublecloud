@@ -739,7 +739,7 @@ Optional:
 - `object_transfer_settings` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source--object_transfer_settings))
 - `password` (String, Sensitive) Database user password
 - `service_database` (String) Service database name
-- `timezone` (String) Is used for parsing timestamps for saving source timezones. Accepts values from IANA timezone database. Default: local timezone.
+- `timezone` (String) Used for parsing timestamps for saving source timezones. Accepts values from the IANA timezone database. Default is the local timezone.
 - `user` (String) Database user
 
 <a id="nestedblock--settings--mysql_source--connection"></a>
@@ -792,7 +792,7 @@ Optional:
 - `service_database` (String) Database schema for the service table
 - `skip_constraint_checks` (Boolean) Disable constraint checks
 - `sql_mode` (String) SQL mode
-- `timezone` (String) Is used for parsing timestamps for saving source timezones. Accepts values from IANA timezone database. Default: local timezone.
+- `timezone` (String) Used for parsing timestamps for saving source timezones. Accepts values from the IANA timezone database. Default is the local timezone.
 - `user` (String) Database user
 
 <a id="nestedblock--settings--mysql_target--connection"></a>
