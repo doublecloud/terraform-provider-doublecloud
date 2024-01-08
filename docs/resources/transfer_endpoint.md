@@ -57,17 +57,17 @@ resource "doublecloud_transfer_endpoint" "sample-pg2ch-target" {
 
 ### Required
 
-- `name` (String) Name of endpoint
-- `project_id` (String) Project identifier
+- `name` (String) Endpoint name
+- `project_id` (String) Project ID
 
 ### Optional
 
-- `description` (String) Description of endpoint
+- `description` (String) Endpoint description
 - `settings` (Block, Optional) Settings (see [below for nested schema](#nestedblock--settings))
 
 ### Read-Only
 
-- `id` (String) Transfer endpoint id
+- `id` (String) Transfer endpoint ID
 
 <a id="nestedblock--settings"></a>
 ### Nested Schema for `settings`
@@ -111,8 +111,8 @@ Optional:
 Optional:
 
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source--connection))
-- `exclude_tables` (List of String)
-- `include_tables` (List of String)
+- `exclude_tables` (List of String) List of tables to exclude
+- `include_tables` (List of String) List of tables to include
 
 <a id="nestedblock--settings--clickhouse_source--connection"></a>
 ### Nested Schema for `settings.clickhouse_source.connection`
@@ -120,16 +120,16 @@ Optional:
 Optional:
 
 - `address` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source--connection--address))
-- `database` (String)
-- `password` (String, Sensitive)
-- `user` (String)
+- `database` (String) Database
+- `password` (String, Sensitive) Database user password
+- `user` (String) Database user
 
 <a id="nestedblock--settings--clickhouse_source--connection--address"></a>
 ### Nested Schema for `settings.clickhouse_source.connection.address`
 
 Optional:
 
-- `cluster_id` (String)
+- `cluster_id` (String) Cluster ID
 - `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source--connection--address--on_premise))
 
 <a id="nestedblock--settings--clickhouse_source--connection--address--on_premise"></a>
@@ -137,8 +137,8 @@ Optional:
 
 Optional:
 
-- `http_port` (Number)
-- `native_port` (Number)
+- `http_port` (Number) HTTP port
+- `native_port` (Number) Native port
 - `shard` (Block List) (see [below for nested schema](#nestedblock--settings--clickhouse_source--connection--address--on_premise--shard))
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source--connection--address--on_premise--tls_mode))
 
@@ -147,8 +147,8 @@ Optional:
 
 Optional:
 
-- `hosts` (List of String)
-- `name` (String)
+- `hosts` (List of String) List of hosts
+- `name` (String) Name
 
 
 <a id="nestedblock--settings--clickhouse_source--connection--address--on_premise--tls_mode"></a>
@@ -169,8 +169,8 @@ Optional:
 Optional:
 
 - `alt_name` (Block List) (see [below for nested schema](#nestedblock--settings--clickhouse_target--alt_name))
-- `clickhouse_cleanup_policy` (String)
-- `clickhouse_cluster_name` (String) clickhouse_cluster_name
+- `clickhouse_cleanup_policy` (String) ClickHouse cleanup policy
+- `clickhouse_cluster_name` (String) ClickHouse cluster name
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target--connection))
 
 <a id="nestedblock--settings--clickhouse_target--alt_name"></a>
@@ -188,16 +188,16 @@ Optional:
 Optional:
 
 - `address` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target--connection--address))
-- `database` (String)
-- `password` (String, Sensitive)
-- `user` (String)
+- `database` (String) Database
+- `password` (String, Sensitive) Database user password
+- `user` (String) Database user
 
 <a id="nestedblock--settings--clickhouse_target--connection--address"></a>
 ### Nested Schema for `settings.clickhouse_target.connection.address`
 
 Optional:
 
-- `cluster_id` (String)
+- `cluster_id` (String) Cluster ID
 - `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target--connection--address--on_premise))
 
 <a id="nestedblock--settings--clickhouse_target--connection--address--on_premise"></a>
@@ -205,8 +205,8 @@ Optional:
 
 Optional:
 
-- `http_port` (Number)
-- `native_port` (Number)
+- `http_port` (Number) HTTP port
+- `native_port` (Number) Native port
 - `shard` (Block List) (see [below for nested schema](#nestedblock--settings--clickhouse_target--connection--address--on_premise--shard))
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target--connection--address--on_premise--tls_mode))
 
@@ -215,8 +215,8 @@ Optional:
 
 Optional:
 
-- `hosts` (List of String)
-- `name` (String)
+- `hosts` (List of String) List of hosts
+- `name` (String) Name
 
 
 <a id="nestedblock--settings--clickhouse_target--connection--address--on_premise--tls_mode"></a>
@@ -252,7 +252,7 @@ Optional:
 - `action_breakdowns` (List of String) `action_breakdowns` request parameter
 - `breakdowns` (List of String) `breakdowns` request parameter
 - `fields` (List of String) `fields` request parameter
-- `name` (String) The name of the insight
+- `name` (String) Insight name
 
 
 
@@ -261,24 +261,24 @@ Optional:
 
 Optional:
 
-- `conversion_window_days` (Number)
+- `conversion_window_days` (Number) Conversion window in days
 - `credentials` (Block, Optional) (see [below for nested schema](#nestedblock--settings--googleads_source--credentials))
-- `custom_queries` (Attributes List) (see [below for nested schema](#nestedatt--settings--googleads_source--custom_queries))
-- `customer_id` (String)
-- `end_date` (String)
-- `login_customer_id` (String)
-- `start_date` (String)
+- `custom_queries` (Attributes List) Custom queries (see [below for nested schema](#nestedatt--settings--googleads_source--custom_queries))
+- `customer_id` (String) Customer ID
+- `end_date` (String) End date
+- `login_customer_id` (String) Login customer ID
+- `start_date` (String) Start date
 
 <a id="nestedblock--settings--googleads_source--credentials"></a>
 ### Nested Schema for `settings.googleads_source.credentials`
 
 Optional:
 
-- `access_token` (String)
-- `client_id` (String)
-- `client_secret` (String)
-- `developer_token` (String)
-- `refresh_token` (String)
+- `access_token` (String) Access token
+- `client_id` (String) Client ID
+- `client_secret` (String) Client secret
+- `developer_token` (String) Developer token
+- `refresh_token` (String) Refresh token
 
 
 <a id="nestedatt--settings--googleads_source--custom_queries"></a>
@@ -286,8 +286,8 @@ Optional:
 
 Optional:
 
-- `query` (String)
-- `table_name` (String)
+- `query` (String) Query
+- `table_name` (String) Table name
 
 
 
@@ -296,13 +296,13 @@ Optional:
 
 Optional:
 
-- `api_token` (String, Sensitive)
-- `domain` (String)
-- `email` (String)
-- `enable_experimental_streams` (Boolean)
+- `api_token` (String, Sensitive) API token
+- `domain` (String) Domain
+- `email` (String) Email
+- `enable_experimental_streams` (Boolean) Enable experimental streams
 - `issues_stream_expand_with` (List of String)
-- `projects` (List of String)
-- `start_date` (String)
+- `projects` (List of String) Projects
+- `start_date` (String) Start date
 
 
 <a id="nestedblock--settings--kafka_source"></a>
@@ -333,8 +333,8 @@ Optional:
 Optional:
 
 - `mechanism` (String)
-- `password` (String, Sensitive)
-- `user` (String)
+- `password` (String, Sensitive) Password
+- `user` (String) User
 
 
 
@@ -377,8 +377,8 @@ Optional:
 
 Optional:
 
-- `add_rest_column` (Boolean)
-- `null_keys_allowed` (Boolean)
+- `add_rest_column` (Boolean) Add the `_rest` column for all unknown fields
+- `null_keys_allowed` (Boolean) Allow null keys. If false, null keys are put to unparsed data
 - `schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json--schema))
 
 <a id="nestedblock--settings--kafka_source--parser--json--schema"></a>
@@ -414,7 +414,7 @@ Optional:
 
 Optional:
 
-- `fields` (String)
+- `fields` (String) Fields
 
 
 
@@ -424,8 +424,8 @@ Optional:
 
 Optional:
 
-- `add_rest_column` (Boolean)
-- `null_keys_allowed` (Boolean)
+- `add_rest_column` (Boolean) Add the `_rest` column for all unknown fields
+- `null_keys_allowed` (Boolean) Allow null keys. If false, null keys are put to unparsed data
 - `schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv--schema))
 
 <a id="nestedblock--settings--kafka_source--parser--tskv--schema"></a>
@@ -461,7 +461,7 @@ Optional:
 
 Optional:
 
-- `fields` (String)
+- `fields` (String) Fields
 
 
 
@@ -496,8 +496,8 @@ Optional:
 Optional:
 
 - `mechanism` (String)
-- `password` (String, Sensitive)
-- `user` (String)
+- `password` (String, Sensitive) Password
+- `user` (String) User
 
 
 
@@ -533,8 +533,8 @@ Optional:
 Optional:
 
 - `auto` (Block, Optional) Select the serialization format automatically (see [below for nested schema](#nestedblock--settings--kafka_target--serializer--auto))
-- `debezium` (Block, Optional) Serialize data in json format (see [below for nested schema](#nestedblock--settings--kafka_target--serializer--debezium))
-- `json` (Block, Optional) Serialize data in json format (see [below for nested schema](#nestedblock--settings--kafka_target--serializer--json))
+- `debezium` (Block, Optional) Serialize data in the JSON format (see [below for nested schema](#nestedblock--settings--kafka_target--serializer--debezium))
+- `json` (Block, Optional) Serialize data in the JSON format (see [below for nested schema](#nestedblock--settings--kafka_target--serializer--json))
 
 <a id="nestedblock--settings--kafka_target--serializer--auto"></a>
 ### Nested Schema for `settings.kafka_target.serializer.auto`
@@ -552,8 +552,8 @@ Optional:
 
 Optional:
 
-- `key` (String)
-- `value` (String)
+- `key` (String) Key
+- `value` (String) Value
 
 
 
@@ -596,9 +596,9 @@ Required:
 
 Optional:
 
-- `account_ids` (List of Number) Account IDs separated by space, to pull the data from. Leave empty, if you want to pull the data from all associated accounts
+- `account_ids` (List of Number) Space-separated account IDs to pull the data from. Leave empty if you want to pull data from all the associated accounts
 - `credentials` (Block, Optional) Authentication method (see [below for nested schema](#nestedblock--settings--linkedinads_source--credentials))
-- `start_date` (String) UTC date in the format YYYY-MM-DD. Any data before this date will not be replicated. Example: 2021-05-17
+- `start_date` (String) UTC date in the `YYYY-MM-DD` format. Any data before this date will not be replicated
 
 <a id="nestedblock--settings--linkedinads_source--credentials"></a>
 ### Nested Schema for `settings.linkedinads_source.credentials`
@@ -613,7 +613,7 @@ Optional:
 
 Optional:
 
-- `access_token` (String, Sensitive)
+- `access_token` (String, Sensitive) Access token
 
 
 <a id="nestedblock--settings--linkedinads_source--credentials--oauth"></a>
@@ -621,9 +621,9 @@ Optional:
 
 Optional:
 
-- `client_id` (String, Sensitive) The Client ID of the LinkedIn Ads developer application
-- `client_secret` (String, Sensitive) The Client Secret for the LinkedIn Ads developer application
-- `refresh_token` (String, Sensitive) The key to refresh the expired access token
+- `client_id` (String, Sensitive) Client ID of the LinkedIn Ads developer application
+- `client_secret` (String, Sensitive) Client Secret for the LinkedIn Ads developer application
+- `refresh_token` (String, Sensitive) Key to refresh the expired access token
 
 
 
@@ -636,15 +636,15 @@ Optional:
 - `collection` (Block List) (see [below for nested schema](#nestedblock--settings--mongo_source--collection))
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection))
 - `excluded_collection` (Block List) (see [below for nested schema](#nestedblock--settings--mongo_source--excluded_collection))
-- `secondary_preferred_mode` (Boolean) Read mode for mongo client
+- `secondary_preferred_mode` (Boolean) Read mode of the MongoDB client
 
 <a id="nestedblock--settings--mongo_source--collection"></a>
 ### Nested Schema for `settings.mongo_source.collection`
 
 Optional:
 
-- `collection_name` (String)
-- `database_name` (String)
+- `collection_name` (String) Collection name
+- `database_name` (String) Database name
 
 
 <a id="nestedblock--settings--mongo_source--connection"></a>
@@ -652,19 +652,19 @@ Optional:
 
 Optional:
 
-- `auth_source` (String)
+- `auth_source` (String) Authentication database associated with the user
 - `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--on_premise))
-- `password` (String, Sensitive)
-- `user` (String)
+- `password` (String, Sensitive) Database user password
+- `user` (String) Database user
 
 <a id="nestedblock--settings--mongo_source--connection--on_premise"></a>
 ### Nested Schema for `settings.mongo_source.connection.on_premise`
 
 Optional:
 
-- `hosts` (List of String)
-- `port` (Number)
-- `replica_set` (String)
+- `hosts` (List of String) List of hosts
+- `port` (Number) Port
+- `replica_set` (String) Replica set
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--on_premise--tls_mode))
 
 <a id="nestedblock--settings--mongo_source--connection--on_premise--tls_mode"></a>
@@ -682,8 +682,8 @@ Optional:
 
 Optional:
 
-- `collection_name` (String)
-- `database_name` (String)
+- `collection_name` (String) Collection name
+- `database_name` (String) Database name
 
 
 
@@ -692,28 +692,28 @@ Optional:
 
 Optional:
 
-- `cleanup_policy` (String)
+- `cleanup_policy` (String) Cleanup policy
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection))
-- `database` (String)
+- `database` (String) Database
 
 <a id="nestedblock--settings--mongo_target--connection"></a>
 ### Nested Schema for `settings.mongo_target.connection`
 
 Optional:
 
-- `auth_source` (String)
+- `auth_source` (String) Authentication database associated with the user
 - `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--on_premise))
-- `password` (String, Sensitive)
-- `user` (String)
+- `password` (String, Sensitive) Database user password
+- `user` (String) Database user
 
 <a id="nestedblock--settings--mongo_target--connection--on_premise"></a>
 ### Nested Schema for `settings.mongo_target.connection.on_premise`
 
 Optional:
 
-- `hosts` (List of String)
-- `port` (Number)
-- `replica_set` (String)
+- `hosts` (List of String) List of hosts
+- `port` (Number) Port
+- `replica_set` (String) Replica set
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--on_premise--tls_mode))
 
 <a id="nestedblock--settings--mongo_target--connection--on_premise--tls_mode"></a>
@@ -737,10 +737,10 @@ Optional:
 - `exclude_tables_regex` (List of String)
 - `include_tables_regex` (List of String)
 - `object_transfer_settings` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source--object_transfer_settings))
-- `password` (String, Sensitive) Password for database access.
-- `service_database` (String) Database name
-- `timezone` (String) Is used for parsing timestamps for saving source timezones. Accepts values from IANA timezone database. Default: local timezone.
-- `user` (String) User for database access
+- `password` (String, Sensitive) Database user password
+- `service_database` (String) Service database name
+- `timezone` (String) Used for parsing timestamps for saving source timezones. Accepts values from the IANA timezone database. Default is the local timezone.
+- `user` (String) Database user
 
 <a id="nestedblock--settings--mysql_source--connection"></a>
 ### Nested Schema for `settings.mysql_source.connection`
@@ -754,8 +754,8 @@ Optional:
 
 Optional:
 
-- `hosts` (List of String) List of mysql hosts
-- `port` (Number) Port of mysql
+- `hosts` (List of String) List of MySQL hosts
+- `port` (Number) MySQL port
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source--connection--on_premise--tls_mode))
 
 <a id="nestedblock--settings--mysql_source--connection--on_premise--tls_mode"></a>
@@ -785,15 +785,15 @@ Optional:
 
 Optional:
 
-- `cleanup_policy` (String) Cleanup policy for activate, reactivate and reupload processes. Default is truncate.
+- `cleanup_policy` (String) Cleanup policy for activating, reactivating, and reuploading processes. Default is `truncate`.
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_target--connection))
 - `database` (String) Database name
-- `password` (String, Sensitive) Password for database access.
-- `service_database` (String) Database schema for service table
-- `skip_constraint_checks` (Boolean) Disable constraints checks
-- `sql_mode` (String)
-- `timezone` (String) Is used for parsing timestamps for saving source timezones. Accepts values from IANA timezone database. Default: local timezone.
-- `user` (String) User for database access
+- `password` (String, Sensitive) Database user password
+- `service_database` (String) Database schema for the service table
+- `skip_constraint_checks` (Boolean) Disable constraint checks
+- `sql_mode` (String) SQL mode
+- `timezone` (String) Used for parsing timestamps for saving source timezones. Accepts values from the IANA timezone database. Default is the local timezone.
+- `user` (String) Database user
 
 <a id="nestedblock--settings--mysql_target--connection"></a>
 ### Nested Schema for `settings.mysql_target.connection`
@@ -807,8 +807,8 @@ Optional:
 
 Optional:
 
-- `hosts` (List of String) List of postgres hosts
-- `port` (Number) Port of postgres
+- `hosts` (List of String) List of PostgreSQL hosts
+- `port` (Number) Port of the PostgreSQL instance
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_target--connection--on_premise--tls_mode))
 
 <a id="nestedblock--settings--mysql_target--connection--on_premise--tls_mode"></a>
@@ -829,7 +829,7 @@ Optional:
 
 - `event_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--event_source))
 - `format` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format))
-- `path_pattern` (String)
+- `path_pattern` (String) Path pattern
 - `provider` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--provider))
 - `result_schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_schema))
 - `result_table` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--result_table))
@@ -856,12 +856,12 @@ Optional:
 
 Optional:
 
-- `aws_access_key_id` (String, Sensitive)
-- `aws_secret_access_key` (String, Sensitive)
-- `endpoint` (String)
-- `owner_id` (String)
-- `queue_name` (String)
-- `region` (String)
+- `aws_access_key_id` (String, Sensitive) Access key ID
+- `aws_secret_access_key` (String, Sensitive) Secret access key
+- `endpoint` (String) Endpoint. Leave blank if you're using AWS
+- `owner_id` (String) Owner ID
+- `queue_name` (String) Queue name
+- `region` (String) Region
 - `use_ssl` (Boolean)
 - `verify_ssl_cert` (Boolean)
 
@@ -888,13 +888,13 @@ Optional:
 
 - `additional_options` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--csv--additional_options))
 - `advanced_options` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source--format--csv--advanced_options))
-- `block_size` (Number)
-- `delimiter` (String)
-- `double_quote` (Boolean)
-- `encoding` (String)
-- `escape_char` (String)
-- `newlines_in_values` (Boolean)
-- `quote_char` (String)
+- `block_size` (Number) Block size
+- `delimiter` (String) Delimiter
+- `double_quote` (Boolean) Replace double quotes with single quotes
+- `encoding` (String) Encoding
+- `escape_char` (String) Escape character
+- `newlines_in_values` (Boolean) Allow newline characters in values
+- `quote_char` (String) Quote character
 
 <a id="nestedblock--settings--object_storage_source--format--csv--additional_options"></a>
 ### Nested Schema for `settings.object_storage_source.format.csv.additional_options`
@@ -917,10 +917,10 @@ Optional:
 
 Optional:
 
-- `autogenerate_column_names` (Boolean)
-- `column_names` (List of String)
-- `skip_rows` (Number)
-- `skip_rows_after_names` (Number)
+- `autogenerate_column_names` (Boolean) Autogenerate column names
+- `column_names` (List of String) Names of columns to transfer
+- `skip_rows` (Number) Number of rows to skip before the column names
+- `skip_rows_after_names` (Number) Number of rows to skip after the column names
 
 
 
@@ -929,8 +929,8 @@ Optional:
 
 Optional:
 
-- `block_size` (Number)
-- `newlines_in_values` (Boolean)
+- `block_size` (Number) Block size
+- `newlines_in_values` (Boolean) Allow newline characters in values
 - `unexpected_field_behavior` (String)
 
 
@@ -944,12 +944,12 @@ Optional:
 
 Optional:
 
-- `aws_access_key_id` (String, Sensitive)
-- `aws_secret_access_key` (String, Sensitive)
-- `bucket` (String)
-- `endpoint` (String)
-- `path_prefix` (String)
-- `region` (String)
+- `aws_access_key_id` (String, Sensitive) Access key ID
+- `aws_secret_access_key` (String, Sensitive) Secret access key
+- `bucket` (String) Bucket
+- `endpoint` (String) Endpoint
+- `path_prefix` (String) Path prefix
+- `region` (String) Region
 - `use_ssl` (Boolean)
 - `verify_ssl_cert` (Boolean)
 
@@ -995,7 +995,7 @@ Optional:
 
 Optional:
 
-- `json_fields` (String)
+- `json_fields` (String) JSON field
 
 
 
@@ -1009,9 +1009,9 @@ Optional:
 
 Optional:
 
-- `add_system_cols` (Boolean)
-- `table_name` (String)
-- `table_namespace` (String)
+- `add_system_cols` (Boolean) Add system columns
+- `table_name` (String) Table name
+- `table_namespace` (String) Table namespace
 
 
 
@@ -1020,27 +1020,27 @@ Optional:
 
 Optional:
 
-- `bucket` (String)
-- `bucket_layout` (String)
-- `bucket_layout_column` (String)
-- `bucket_layout_timezone` (String)
-- `buffer_interval` (String)
-- `buffer_size` (String)
+- `bucket` (String) Target bucket
+- `bucket_layout` (String) Bucket layout
+- `bucket_layout_column` (String) Bucket layout column
+- `bucket_layout_timezone` (String) Bucket layout timezone
+- `buffer_interval` (String) Buffer interval
+- `buffer_size` (String) Buffer size
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_target--connection))
-- `output_encoding` (String)
+- `output_encoding` (String) Output encoding
 - `output_format` (String)
 - `serializer_config` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_target--serializer_config))
-- `service_account_id` (String)
+- `service_account_id` (String) Service account ID
 
 <a id="nestedblock--settings--object_storage_target--connection"></a>
 ### Nested Schema for `settings.object_storage_target.connection`
 
 Optional:
 
-- `aws_access_key_id` (String)
-- `aws_secret_access_key` (String)
-- `endpoint` (String)
-- `region` (String)
+- `aws_access_key_id` (String) Access key ID
+- `aws_secret_access_key` (String) Secret access key
+- `endpoint` (String) Endpoint
+- `region` (String) Region
 - `use_ssl` (Boolean)
 - `verify_ssl_cert` (Boolean)
 
@@ -1061,13 +1061,13 @@ Optional:
 
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source--connection))
 - `database` (String) Database name
-- `exclude_tables` (List of String)
-- `include_tables` (List of String) If none or empty list is presented, all tables are replicated. Full table name with schema. Can contain schema_name.* patterns.
+- `exclude_tables` (List of String) List of tables to be excluded from replication
+- `include_tables` (List of String) List of tables to be replicated. Table names must be full and contain schemas. Can contain `schema_name.*` patterns. If the setting isn't specified or contains an empty list, all tables are replicated
 - `object_transfer_settings` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source--object_transfer_settings))
-- `password` (String, Sensitive) Password for database access.
-- `service_schema` (String) Database schema for service tables (__consumer_keeper, __data_transfer_mole_finder). Default is public
-- `slot_byte_lag_limit` (Number) Maximum lag of replication slot (in bytes); after exceeding this limit replication will be aborted.
-- `user` (String) User for database access
+- `password` (String, Sensitive) Database user password
+- `service_schema` (String) Database schema for service tables (`__consumer_keeper` and `__data_transfer_mole_finder`). Default is `public`
+- `slot_byte_lag_limit` (Number) Maximum lag of replication slots (in bytes). When this limit is exceeded,replication is aborted
+- `user` (String) Database user
 
 <a id="nestedblock--settings--postgres_source--connection"></a>
 ### Nested Schema for `settings.postgres_source.connection`
@@ -1081,8 +1081,8 @@ Optional:
 
 Optional:
 
-- `hosts` (List of String) List of postgres hosts
-- `port` (Number) Port of postgres
+- `hosts` (List of String) List of PostgreSQL hosts
+- `port` (Number) Port of the PostgreSQL instance
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source--connection--on_premise--tls_mode))
 
 <a id="nestedblock--settings--postgres_source--connection--on_premise--tls_mode"></a>
@@ -1126,11 +1126,11 @@ Optional:
 
 Optional:
 
-- `cleanup_policy` (String) Cleanup policy for activate, reactivate and reupload processes. Default is truncate.
+- `cleanup_policy` (String) Cleanup policy for activating, reactivating, and reuploading processes. Default is `truncate`
 - `connection` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_target--connection))
 - `database` (String) Database name
-- `password` (String, Sensitive) Password for database access.
-- `user` (String) User for database access
+- `password` (String, Sensitive) Database user password
+- `user` (String) Database user
 
 <a id="nestedblock--settings--postgres_target--connection"></a>
 ### Nested Schema for `settings.postgres_target.connection`
@@ -1144,8 +1144,8 @@ Optional:
 
 Optional:
 
-- `hosts` (List of String) List of postgres hosts
-- `port` (Number) Port of postgres
+- `hosts` (List of String) List of PostgreSQL hosts
+- `port` (Number) Port of the PostgreSQL instance
 - `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_target--connection--on_premise--tls_mode))
 
 <a id="nestedblock--settings--postgres_target--connection--on_premise--tls_mode"></a>
@@ -1164,11 +1164,11 @@ Optional:
 
 Optional:
 
-- `dataset` (String)
+- `dataset` (String) Dataset
 - `format` (Block, Optional) (see [below for nested schema](#nestedblock--settings--s3_source--format))
-- `path_pattern` (String)
+- `path_pattern` (String) Path pattern
 - `provider` (Block, Optional) (see [below for nested schema](#nestedblock--settings--s3_source--provider))
-- `schema` (String)
+- `schema` (String) Schema
 
 <a id="nestedblock--settings--s3_source--format"></a>
 ### Nested Schema for `settings.s3_source.format`
@@ -1190,14 +1190,14 @@ Optional:
 Optional:
 
 - `additional_reader_options` (String)
-- `advanced_options` (String)
-- `block_size` (Number)
-- `delimiter` (String)
-- `double_quote` (Boolean)
+- `advanced_options` (String) Advanced options
+- `block_size` (Number) Block size
+- `delimiter` (String) Delimiter
+- `double_quote` (Boolean) Replace double quotes with single quotes
 - `encoding` (String)
-- `escape_char` (String)
-- `newlines_in_values` (Boolean)
-- `quote_char` (String)
+- `escape_char` (String) Escape character
+- `newlines_in_values` (Boolean) Allow newline characters in values
+- `quote_char` (String) Quote character
 
 
 <a id="nestedblock--settings--s3_source--format--jsonl"></a>
@@ -1205,8 +1205,8 @@ Optional:
 
 Optional:
 
-- `block_size` (Number)
-- `newlines_in_values` (Boolean)
+- `block_size` (Number) Block size
+- `newlines_in_values` (Boolean) Allow newline characters in values
 - `unexpected_field_behavior` (String)
 
 
@@ -1215,9 +1215,9 @@ Optional:
 
 Optional:
 
-- `batch_size` (Number)
-- `buffer_size` (Number)
-- `columns` (List of String)
+- `batch_size` (Number) Batch size
+- `buffer_size` (Number) Buffer size
+- `columns` (List of String) List of columns
 
 
 
@@ -1226,11 +1226,11 @@ Optional:
 
 Optional:
 
-- `aws_access_key_id` (String)
-- `aws_secret_access_key` (String)
-- `bucket` (String)
-- `endpoint` (String)
-- `path_prefix` (String)
+- `aws_access_key_id` (String) Access key ID
+- `aws_secret_access_key` (String) Secret access key
+- `bucket` (String) Bucket
+- `endpoint` (String) Endpoint
+- `path_prefix` (String) Path prefix
 - `use_ssl` (Boolean)
 - `verify_ssl_cert` (Boolean)
 
@@ -1242,12 +1242,12 @@ Optional:
 Optional:
 
 - `credentials` (Block, Optional) (see [below for nested schema](#nestedblock--settings--snowflake_source--credentials))
-- `database` (String)
-- `host` (String)
-- `jdbc_url_params` (String)
-- `role` (String)
-- `schema` (String)
-- `warehouse` (String)
+- `database` (String) Database
+- `host` (String) Host
+- `jdbc_url_params` (String) JDBC URL parameters
+- `role` (String) Role
+- `schema` (String) Schema
+- `warehouse` (String) Warehouse
 
 <a id="nestedblock--settings--snowflake_source--credentials"></a>
 ### Nested Schema for `settings.snowflake_source.credentials`
@@ -1262,8 +1262,8 @@ Optional:
 
 Optional:
 
-- `password` (String, Sensitive)
-- `username` (String)
+- `password` (String, Sensitive) Password
+- `username` (String) Username
 
 
 <a id="nestedblock--settings--snowflake_source--credentials--oauth"></a>
@@ -1271,9 +1271,9 @@ Optional:
 
 Optional:
 
-- `access_token` (String, Sensitive)
-- `client_id` (String, Sensitive)
-- `client_secret` (String, Sensitive)
-- `refresh_token` (String, Sensitive)
+- `access_token` (String, Sensitive) Access token
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client secret
+- `refresh_token` (String, Sensitive) Refresh token
 
 

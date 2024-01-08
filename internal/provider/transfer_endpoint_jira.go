@@ -28,17 +28,40 @@ type endpointJiraSourceSettings struct {
 func endpointJiraSourceSettingsSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"api_token":  schema.StringAttribute{Optional: true, Sensitive: true},
-			"domain":     schema.StringAttribute{Optional: true},
-			"email":      schema.StringAttribute{Optional: true},
-			"projects":   schema.ListAttribute{ElementType: types.StringType, Optional: true},
-			"start_date": schema.StringAttribute{Optional: true},
-			"issues_stream_expand_with": schema.ListAttribute{
-				ElementType: types.StringType,
-				Optional:    true,
-				Validators:  []validator.List{listvalidator.ValueStringsAre(stringvalidator.OneOf(transferEndpointJiraSourceIssuesStreamExpandWithOneofValues()...))},
+			"api_token": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "API token",
 			},
-			"enable_experimental_streams": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
+			"domain": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Domain",
+			},
+			"email": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Email",
+			},
+			"projects": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				MarkdownDescription: "Projects",
+			},
+			"start_date": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Start date",
+			},
+			"issues_stream_expand_with": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				Validators:          []validator.List{listvalidator.ValueStringsAre(stringvalidator.OneOf(transferEndpointJiraSourceIssuesStreamExpandWithOneofValues()...))},
+				MarkdownDescription: "",
+			},
+			"enable_experimental_streams": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+				MarkdownDescription: "Enable experimental streams",
+			},
 		},
 	}
 }

@@ -73,30 +73,31 @@ func transferEndpointPostgresSourceSchema() schema.Block {
 				Optional:            true,
 			},
 			"user": schema.StringAttribute{
-				MarkdownDescription: "User for database access",
+				MarkdownDescription: "Database user",
 				Optional:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password for database access.",
+				MarkdownDescription: "Database user password",
 				Optional:            true,
 				Sensitive:           true,
 			},
 			"include_tables": schema.ListAttribute{
-				MarkdownDescription: "If none or empty list is presented, all tables are replicated. Full table name with schema. Can contain schema_name.* patterns.",
+				MarkdownDescription: "List of tables to be replicated. Table names must be full and contain schemas. Can contain `schema_name.*` patterns. If the setting isn't specified or contains an empty list, all tables are replicated",
 				ElementType:         types.StringType,
 				Optional:            true,
 			},
 			"exclude_tables": schema.ListAttribute{
-				ElementType: types.StringType,
-				Optional:    true,
+				ElementType:         types.StringType,
+				Optional:            true,
+				MarkdownDescription: "List of tables to be excluded from replication",
 			},
 			"slot_byte_lag_limit": schema.Int64Attribute{
-				MarkdownDescription: "Maximum lag of replication slot (in bytes); after exceeding this limit replication will be aborted.",
+				MarkdownDescription: "Maximum lag of replication slots (in bytes). When this limit is exceeded,replication is aborted",
 				Optional:            true,
 				Computed:            true,
 			},
 			"service_schema": schema.StringAttribute{
-				MarkdownDescription: "Database schema for service tables (__consumer_keeper, __data_transfer_mole_finder). Default is public",
+				MarkdownDescription: "Database schema for service tables (`__consumer_keeper` and `__data_transfer_mole_finder`). Default is `public`",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -114,12 +115,12 @@ func transferEndpointPostgresConnectionSchema() schema.Block {
 			"on_premise": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
 					"hosts": schema.ListAttribute{
-						MarkdownDescription: "List of postgres hosts",
+						MarkdownDescription: "List of PostgreSQL hosts",
 						ElementType:         types.StringType,
 						Optional:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: "Port of postgres",
+						MarkdownDescription: "Port of the PostgreSQL instance",
 						Optional:            true,
 					},
 				},
@@ -236,11 +237,11 @@ func transferEndpointPostgresTargetSchema() schema.Block {
 				Optional:            true,
 			},
 			"user": schema.StringAttribute{
-				MarkdownDescription: "User for database access",
+				MarkdownDescription: "Database user",
 				Optional:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password for database access.",
+				MarkdownDescription: "Database user password",
 				Optional:            true,
 				Sensitive:           true,
 			},
@@ -250,7 +251,7 @@ func transferEndpointPostgresTargetSchema() schema.Block {
 			// 	Optional:            true,
 			// },
 			"cleanup_policy": schema.StringAttribute{
-				MarkdownDescription: "Cleanup policy for activate, reactivate and reupload processes. Default is truncate.",
+				MarkdownDescription: "Cleanup policy for activating, reactivating, and reuploading processes. Default is `truncate`",
 				Optional:            true,
 				Computed:            true,
 				Validators:          []validator.String{transferEndpointCleanupPolicyValidator()},

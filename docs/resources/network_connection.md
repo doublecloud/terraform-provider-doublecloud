@@ -78,17 +78,17 @@ resource "aws_route" "ipv6" {
 
 ### Required
 
-- `network_id` (String) Network identifier
+- `network_id` (String) Network ID
 
 ### Optional
 
 - `aws` (Attributes) AWS connection info (see [below for nested schema](#nestedatt--aws))
-- `description` (String) Description of network connection
+- `description` (String) Network connection description
 - `google` (Attributes) Google Cloud connection info (see [below for nested schema](#nestedatt--google))
 
 ### Read-Only
 
-- `id` (String) Network Connection identifier
+- `id` (String) Network Connection ID
 
 <a id="nestedatt--aws"></a>
 ### Nested Schema for `aws`
@@ -103,15 +103,15 @@ Required:
 Required:
 
 - `account_id` (String) ID of the VPC owner account
-- `ipv4_cidr_block` (String) Customer IPv4 CIDR block.
-DoubleCloud will create route to this CIDR using Peering Connection.
-- `region_id` (String) ID of the AWS region
-- `vpc_id` (String) ID of the VPC
+- `ipv4_cidr_block` (String) Customer's IPv4 CIDR block.
+    DoubleCloud will create a route to this CIDR using the Peering Connection.
+- `region_id` (String) AWS region ID
+- `vpc_id` (String) VPC ID
 
 Optional:
 
-- `ipv6_cidr_block` (String) Customer IPv6 CIDR block.
-DoubleCloud will create route to this CIDR using Peering Connection.
+- `ipv6_cidr_block` (String) Customer's IPv6 CIDR block.
+    DoubleCloud will create a route to this CIDR using the Peering Connection.
 
 Read-Only:
 
@@ -129,10 +129,10 @@ Customer should create route to this CIDR using Peering Connection.
 Required:
 
 - `name` (String) Name of this peering
-- `peer_network_url` (String) The URL of the peer network
+- `peer_network_url` (String) Peer network URL
 
 Read-Only:
 
-- `managed_network_url` (String) The URL of the managed GCP network
+- `managed_network_url` (String) URL of the managed GCP network
 
 

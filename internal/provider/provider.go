@@ -75,7 +75,7 @@ func (p *DoubleCloudProvider) Schema(ctx context.Context, req provider.SchemaReq
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"authorized_key": schema.StringAttribute{
-				MarkdownDescription: "Path to authorized key",
+				MarkdownDescription: "Path to the authorized key",
 				Optional:            true,
 				Sensitive:           true,
 			},
@@ -84,7 +84,7 @@ func (p *DoubleCloudProvider) Schema(ctx context.Context, req provider.SchemaReq
 				Optional:            true,
 			},
 			"token_url": schema.StringAttribute{
-				MarkdownDescription: "URL for token resolver",
+				MarkdownDescription: "Token resolver URL",
 				Optional:            true,
 			},
 		},

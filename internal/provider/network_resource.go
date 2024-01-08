@@ -77,21 +77,21 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Network identifier",
+				MarkdownDescription: "Network ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"cloud_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Cloud type (aws, gcp, azure)",
+				MarkdownDescription: "Cloud provider (`aws`, `gcp`, or `azure`)",
 				Validators:          []validator.String{cloudTypeValidator()},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -99,7 +99,7 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of network",
+				MarkdownDescription: "Network name",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -107,7 +107,7 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description of network",
+				MarkdownDescription: "Network description",
 				Default:             stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -115,7 +115,7 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"region_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Region of network",
+				MarkdownDescription: "Network region",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -123,9 +123,9 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"ipv4_cidr_block": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
-				MarkdownDescription: "The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.\n" +
-					"Required for non BYOC networks.\n" +
-					"For BYOC it will be read from provided VPC (AWS) or Subnetwork (GCP).",
+				MarkdownDescription: "Subnet IPv4 network range in CIDR notation, such as `10.0.0.0/16`.\n" +
+					"    Required for non-BYOC networks.\n" +
+					"    For BYOC, it's read from the provided VPC (AWS) or Subnetwork (GCP).",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -138,32 +138,32 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"ipv6_cidr_block": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "The IPv6 network range for the subnet, it is known only after creation.",
+				MarkdownDescription: "Subnet IPv6 network rabge. Available only after the network is created.",
 			},
 			"is_external": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "True if network was imported using BYOC.",
+				MarkdownDescription: "True if the network was imported using BYOC.",
 			},
 			"aws": schema.SingleNestedAttribute{
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"vpc_id": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "ID of the VPC",
+						MarkdownDescription: "VPC ID",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
 					"account_id": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "ID of the VPC owner account",
+						MarkdownDescription: "VPC owner account ID",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
 					"iam_role_arn": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "IAM role ARN to use for resource creations",
+						MarkdownDescription: "ARN of an IAM role with permissions to create resources",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
@@ -172,7 +172,7 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 						Optional:            true,
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
-						MarkdownDescription: "Create private subnets instead of default public",
+						MarkdownDescription: "Create private subnets instead of the default public ones",
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.RequiresReplace(),
 						},
@@ -187,25 +187,25 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"gcp": schema.SingleNestedAttribute{
 				Optional:            true,
-				MarkdownDescription: "BYOC parameters for GCP.",
+				MarkdownDescription: "BYOC parameters for GCP",
 				Attributes: map[string]schema.Attribute{
 					"network_name": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Name of a network to import",
+						MarkdownDescription: "Name of the network to import",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
 					"subnetwork_name": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Name of a subnetwork to import",
+						MarkdownDescription: "Name of the subnetwork to import",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
 					"project_name": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Name of a project where is an imported network is located",
+						MarkdownDescription: "Name of the project where is the imported network is located",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
@@ -453,7 +453,7 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 		resp.Diagnostics.AddAttributeError(
 			path.Root("ipv4_cidr_block"),
 			"ipv4_cidr_block must be specified.",
-			"IPv4 CIDR block is required for non BYOC networks.",
+			"IPv4 CIDR block is required for non-BYOC networks.",
 		)
 	}
 }

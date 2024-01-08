@@ -3,12 +3,12 @@
 page_title: "doublecloud_clickhouse_cluster Resource - terraform-provider-doublecloud"
 subcategory: ""
 description: |-
-  Clickhouse Cluster resource
+  ClickHouse Cluster resource
 ---
 
 # doublecloud_clickhouse_cluster (Resource)
 
-Clickhouse Cluster resource
+ClickHouse Cluster resource
 
 ## Example Usage
 
@@ -50,20 +50,20 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 
 ### Required
 
-- `cloud_type` (String) Type of the cloud where instances should be hosted.
-- `name` (String) Name of the ClickHouse cluster.
-- `network_id` (String) ID of the network that the ClickHouse cluster belongs to.
-- `project_id` (String) ID of the project that the ClickHouse cluster belongs to.
-- `region_id` (String) ID of the region to place instances.
+- `cloud_type` (String) Cloud provider where the cluster is created. Possible values: `aws` and `gcp`
+- `name` (String) Cluster name
+- `network_id` (String) ID of the network where the cluster is created
+- `project_id` (String) ID of the project where the ClickHouse cluster is created
+- `region_id` (String) ID of the region where resources are created
 
 ### Optional
 
-- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
+- `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) (see [below for nested schema](#nestedblock--config))
-- `description` (String) Description of the ClickHouse cluster.
-- `id` (String) ID of the ClickHouse cluster.
-- `resources` (Block, Optional) (see [below for nested schema](#nestedblock--resources))
-- `version` (String) Version of ClickHouse DBMS.
+- `description` (String) Cluster description
+- `id` (String) Cluster ID
+- `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
+- `version` (String) Version of the ClickHouse DBMS
 
 <a id="nestedblock--access"></a>
 ### Nested Schema for `access`
@@ -71,8 +71,8 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 Optional:
 
 - `data_services` (List of String) List of allowed services
-- `ipv4_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
-- `ipv6_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
+- `ipv4_cidr_blocks` (Attributes List) IPv4 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
+- `ipv6_cidr_blocks` (Attributes List) IPv6 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
 
 <a id="nestedatt--access--ipv4_cidr_blocks"></a>
 ### Nested Schema for `access.ipv4_cidr_blocks`
@@ -83,7 +83,7 @@ Required:
 
 Optional:
 
-- `description` (String) Description of CIDR block
+- `description` (String) CIDR block description
 
 
 <a id="nestedatt--access--ipv6_cidr_blocks"></a>
@@ -95,7 +95,7 @@ Required:
 
 Optional:
 
-- `description` (String) Description of CIDR block
+- `description` (String) CIDR block description
 
 
 
@@ -104,73 +104,73 @@ Optional:
 
 Optional:
 
-- `asynchronous_insert_log_enabled` (Boolean)
-- `asynchronous_insert_log_retention_size` (Number)
-- `asynchronous_insert_log_retention_time` (String)
-- `asynchronous_metric_log_enabled` (Boolean)
-- `asynchronous_metric_log_retention_size` (Number)
-- `asynchronous_metric_log_retention_time` (String)
-- `background_common_pool_size` (Number)
-- `background_fetches_pool_size` (Number)
-- `background_merges_mutations_concurrency_ratio` (Number)
-- `background_message_broker_schedule_pool_size` (Number)
-- `background_move_pool_size` (Number)
-- `background_pool_size` (Number)
-- `background_schedule_pool_size` (Number)
+- `asynchronous_insert_log_enabled` (Boolean) Enable logging asynchronous inserts
+- `asynchronous_insert_log_retention_size` (Number) Maximum size of the asynchronous insert log table in bytes
+- `asynchronous_insert_log_retention_time` (String) Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`
+- `asynchronous_metric_log_enabled` (Boolean) Enable logging asynchronous metrics
+- `asynchronous_metric_log_retention_size` (Number) Maximum size of the asynchronous insert log table in bytes
+- `asynchronous_metric_log_retention_time` (String) Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`
+- `background_common_pool_size` (Number) Number of threads performing various operations (mostly garbage collection) for tables with MergeTree engines
+- `background_fetches_pool_size` (Number) Number of threads performing background fetches for replicated tables
+- `background_merges_mutations_concurrency_ratio` (Number) Ratio of the number of threads to the number of background merges and mutations that can be executed concurrently
+- `background_message_broker_schedule_pool_size` (Number) Number of threads for executing background message translation operations
+- `background_move_pool_size` (Number) Number of threads performing background moves of data parts for tables with MergeTree engines
+- `background_pool_size` (Number) Number of threads performing background merges and mutations for tables with MergeTree engines
+- `background_schedule_pool_size` (Number) Number of threads for background jobs for replicated tables, streams in Apache Kafka, and DNS cache updates
 - `kafka` (Block, Optional) (see [below for nested schema](#nestedblock--config--kafka))
-- `keep_alive_timeout` (String)
-- `log_level` (String)
-- `mark_cache_size` (Number)
-- `max_concurrent_queries` (Number)
-- `max_connections` (Number)
-- `max_partition_size_to_drop` (Number)
-- `max_table_size_to_drop` (Number)
-- `metric_log_enabled` (Boolean)
-- `metric_log_retention_size` (Number)
-- `metric_log_retention_time` (String)
-- `opentelemetry_span_log_enabled` (Boolean)
-- `opentelemetry_span_log_retention_size` (Number)
-- `opentelemetry_span_log_retention_time` (String)
-- `part_log_retention_size` (Number)
-- `part_log_retention_time` (String)
-- `query_log_retention_size` (Number)
-- `query_log_retention_time` (String)
-- `query_thread_log_enabled` (Boolean)
-- `query_thread_log_retention_size` (Number)
-- `query_thread_log_retention_time` (String)
-- `query_views_log_enabled` (Boolean)
-- `query_views_log_retention_size` (Number)
-- `query_views_log_retention_time` (String)
-- `session_log_enabled` (Boolean)
-- `session_log_retention_size` (Number)
-- `session_log_retention_time` (String)
-- `text_log_enabled` (Boolean)
-- `text_log_level` (String)
-- `text_log_retention_size` (Number)
-- `text_log_retention_time` (String)
-- `timezone` (String)
-- `total_memory_profiler_step` (Number)
-- `total_memory_tracker_sample_probability` (Number)
-- `trace_log_enabled` (Boolean)
-- `trace_log_retention_size` (Number)
-- `trace_log_retention_time` (String)
-- `uncompressed_cache_size` (Number)
-- `zookeeper_log_enabled` (Boolean)
-- `zookeeper_log_retention_size` (Number)
-- `zookeeper_log_retention_time` (String)
+- `keep_alive_timeout` (String) Time in seconds for which ClickHouse waits for incoming requests before closing the connection
+- `log_level` (String) Level of logged events, such as `ERROR` or `TRACE`
+- `mark_cache_size` (Number) Approximate size in bytes of the mark cache used by table engines in the MergeTree family
+- `max_concurrent_queries` (Number) Maximum number of requests processed simultaneously
+- `max_connections` (Number) Maximum number of inbound client connections
+- `max_partition_size_to_drop` (Number) Maximum partition size in bytes for the MergeTree family at which a table can be deleted using the `DROP TABLE` query
+- `max_table_size_to_drop` (Number) Maximum size in bytes of a table in the MergeTree family that can be deleted using the `DROP TABLE` query
+- `metric_log_enabled` (Boolean) Enable logging metric values from the `system.metrics` and the `system.events` tables to `system.metric_log`
+- `metric_log_retention_size` (Number) Maximum size of the metric log table in bytes
+- `metric_log_retention_time` (String) Retention time of the metric log table in the duration string format, such as `2h45m`
+- `opentelemetry_span_log_enabled` (Boolean) Enable log trace and metric values from a distributed application
+- `opentelemetry_span_log_retention_size` (Number) Maximum size of the opentelemetry span log table in bytes
+- `opentelemetry_span_log_retention_time` (String) Retention time of the opentelemetry span log table in the duration string format, such as `2h45m`
+- `part_log_retention_size` (Number) Maximum size of the part log table in bytes
+- `part_log_retention_time` (String) Retention time of the part log table in the duration string format, such as `2h45m`
+- `query_log_retention_size` (Number) Maximum size of the query log table in bytes
+- `query_log_retention_time` (String) Retention time of the query log table in the duration string format, such as `2h45m`
+- `query_thread_log_enabled` (Boolean) Enable logging query threads
+- `query_thread_log_retention_size` (Number) Maximum size of the query thread log table in bytes
+- `query_thread_log_retention_time` (String) Retention time of the query thread log table in the duration string format, such as `2h45m`
+- `query_views_log_enabled` (Boolean) Enable logging query views
+- `query_views_log_retention_size` (Number) Maximum size of the query views log table in bytes
+- `query_views_log_retention_time` (String) Retention time of the query views log table in the duration string format, such as `2h45m`
+- `session_log_enabled` (Boolean) Enable logging successful and failed login/logout events
+- `session_log_retention_size` (Number) Maximum size of the session log table in bytes
+- `session_log_retention_time` (String) Retention time of the session log in the duration string format, such as `2h45m`
+- `text_log_enabled` (Boolean) Enable system logs
+- `text_log_level` (String) Level of logging, such as `ERROR` or `TRACE`
+- `text_log_retention_size` (Number) Maximum size of the text log table in bytes
+- `text_log_retention_time` (String) Retention time of the text log table in the duration string format, such as `2h45m`
+- `timezone` (String) Cluster time zone from the IANA Time Zone Database, such as `Africa/Abidjan`
+- `total_memory_profiler_step` (Number) RAM in bytes for a stack trace at each memory allocation step
+- `total_memory_tracker_sample_probability` (Number) Allows collecting and logging informaiton about random memory allocation and release with the specified probability
+- `trace_log_enabled` (Boolean) Enable logging stack traces collected by the query profiler
+- `trace_log_retention_size` (Number) Maximum size of the trace log table in bytes
+- `trace_log_retention_time` (String) Retention time of the trace log table in the duration string format, such as `2h45m`
+- `uncompressed_cache_size` (Number) Cache size in bytes for uncompressed data used by table engines in the MergeTree family
+- `zookeeper_log_enabled` (Boolean) Enable logging parameters of requests to the ZooKeeper server and responses from it
+- `zookeeper_log_retention_size` (Number) Maximum size of the ZooKeeper log table in bytes
+- `zookeeper_log_retention_time` (String) Retention time of the ZooKeeper log table in the duration string format, such as `2h45m`
 
 <a id="nestedblock--config--kafka"></a>
 ### Nested Schema for `config.kafka`
 
 Optional:
 
-- `enable_ssl_certificate_verification` (Boolean)
-- `max_poll_interval_ms` (String)
-- `sasl_mechanism` (String)
-- `sasl_password` (String, Sensitive)
-- `sasl_username` (String)
-- `security_protocol` (String)
-- `session_timeout_ms` (String)
+- `enable_ssl_certificate_verification` (Boolean) Enable SSL certificate verification
+- `max_poll_interval_ms` (String) Maximum interval in milliseconds between making poll calls to get messages for high-level consumers
+- `sasl_mechanism` (String) SASL authentication mechanism
+- `sasl_password` (String, Sensitive) Apache Kafka® account password
+- `sasl_username` (String) Apache Kafka® account username
+- `security_protocol` (String) Security protocol used for authentication
+- `session_timeout_ms` (String) Timeout to maintain a client group session
 
 
 
@@ -179,19 +179,19 @@ Optional:
 
 Optional:
 
-- `clickhouse` (Block, Optional) (see [below for nested schema](#nestedblock--resources--clickhouse))
-- `dedicated_keeper` (Block, Optional) (see [below for nested schema](#nestedblock--resources--dedicated_keeper))
+- `clickhouse` (Block, Optional) Resources available to ClickHouse hosts (see [below for nested schema](#nestedblock--resources--clickhouse))
+- `dedicated_keeper` (Block, Optional) Resources available to dedicated ClickHouse Keeper hosts (see [below for nested schema](#nestedblock--resources--dedicated_keeper))
 
 <a id="nestedblock--resources--clickhouse"></a>
 ### Nested Schema for `resources.clickhouse`
 
 Optional:
 
-- `disk_size` (Number) Volume of the storage available to a host, in bytes.
-- `max_disk_size` (Number) Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.
-- `replica_count` (Number) Number of hosts per shard.
-- `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
-- `shard_count` (Number) Number of shards in the cluster.
+- `disk_size` (Number) Storage volume available to a host in bytes
+- `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
+- `replica_count` (Number) Number of hosts per shard
+- `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
+- `shard_count` (Number) Number of shards in the cluster
 
 
 <a id="nestedblock--resources--dedicated_keeper"></a>
@@ -199,9 +199,9 @@ Optional:
 
 Optional:
 
-- `disk_size` (Number) Volume of the storage available to a host, in bytes.
-- `max_disk_size` (Number) Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.
-- `replica_count` (Number) Number of keeper hosts.
-- `resource_preset_id` (String) ID of the preset for computational resources available to a host (CPU, memory, etc.).
+- `disk_size` (Number) Volume of the storage available to a host in bytes
+- `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
+- `replica_count` (Number) Number of keeper hosts
+- `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
 
 

@@ -38,7 +38,7 @@ func (r *NetworkConnectionAccepterResource) Schema(ctx context.Context, req reso
 		Attributes: map[string]resourceschema.Attribute{
 			"id": resourceschema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Network Connection identifier",
+				MarkdownDescription: "Network Connection ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

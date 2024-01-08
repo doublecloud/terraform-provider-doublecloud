@@ -57,7 +57,7 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"host": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Host to connect",
+			MarkdownDescription: "Host to connect to",
 		},
 		"user": schema.StringAttribute{
 			Computed:            true,
@@ -65,31 +65,31 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 		},
 		"password": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Password for ClickHouse user",
+			MarkdownDescription: "Password for the ClickHouse user",
 		},
 		"https_port": schema.Int64Attribute{
 			Computed:            true,
-			MarkdownDescription: "Port to connect using HTTPS protocol",
+			MarkdownDescription: "Port to connect to using the HTTPS protocol",
 		},
 		"tcp_port_secure": schema.Int64Attribute{
 			Computed:            true,
-			MarkdownDescription: "Port to connect using TCP/native protocol",
+			MarkdownDescription: "Port to connect to using the TCP/native protocol",
 		},
 		"native_protocol": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Connection string for ClickHouse native protocol",
+			MarkdownDescription: "Connection string for the ClickHouse native protocol",
 		},
 		"https_uri": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "URI to connect using HTTPS protocol",
+			MarkdownDescription: "URI to connect to using the HTTPS protocol",
 		},
 		"jdbc_uri": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "URI to connect using JDBC protocol",
+			MarkdownDescription: "URI to connect to using the JDBC protocol",
 		},
 		"odbc_uri": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "URI to connect using ODBC protocol",
+			MarkdownDescription: "URI to connect to using the ODBC protocol",
 		},
 	}
 }
@@ -100,41 +100,43 @@ func (d *ClickhouseDataSource) Schema(ctx context.Context, req datasource.Schema
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Cluster identifier",
+				MarkdownDescription: "Cluster ID",
 			},
 			"name": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Name of cluster",
+				MarkdownDescription: "Cluster name",
 			},
 			"description": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Description of cluster",
+				MarkdownDescription: "Cluster description",
 			},
 			"region_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Region of cluster",
+				MarkdownDescription: "Region where the cluster is located",
 			},
 			"cloud_type": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Cloud type (aws, gcp, azure)",
+				MarkdownDescription: "Cloud provider (`aws`, `gcp`, or `azure`)",
 			},
 			"version": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Version of ClickHouse DBMS",
+				MarkdownDescription: "Version of the ClickHouse DBMS",
 			},
 			"connection_info": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: clickhouseConenctionInfoSchema(),
+				Computed:            true,
+				Attributes:          clickhouseConenctionInfoSchema(),
+				MarkdownDescription: "Public connection info",
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: clickhouseConenctionInfoSchema(),
+				Computed:            true,
+				Attributes:          clickhouseConenctionInfoSchema(),
+				MarkdownDescription: "Private connection info",
 			},
 		},
 	}
