@@ -310,14 +310,6 @@ Aproach with Transfer (i.e. separate delivery mechanism) is much more reliable a
 Simplified representation of the decision tree:
 
 ```
-                         +---------------------------------------------+
-                         | Is delivery critical?                       |
-                         |                                             |
-                         |                                             |
-                         |      Yes                           No       |
-                         +---------------------------------------------+
-                                 |                            |
-                                 v                            v
                    +---------------------------+      +--------------------------+
                    | Is format unstable?       |      | Is delivery small and    |
                    |                           |      | format very stable?      |
