@@ -307,8 +307,29 @@ Aproach with Transfer (i.e. separate delivery mechanism) is much more reliable a
 
 ## How to choose right delivery mechanism
 
-If delivery is critical - use external writer.
-If format is unstable - use external writer.
-If delivery can be huge (10+ mb/s) - use external writer.
-If delivery small and format is very stable - use KafkaEngine.
-If you need complex parsing inside clickhouse - use KafkaEngine.
+Simplified representation of the decision tree:
+
+```
+                         +---------------------------------------------+
+                         | Is delivery critical?                       |
+                         |                                             |
+                         |                                             |
+                         |      Yes                           No       |
+                         +---------------------------------------------+
+                                 |                            |
+                                 v                            v
+                   +---------------------------+      +--------------------------+
+                   | Is format unstable?       |      | Is delivery small and    |
+                   |                           |      | format very stable?      |
+                   |                           |      |                          |
+                   |      Yes               No |      |   Yes                 No |
+                   +---------------------------+      +--------------------------+
+                           |                |              |                  |
+                           v                v              v                  v
+          +-----------------------+  +------------------------+  +----------------------+
+          |   Use Transfer writer |  |   Use KafkaEngine      |  |  Use Transfer writer |
+          |                       |  |                        |  |                      |
+          +-----------------------+  +------------------------+  +----------------------+
+```
+
+This representation shows the decision-making process based on the criteria you provided. The rectangles represent decision points, and the ovals represent the recommended actions based on the given conditions. Follow the paths from the top to the bottom to determine the suitable solution based on specific scenarios.
