@@ -10,6 +10,7 @@ This example create a simple clicstream infrastructure:
 4. Small go-demo producer to generate sample data
 
 **Baseline Architecture**
+
 ![architecture.png](./assets/architecture.png)
 
 This project written in terraform, to apply this project run:
@@ -45,6 +46,7 @@ kafka_connection = {
 Clusters would be visible in UI:
 
 **Kafka:** 
+
 ![create_kafka.png](./assets/create_kafka.png)
 
 **Clickhouse:**
@@ -55,9 +57,10 @@ Once we have a clusters setup we can start building a clickstream solution from 
 
 ### Upload sample data
 
-Let's try to upload some sample data, for that's need we have a demo go-application that upload demo data.
 Since we expose cluster to our local machine by allow list, we can simply run our application from same host to generate load. For production use cases you should concider to setup networking access via [this](https://double.cloud/docs/en/vpc/connect-dc-to-aws) guide.
+
 [kafka.tf#L21-L34](./kafka.tf#L21-L34)
+
 ```tf
   access {
     ipv4_cidr_blocks = [
@@ -75,7 +78,7 @@ Since we expose cluster to our local machine by allow list, we can simply run ou
   }
 ```
 
-
+Let's try to upload some sample data, for that's need we have a demo go-application that upload demo data.
 
 ```shell
 cd producer
@@ -100,6 +103,10 @@ go build .
 .....
 {"user_ts": "2024-01-10T16:14:17Z", "id": 325252000, "name": "test_10_73"}
 ```
+
+As we can see kafka topic really have some data in it. On kafka-monitoring page we can observe that our **clickhouse-events** contains some data:
+
+![kafka_monitoring.png](./assets/kafka_monitoring.png)
 
 ## Clikchouse delivery via Kafka Engine
 
