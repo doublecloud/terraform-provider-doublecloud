@@ -206,7 +206,7 @@ FROM demo_events_table
 Query id: f2637cee-67a6-4598-b160-b5791566d2d8
 
 ┌─count()─┐
-│     439 │
+│    6502 │
 └─────────┘
 
 1 row in set. Elapsed: 0.336 sec.
