@@ -33,3 +33,9 @@ resource "doublecloud_kafka_cluster" "input-kafka" {
     ]
   }
 }
+
+// Grab newly create Clickhouse data
+data "doublecloud_kafka" "input-kafka" {
+  name       = doublecloud_kafka_cluster.input-kafka.name
+  project_id = var.project_id
+}

@@ -1,10 +1,10 @@
 -- Clickhouse queue wrapper
 CREATE TABLE demo_events_queue ON CLUSTER '{cluster}' (
-                       user_ts String,
-                       id UInt64,
-                       message String
+   user_ts String,
+   id UInt64,
+   message String
 ) ENGINE = Kafka SETTINGS
-    kafka_broker_list = 'rw.kfcjt1dpfcajmm2rkvlh.at.double.cloud:9091',
+    kafka_broker_list = 'rw.kfco0k6auq0uolk2oi4j.at.double.cloud:9091с', -- KAFKA_URL
     kafka_topic_list = 'clickhouse-events',
     kafka_group_name = 'uniq_group_id',
     kafka_format = 'JSONEachRow';
