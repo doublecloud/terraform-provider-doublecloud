@@ -1,35 +1,37 @@
+Here are the grammar edits for the provided Markdown:
+
 ## Clickstream App
 
-Clickstream Demo app for realtime analytics powered by Double.Cloud.
+Clickstream Demo app for real-time analytics powered by Double.Cloud.
 
-This example create a simple clicstream infrastructure:
+This example creates a simple clickstream infrastructure:
 
 1. Kafka stream buffer
 2. Clickhouse as click storage
 3. Transfer or Kafka Engine as click delivery mechanism
-4. Small go-demo producer to generate sample data
+4. Small Go-demo producer to generate sample data
 
 **Baseline Architecture**
 
 ![architecture.png](./assets/architecture.png)
 
-This project written in terraform, to apply this project run:
+This project is written in Terraform. To apply this project, run:
 
 ```shell
- terraform apply \
+terraform apply \
   -var="my_ip=$(curl -4 ifconfig.me)" \
   -var="my_ipv6=$(curl -6 ifconfig.me)" \
   -var="project_id=YOUR_PROJECT_ID"
 ```
 
-Once terraform is applied you will see your credentials:
+Once Terraform is applied, you will see your credentials:
 
 ```shell
 Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-clikchouse_connection = {
+clickhouse_connection = {
   "host" = "CLICKHOUSE_HOST"
   "https_port" = 8443
   "password" = "CLICKHOUSE_PASSWORD"
@@ -45,7 +47,7 @@ kafka_connection = {
 
 Clusters would be visible in UI:
 
-**Kafka:** 
+**Kafka:**
 
 ![create_kafka.png](./assets/create_kafka.png)
 
@@ -53,11 +55,11 @@ Clusters would be visible in UI:
 
 ![create_clickhouse.png](./assets/create_clickhouse.png)
 
-Once we have a clusters setup we can start building a clickstream solution from it.
+Once we have clusters set up, we can start building a clickstream solution from it.
 
 ### Upload sample data
 
-Since we expose cluster to our local machine by allow list, we can simply run our application from same host to generate load. For production use cases you should concider to setup networking access via [this](https://double.cloud/docs/en/vpc/connect-dc-to-aws) guide.
+Since we expose the cluster to our local machine by allowlist, we can simply run our application from the same host to generate load. For production use cases, you should consider setting up networking access via [this](https://double.cloud/docs/en/vpc/connect-dc-to-aws) guide.
 
 [kafka.tf#L21-L34](./kafka.tf#L21-L34)
 
@@ -78,7 +80,7 @@ Since we expose cluster to our local machine by allow list, we can simply run ou
   }
 ```
 
-Let's try to upload some sample data, for that's need we have a demo go-application that upload demo data.
+Let's try to upload some sample data. For that, we need a demo Go-application that uploads demo data.
 
 ```shell
 cd producer
@@ -92,7 +94,7 @@ message: 10 written
 
 ### Read sample data
 
-To verify that data uploaded let's read it:
+To verify that data is uploaded, let's read it:
 
 ```shell
 cd consumer
@@ -104,17 +106,16 @@ go build .
 {"user_ts": "2024-01-10T16:14:17Z", "id": 325252000, "name": "test_10_73"}
 ```
 
-As we can see kafka topic really have some data in it. On kafka-monitoring page we can observe that our **clickhouse-events** contains some data:
+As we can see, the Kafka topic really has some data in it. On the Kafka monitoring page, we can observe that our **clickhouse-events** contains some data:
 
 ![kafka_monitoring.png](./assets/kafka_monitoring.png)
 
-## Clikchouse delivery via Kafka Engine
+## Clickhouse delivery via Kafka Engine
 
-ClickHouse can read messages directly from a Kafka topic using the Kafka table engine coupled with a materialized view that fetches messages and pushes them to a ClickHouse target table.
-The target table is typically implemented using `*MergeTree` engine or a variant like `Replicated*MergeTree`.
-The flow of messages is illustrated below:
+ClickHouse can read messages directly from a Kafka topic using the Kafka table engine coupled with a materialized view that fetches messages and pushes them to a ClickHouse target table. The target table is typically implemented using `*MergeTree` engine or a variant like `Replicated*MergeTree`. The flow of messages is illustrated below:
 
 Topic -> Kafka Engine Table -> Materialized View to parse -> Final Table:
+
 ![kafka_table_engine_flow.png](./assets/kafka_table_engine_flow.png)
 
 Let's create example tables:
@@ -133,7 +134,8 @@ CREATE TABLE demo_events_queue ON CLUSTER '{cluster}' (
     kafka_format = 'JSONEachRow';
 ```
 
-As you see in example we don't need to specify auth details for kafka engine, since it already passed during cluster setup here:
+As you see in the example, we don't need to specify auth details for the Kafka engine, since it already passed during cluster setup here:
+
 [clickhouse.tf#L20-L25](./clickhouse.tf#L20-L25)
 ```tf
     kafka {
@@ -144,7 +146,7 @@ As you see in example we don't need to specify auth details for kafka engine, si
     }
 ```
 
-As a result you will see:
+As a result, you will see:
 
 ```sql
 CREATE TABLE demo_events_queue ON CLUSTER `{cluster}`
@@ -165,7 +167,8 @@ Query id: 03387739-2e46-459b-957d-ff776867b741
 1 row in set. Elapsed: 0.423 sec.
 ```
 
-Now we need to create storage table (Replicated Merge Tree):
+Now we need to create the storage table (Replicated Merge Tree):
+
 [kafka_stream_engine.sql#L12-L23](./kafka_stream_engine.sql#L12-L23)
 ```sql
 -- Table to store data
@@ -182,9 +185,12 @@ PARTITION BY toYYYYMM(timestamp)
 ORDER BY (topic, partition, offset);
 ```
 
-And as final touch delivery materialized view:
+And as a final touch, delivery materialized view:
+
 [kafka_stream_engine.sql#L25-L34](./kafka_stream_engine.sql#L25-L34)
 ```sql
+
+
 -- Delivery pipeline
 CREATE MATERIALIZED VIEW readings_queue_mv TO demo_events_table AS
 SELECT
@@ -197,7 +203,7 @@ SELECT
 FROM demo_events_queue;
 ```
 
-To verify that's all good let's check what inside target table:
+To verify that all is good, let's check what's inside the target table:
 
 ```sql
 SELECT count(*)
@@ -212,14 +218,13 @@ Query id: f2637cee-67a6-4598-b160-b5791566d2d8
 1 row in set. Elapsed: 0.336 sec.
 ```
 
-This whole setup works inside clickhouse, its simple, but yet powerful.
-The utilization of KafkaEngine is robust, yet it introduces unresolved challenges:
+This whole setup works inside ClickHouse; it's simple but yet powerful. The utilization of Kafka Engine is robust, yet it introduces unresolved challenges:
 
 1. **Offset Management**: In the event of malformed data entering Kafka, ClickHouse may become unresponsive until manual offset deletion by an administrator—an inherently labor-intensive task.
 2. **Limited Visibility**: Monitoring poses a challenge as all operations occur within ClickHouse, necessitating reliance on ClickHouse logs as the sole means of gaining insights into system activities.
 3. **Scalability Concerns**: Handling parsing and reading within the ClickHouse cluster itself may impede the seamless scaling of read and write operations during periods of heightened demand, potentially leading to CPU and I/O concurrency issues.
 
-## Clikchouse delivery via DoubleCloud.Transfer
+## Clickhouse delivery via DoubleCloud.Transfer
 
 At Double.Cloud, our robust EL(t) engine, Transfer, boasts a pivotal feature—Queue Engine -> ClickHouse delivery. In crafting this delivery mechanism, we proactively addressed the lingering challenges:
 
@@ -229,11 +234,12 @@ At Double.Cloud, our robust EL(t) engine, Transfer, boasts a pivotal feature—Q
 2. **Enhanced Visibility:** To overcome the limited visibility inherent in ClickHouse, we've developed dedicated dashboards and alerts that provide real-time insights into specific delivery metrics. This includes comprehensive monitoring of data lag, delivered rows, and delivered bytes.
 3. **Dynamic Scalability:** Transfer deploys delivery jobs externally, within Kubernetes, EC2, or GCP instances, allowing for independent scaling separate from the ClickHouse cluster. This ensures optimal scalability to meet varying demands without compromising performance.
 
-Also Double.Cloud Transfer enable automatic schema creation / migration capabilities, therefore no need to perform any extra steps on clickhouse side.
+Also, Double.Cloud Transfer enables automatic schema creation/migration capabilities; therefore, no need to perform any extra steps on the ClickHouse side.
 
-Let's create transfer via terraform:
+Let's create transfer via Terraform:
+
 ```shell
- terraform apply \
+terraform apply \
   -var="my_ip=$(curl -4 ifconfig.me)" \
   -var="my_ipv6=$(curl -6 ifconfig.me)" \
   -var="project_id=YOUR_PROJECT_ID" \
@@ -242,7 +248,7 @@ Let's create transfer via terraform:
 
 This option will create a transfer, from `./transfer.tf`
 
-Main thing on transfer configuration - parser rule:
+The main thing on transfer configuration - parser rule:
 
 [transfer.tf#L15-L44](./transfer.tf#L15-L44)
 ```hcl
@@ -276,13 +282,14 @@ Main thing on transfer configuration - parser rule:
           null_keys_allowed = false
           add_rest_column   = true
         }
+      }
 ```
 
-After apply it will create transfer:
+After applying, it will create transfer:
 
 ![transfer.png](./assets/transfer.png)
 
-This transfer automatically create a table called: `clickhouse_events`, name was infered from source topic name, and delivery a rows into it:
+This transfer automatically creates a table called: `clickhouse_events`, the name was inferred from the source topic name, and it delivers rows into it:
 
 ```sql
 SELECT count(*)
@@ -297,7 +304,7 @@ Query id: 04813338-c261-49e4-b729-881f00dc290d
 1 row in set. Elapsed: 0.323 sec.
 ```
 
-To see what happens inside you can explore transfer logs and metrics:
+To see what happens inside, you can explore transfer logs and metrics:
 
 **Logs**
 ![transfer_logs.png](./assets/transfer_logs.png)
@@ -305,11 +312,11 @@ To see what happens inside you can explore transfer logs and metrics:
 **Metrics**
 ![transfer_metrics.png](./assets/transfer_metrics.png)
 
-Aproach with Transfer (i.e. separate delivery mechanism) is much more reliable and scalable, and in some cases even easier to setup, since all setup in one place (terraform).
+The approach with Transfer (i.e., a separate delivery mechanism) is much more reliable and scalable, and in some cases, even easier to set up, since all setup is in one place (Terraform).
 
-## How to choose right delivery mechanism
+## How to choose the right delivery mechanism
 
-Simplified representation of the decision tree:
+A simplified representation of the decision tree:
 
 ![decision_chart.png](./assets/decision_chart.png)
 
