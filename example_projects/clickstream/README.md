@@ -223,6 +223,8 @@ The utilization of KafkaEngine is robust, yet it introduces unresolved challenge
 
 At Double.Cloud, our robust EL(t) engine, Transfer, boasts a pivotal feature—Queue Engine -> ClickHouse delivery. In crafting this delivery mechanism, we proactively addressed the lingering challenges:
 
+![transfer_flow.png](./assets/transfer_flow.png)
+
 1. **Automated Offset Management:** We've implemented automatic unparsed tables, streamlining the handling of corrupt data and eliminating the need for manual intervention in offset management.
 2. **Enhanced Visibility:** To overcome the limited visibility inherent in ClickHouse, we've developed dedicated dashboards and alerts that provide real-time insights into specific delivery metrics. This includes comprehensive monitoring of data lag, delivered rows, and delivered bytes.
 3. **Dynamic Scalability:** Transfer deploys delivery jobs externally, within Kubernetes, EC2, or GCP instances, allowing for independent scaling separate from the ClickHouse cluster. This ensures optimal scalability to meet varying demands without compromising performance.
@@ -309,19 +311,6 @@ Aproach with Transfer (i.e. separate delivery mechanism) is much more reliable a
 
 Simplified representation of the decision tree:
 
-```
-                   +---------------------------+      +--------------------------+
-                   | Is format unstable?       |      | Is delivery small and    |
-                   |                           |      | format very stable?      |
-                   |                           |      |                          |
-                   |      Yes               No |      |   Yes                 No |
-                   +---------------------------+      +--------------------------+
-                           |                |              |                  |
-                           v                v              v                  v
-          +-----------------------+  +------------------------+  +----------------------+
-          |   Use Transfer writer |  |   Use KafkaEngine      |  |  Use Transfer writer |
-          |                       |  |                        |  |                      |
-          +-----------------------+  +------------------------+  +----------------------+
-```
+![decision_chart.png](./assets/decision_chart.png)
 
 This representation shows the decision-making process based on the criteria you provided. The rectangles represent decision points, and the ovals represent the recommended actions based on the given conditions. Follow the paths from the top to the bottom to determine the suitable solution based on specific scenarios.

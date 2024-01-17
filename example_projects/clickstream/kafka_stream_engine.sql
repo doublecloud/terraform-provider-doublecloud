@@ -4,7 +4,7 @@ CREATE TABLE demo_events_queue ON CLUSTER '{cluster}' (
    id UInt64,
    message String
 ) ENGINE = Kafka SETTINGS
-    kafka_broker_list = 'rw.kfco0k6auq0uolk2oi4j.at.double.cloud:9091с', -- KAFKA_URL
+    kafka_broker_list = 'KAFKA_HOST:9091с',
     kafka_topic_list = 'clickhouse-events',
     kafka_group_name = 'uniq_group_id',
     kafka_format = 'JSONEachRow';
