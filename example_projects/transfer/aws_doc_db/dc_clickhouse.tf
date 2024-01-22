@@ -1,5 +1,5 @@
 ## Actual Clickhouse DB
-resource "doublecloud_clickhouse_cluster" "alpha-clickhouse" {
+resource "doublecloud_clickhouse_cluster" "beta-clickhouse" {
   project_id = var.dc_project_id
   name       = "beta-clickhouse"
   region_id  = var.aws_region

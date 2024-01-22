@@ -10,7 +10,7 @@ module "doublecloud_byoc" {
     aws = aws
   }
   // This is CIDR of newly created Data VPC (where Clickhosue and ELT jobs would be hosted)
-  ipv4_cidr = var.dwh_ipv4_cidr
+  ipv4_cidr = var.dc_ipv4_cidr
 }
 
 # Get account ID to peer with
@@ -68,16 +68,26 @@ resource "doublecloud_network_connection_accepter" "accept" {
 }
 
 # Create ipv4 routes to DoubleCloud Network
-resource "aws_route" "ipv4_private_route" {
-  provider                  = aws
-  route_table_id            = aws_route_table.docdb_private_rt.id
-  destination_cidr_block    = doublecloud_network_connection.example.aws.peering.managed_ipv4_cidr_block
+
+// from user to DC
+data "aws_route_tables" "user" {
+  vpc_id = aws_vpc.docdb_vpc.id
+}
+resource "aws_route" "user_to_dc" {
+  count                     = length(data.aws_route_tables.user.ids)
+  route_table_id            = tolist(data.aws_route_tables.user.ids)[count.index]
+  destination_cidr_block    = var.dc_ipv4_cidr
   vpc_peering_connection_id = time_sleep.avoid_aws_race.triggers["peering_connection_id"]
 }
-resource "aws_route" "ipv4_public_route" {
-  provider                  = aws
-  route_table_id            = aws_route_table.docdb_public_rt.id
-  destination_cidr_block    = doublecloud_network_connection.example.aws.peering.managed_ipv4_cidr_block
+
+// from DC to user
+data "aws_route_tables" "dc" {
+  vpc_id = module.doublecloud_byoc.vpc_id
+}
+resource "aws_route" "dc_to_user" {
+  count                     = length(data.aws_route_tables.dc.ids)
+  route_table_id            = tolist(data.aws_route_tables.dc.ids)[count.index]
+  destination_cidr_block    = var.user_cidr_block
   vpc_peering_connection_id = time_sleep.avoid_aws_race.triggers["peering_connection_id"]
 }
 

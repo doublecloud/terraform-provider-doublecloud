@@ -15,7 +15,7 @@ variable "aws_profile" {
 
 // This variable is to set the
 // CIDR block for the VPC
-variable "vpc_cidr_block" {
+variable "user_cidr_block" {
   description = "CIDR block for VPC"
   type        = string
   default     = "10.0.0.0/16"
@@ -89,10 +89,10 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "dwh_ipv4_cidr" {
+variable "dc_ipv4_cidr" {
   type        = string
   description = "CIDR of a used vpc"
-  default     = "172.16.0.0/16"
+  default     = "10.1.0.0/16"
 }
 variable "dc_project_id" {
   type        = string

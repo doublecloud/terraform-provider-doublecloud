@@ -23,7 +23,7 @@ resource "doublecloud_transfer_endpoint" "docdb-source" {
 
 // Grab newly create Clickhouse data
 data "doublecloud_clickhouse" "dwh" {
-  name       = doublecloud_clickhouse_cluster.alpha-clickhouse.name
+  name       = doublecloud_clickhouse_cluster.beta-clickhouse.name
   project_id = var.dc_project_id
 }
 
@@ -35,7 +35,7 @@ resource "doublecloud_transfer_endpoint" "dwh-target" {
     clickhouse_target {
       connection {
         address {
-          cluster_id = doublecloud_clickhouse_cluster.alpha-clickhouse.id
+          cluster_id = doublecloud_clickhouse_cluster.beta-clickhouse.id
         }
         // We use default database, user and password here, for sake of simplicity
         database = "default"

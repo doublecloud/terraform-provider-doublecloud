@@ -2,7 +2,7 @@
 resource "aws_vpc" "docdb_vpc" {
   // Here we are setting the CIDR block of the VPC
   // to the "vpc_cidr_block" variable
-  cidr_block = var.vpc_cidr_block
+  cidr_block = var.user_cidr_block
   // We want DNS hostnames enabled for this VPC
   enable_dns_hostnames = true
 
@@ -69,6 +69,9 @@ resource "aws_subnet" "docdb_private_subnet" {
 resource "aws_route_table" "docdb_public_rt" {
   // Put the route table in the "docdb_vpc" VPC
   vpc_id = aws_vpc.docdb_vpc.id
+  tags = {
+    "Name" = "DocDB Public Route Tables"
+  }
 }
 
 // Since this is the public route table, it will need
@@ -100,8 +103,9 @@ resource "aws_route_table" "docdb_private_rt" {
   // Put the route table in the "docdb_VPC" VPC
   vpc_id = aws_vpc.docdb_vpc.id
 
-  // Since this is going to be a private route table,
-  // we will not be adding a route
+  tags = {
+    "Name" = "DocDB Private Route Tables"
+  }
 }
 
 // Here we are going to add the private subnets to the
@@ -197,7 +201,7 @@ resource "aws_security_group" "docdb_db_sg" {
     from_port   = "27017"
     to_port     = "27017"
     protocol    = "tcp"
-    cidr_blocks = [var.dwh_ipv4_cidr]
+    cidr_blocks = [var.dc_ipv4_cidr, "10.1.0.0/16"]
   }
 
   // Here we are tagging the SG with the name "docdb_db_sg"
@@ -207,9 +211,9 @@ resource "aws_security_group" "docdb_db_sg" {
 }
 
 // Create a db subnet group named "docdb_db_subnet_group"
-resource "aws_docdb_subnet_group" "docdb_db_subnet_group" {
+resource "aws_docdb_subnet_group" "docdb_subnet_group" {
   // The name and description of the db subnet group
-  name        = "docdb_docdb_subnet_group"
+  name        = "docdb_subnet_group"
   description = "DB subnet group for tutorial"
 
   // Since the db subnet group requires 2 or more subnets, we are going to
@@ -218,15 +222,25 @@ resource "aws_docdb_subnet_group" "docdb_db_subnet_group" {
   subnet_ids = [for subnet in aws_subnet.docdb_private_subnet : subnet.id]
 }
 
-
 resource "aws_docdb_cluster" "service" {
-  skip_final_snapshot    = true
-  db_subnet_group_name   = aws_docdb_subnet_group.docdb_db_subnet_group.name
-  cluster_identifier     = "tf-demo-docdb"
-  engine                 = "docdb"
-  master_username        = var.db_username
-  master_password        = var.db_password
-  vpc_security_group_ids = [aws_security_group.docdb_db_sg.id]
+  skip_final_snapshot             = true
+  db_subnet_group_name            = aws_docdb_subnet_group.docdb_subnet_group.name
+  cluster_identifier              = "demo-docdb"
+  engine                          = "docdb"
+  master_username                 = var.db_username
+  master_password                 = var.db_password
+  vpc_security_group_ids          = [aws_security_group.docdb_db_sg.id]
+  db_cluster_parameter_group_name = aws_docdb_cluster_parameter_group.service.name
+}
+
+resource "aws_docdb_cluster_parameter_group" "service" {
+  family = "docdb5.0"
+  name   = "demo-docdb-params"
+
+  parameter {
+    name  = "tls"
+    value = "enabled"
+  }
 }
 
 resource "aws_docdb_cluster_instance" "service" {
