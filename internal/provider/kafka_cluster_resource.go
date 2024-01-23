@@ -40,19 +40,20 @@ type KafkaClusterResource struct {
 }
 
 type KafkaClusterModel struct {
-	Id                    types.String         `tfsdk:"id"`
-	ProjectID             types.String         `tfsdk:"project_id"`
-	CloudType             types.String         `tfsdk:"cloud_type"`
-	RegionID              types.String         `tfsdk:"region_id"`
-	Name                  types.String         `tfsdk:"name"`
-	Description           types.String         `tfsdk:"description"`
-	Version               types.String         `tfsdk:"version"`
-	Resources             *KafkaResourcesModel `tfsdk:"resources"`
-	NetworkId             types.String         `tfsdk:"network_id"`
-	SchemaRegistry        *schemaRegistryModel `tfsdk:"schema_registry"`
-	Access                *AccessModel         `tfsdk:"access"`
-	ConnectionInfo        types.Object         `tfsdk:"connection_info"`
-	PrivateConnectionInfo types.Object         `tfsdk:"private_connection_info"`
+	Id                    types.String             `tfsdk:"id"`
+	ProjectID             types.String             `tfsdk:"project_id"`
+	CloudType             types.String             `tfsdk:"cloud_type"`
+	RegionID              types.String             `tfsdk:"region_id"`
+	Name                  types.String             `tfsdk:"name"`
+	Description           types.String             `tfsdk:"description"`
+	Version               types.String             `tfsdk:"version"`
+	Resources             *KafkaResourcesModel     `tfsdk:"resources"`
+	NetworkId             types.String             `tfsdk:"network_id"`
+	SchemaRegistry        *schemaRegistryModel     `tfsdk:"schema_registry"`
+	Access                *AccessModel             `tfsdk:"access"`
+	ConnectionInfo        types.Object             `tfsdk:"connection_info"`
+	PrivateConnectionInfo types.Object             `tfsdk:"private_connection_info"`
+	Config                *KafkaClusterConfigModel `tfsdk:"config"`
 }
 
 type schemaRegistryModel struct {
@@ -65,6 +66,15 @@ type KafkaResourcesKafkaModel struct {
 	MaxDiskSize      types.Int64  `tfsdk:"max_disk_size"`
 	BrokerCount      types.Int64  `tfsdk:"broker_count"`
 	ZoneCount        types.Int64  `tfsdk:"zone_count"`
+}
+
+type KafkaClusterConfigModel struct {
+	MessageMaxBytes      types.Int64 `tfsdk:"message_max_bytes"`
+	ReplicaFetchMaxBytes types.Int64 `tfsdk:"replica_fetch_max_bytes"`
+	LogRetentionBytes    types.Int64 `tfsdk:"log_retention_bytes"`
+	LogRetentionHours    types.Int64 `tfsdk:"log_retention_hours"`
+	LogRetentionMinutes  types.Int64 `tfsdk:"log_retention_minutes"`
+	LogRetentionMs       types.Int64 `tfsdk:"log_retention_ms"`
 }
 
 type KafkaResourcesModel struct {
@@ -164,6 +174,17 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 			},
 			"access": AccessSchemaBlock(),
+			"config": schema.SingleNestedBlock{
+				Description: "Cluster configuration",
+				Attributes: map[string]schema.Attribute{
+					"message_max_bytes":       schema.Int64Attribute{Optional: true},
+					"replica_fetch_max_bytes": schema.Int64Attribute{Optional: true},
+					"log_retention_bytes":     schema.Int64Attribute{Optional: true},
+					"log_retention_hours":     schema.Int64Attribute{Optional: true},
+					"log_retention_minutes":   schema.Int64Attribute{Optional: true},
+					"log_retention_ms":        schema.Int64Attribute{Optional: true},
+				},
+			},
 		},
 		MarkdownDescription: "Kafka cluster resource",
 		Version:             0,
@@ -226,6 +247,12 @@ func createKafkaClusterRequest(m *KafkaClusterModel) (*kafka.CreateClusterReques
 		access, d := m.Access.convert()
 		diags.Append(d...)
 		rq.Access = access
+	}
+
+	if m.Config != nil {
+		config, d := m.Config.convert()
+		diags.Append(d...)
+		rq.KafkaConfig = config
 	}
 
 	return rq, diags
@@ -394,6 +421,13 @@ func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadReques
 		data.SchemaRegistry = nil
 	}
 
+	if config := rs.GetKafkaConfig(); config != nil {
+		data.Config = &KafkaClusterConfigModel{}
+		diag.Append(data.Config.parse(config)...)
+	} else {
+		data.Config = nil
+	}
+
 	if info := rs.GetConnectionInfo(); info != nil {
 		o, d := types.ObjectValue(map[string]attr.Type{
 			"connection_string": types.StringType,
@@ -458,6 +492,12 @@ func updateKafkaClusterRequest(m *KafkaClusterModel) (*kafka.UpdateClusterReques
 		access, d := m.Access.convert()
 		diags.Append(d...)
 		rq.Access = access
+	}
+
+	if m.Config != nil {
+		config, d := m.Config.convert()
+		diags.Append(d...)
+		rq.KafkaConfig = config
 	}
 
 	return rq, diags
@@ -548,4 +588,52 @@ func kafkaConnectionInfoResSchema() map[string]schema.Attribute {
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 	}
+}
+
+func (m *KafkaClusterConfigModel) convert() (*kafka.KafkaConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	r := kafka.KafkaConfig{}
+	if v := m.MessageMaxBytes; !v.IsUnknown() && v.ValueInt64() != 0 {
+		r.MessageMaxBytes = wrapperspb.Int64(v.ValueInt64())
+	}
+	if v := m.ReplicaFetchMaxBytes; !v.IsUnknown() && v.ValueInt64() != 0 {
+		r.ReplicaFetchMaxBytes = wrapperspb.Int64(v.ValueInt64())
+	}
+	if v := m.LogRetentionBytes; !v.IsUnknown() && v.ValueInt64() != 0 {
+		r.LogRetentionBytes = wrapperspb.Int64(v.ValueInt64())
+	}
+	if v := m.LogRetentionHours; !v.IsUnknown() && v.ValueInt64() != 0 {
+		r.LogRetentionHours = wrapperspb.Int64(v.ValueInt64())
+	}
+	if v := m.LogRetentionMinutes; !v.IsUnknown() && v.ValueInt64() != 0 {
+		r.LogRetentionMinutes = wrapperspb.Int64(v.ValueInt64())
+	}
+	if v := m.LogRetentionMs; !v.IsUnknown() && v.ValueInt64() != 0 {
+		r.LogRetentionMs = wrapperspb.Int64(v.ValueInt64())
+	}
+	return &r, diags
+}
+
+func (m *KafkaClusterConfigModel) parse(v *kafka.KafkaConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if v := v.MessageMaxBytes; v != nil {
+		m.MessageMaxBytes = types.Int64Value(v.GetValue())
+	}
+	if v := v.ReplicaFetchMaxBytes; v != nil {
+		m.ReplicaFetchMaxBytes = types.Int64Value(v.GetValue())
+	}
+	if v := v.LogRetentionBytes; v != nil {
+		m.LogRetentionBytes = types.Int64Value(v.GetValue())
+	}
+	if v := v.LogRetentionHours; v != nil {
+		m.LogRetentionHours = types.Int64Value(v.GetValue())
+	}
+	if v := v.LogRetentionMinutes; v != nil {
+		m.LogRetentionMinutes = types.Int64Value(v.GetValue())
+	}
+	if v := v.ReplicaFetchMaxBytes; v != nil {
+		m.ReplicaFetchMaxBytes = types.Int64Value(v.GetValue())
+	}
+	return diags
 }
