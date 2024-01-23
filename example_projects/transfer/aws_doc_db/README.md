@@ -1,4 +1,5 @@
-# Terraform Project: AWS Integration with DoubleCloud Infrastructure for AWS DocDB and ClickHouse
+# Terraform Project: AWS Integra
+tion with DoubleCloud Infrastructure for AWS DocDB and ClickHouse
 
 This Terraform project aims to integrate an existing AWS infrastructure with a DoubleCloud environment. It establishes connectivity between AWS resources and DoubleCloud while setting up an AWS DocDB instance and a DoubleCloud ClickHouse cluster. The project also includes configurations for data transfer from AWS DocDB to DoubleCloud ClickHouse and visualization setup for dashboards.
 
@@ -67,28 +68,58 @@ sudo apt install mongodb-clients
 
 ```
 
+Let's add a demo message:
 
 ```shell
-mongo --ssl --host tf-demo-docdb.cluster-YOUR_CLUSTER_ID.eu-west-2.docdb.amazonaws.com:27017 --sslCAFile global-bundle.pem --username tutorial_admin --password Password
+mongo --ssl --host demo-docdb-0.YOUR_CLUSTER_ID.eu-west-2.docdb.amazonaws.com:27017 --sslCAFile global-bundle.pem --username tutorial_admin --password Password
 
-MongoDB shell version v3.6.8
-connecting to: mongodb://tf-demo-docdb.cluster-YOUR_CLUSTER_ID.eu-west-2.docdb.amazonaws.com:27017/
-Implicit session: session { "id" : UUID("05bd902f-0c9b-4339-9922-223981dc15e5") }
-MongoDB server version: 5.0.0
-WARNING: shell and server versions do not match
-rs0:PRIMARY> db.createCollection("posts")
-{ "ok" : 1, "operationTime" : Timestamp(1705675214, 1) }
-rs0:PRIMARY> db.posts.insertOne({"text":"hello world!"})
-{
-        "acknowledged" : true,
-        "insertedId" : ObjectId("65aa89e5b1621757210fef3b")
-}
+rs0:PRIMARY> use demo
+switched to db demo
+rs0:PRIMARY> db
+demo
+rs0:PRIMARY> db.messages.insert({text: "hello 1"})
+WriteResult({ "nInserted" : 1 })
+rs0:PRIMARY> db.messages.find()
+{ "_id" : ObjectId("65afbff572ffb0e925667312"), "text" : "hello 1" }
 rs0:PRIMARY> 
 ```
 
-So you have one document in posts collection.
+So you have some data in database, so let's activate a transfer that move this collection into DC Clickhouse.
 
-Let's create a transfer that move this collection into DC Clickhouse.
+![img_1.png](assets/doc_db_repl_transfer.png)
+
+Let's check that data is moved:
+
+```shell
+clickhouse-client --host rw.DC_CLICHOUSE_CLUSTER_ID.at.double.cloud --port 9440 --secure --user admin --password YOUR_PASSWORD
+
+SELECT count(*)
+FROM demo_messages
+
+┌─count()─┐
+│       1 │
+└─────────┘
+```
+
+So, let's add one more row in mongo, to check that replication is working:
+
+```shell
+rs0:PRIMARY> db.messages.insert({text: "hello 2"})
+```
+
+And in clickhouse:
+
+```shell
+SELECT count(*)
+FROM demo_messages
+
+┌─count()─┐
+│       2 │
+└─────────┘
+```
+
+As we see data transferred to a clickhouse.
+
 
 ## Notes
 

@@ -52,7 +52,7 @@ resource "doublecloud_transfer" "pg2ch" {
   project_id = var.dc_project_id
   source     = doublecloud_transfer_endpoint.docdb-source.id
   target     = doublecloud_transfer_endpoint.dwh-target.id
-  type       = "SNAPSHOT_ONLY"
+  type       = "SNAPSHOT_AND_INCREMENT"
   activated  = false
   runtime = {
     dedicated = {
