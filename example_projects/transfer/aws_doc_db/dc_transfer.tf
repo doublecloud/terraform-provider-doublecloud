@@ -48,7 +48,7 @@ resource "doublecloud_transfer_endpoint" "dwh-target" {
 
 // Actual transfer, this will create transfer from RDS to Clickhouse.
 resource "doublecloud_transfer" "pg2ch" {
-  name       = "docdb-to-clickhouse-snapshot"
+  name       = "docdb-to-clickhouse-replication"
   project_id = var.dc_project_id
   source     = doublecloud_transfer_endpoint.docdb-source.id
   target     = doublecloud_transfer_endpoint.dwh-target.id
