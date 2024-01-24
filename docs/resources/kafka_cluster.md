@@ -58,9 +58,11 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 
 ### Optional
 
-- `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
-- `description` (String) Cluster description
-- `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
+
+- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
+- `config` (Block, Optional) Cluster configuration (see [below for nested schema](#nestedblock--config))
+- `description` (String) Description of cluster
+- `resources` (Block, Optional) Resources of cluster (see [below for nested schema](#nestedblock--resources))
 - `schema_registry` (Block, Optional) Schema Registry configuration (see [below for nested schema](#nestedblock--schema_registry))
 - `version` (String) Version of Apache Kafka
 
@@ -102,6 +104,19 @@ Optional:
 
 - `description` (String) CIDR block description
 
+
+
+<a id="nestedblock--config"></a>
+### Nested Schema for `config`
+
+Optional:
+
+- `log_retention_bytes` (Number)
+- `log_retention_hours` (Number)
+- `log_retention_minutes` (Number)
+- `log_retention_ms` (Number)
+- `message_max_bytes` (Number)
+- `replica_fetch_max_bytes` (Number)
 
 
 <a id="nestedblock--resources"></a>
