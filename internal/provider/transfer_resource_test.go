@@ -164,6 +164,29 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testTransferResource, "runtime.dedicated.flavor", "TINY"),
 				),
 			},
+			{
+				Config: (testTransferResourceEndpointsConfig() +
+					"\n\n" +
+					fmt.Sprintf(`resource "doublecloud_transfer" "ttr-transfer" {
+						project_id = %[1]q
+						name = "ttr-transfer"
+						description = "test description"
+						source = doublecloud_transfer_endpoint.ttr-src-pg.id
+						target = doublecloud_transfer_endpoint.ttr-dst-ch.id
+						type = "SNAPSHOT_ONLY"
+						activated = false
+						runtime = {
+							dedicated = {
+								flavor = "TINY"
+							}
+						}
+						data_objects = ["foo.barovich", "bar.fooovich"]
+					}`, testProjectId)),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testTransferResource, "data_objects[0]", "foo.barovich"),
+					resource.TestCheckResourceAttr(testTransferResource, "data_objects[1]", "bar.fooovich"),
+				),
+			},
 			// Delete occurs automatically
 		},
 	})
