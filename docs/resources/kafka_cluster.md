@@ -59,10 +59,10 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 ### Optional
 
 
-- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
+- `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) Cluster configuration (see [below for nested schema](#nestedblock--config))
-- `description` (String) Description of cluster
-- `resources` (Block, Optional) Resources of cluster (see [below for nested schema](#nestedblock--resources))
+- `description` (String) Cluster description
+- `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
 - `schema_registry` (Block, Optional) Schema Registry configuration (see [below for nested schema](#nestedblock--schema_registry))
 - `version` (String) Version of Apache Kafka
 
