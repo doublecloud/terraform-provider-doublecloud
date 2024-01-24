@@ -58,7 +58,6 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 
 ### Optional
 
-
 - `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) Cluster configuration (see [below for nested schema](#nestedblock--config))
 - `description` (String) Cluster description
