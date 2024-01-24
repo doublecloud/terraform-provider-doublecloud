@@ -385,6 +385,7 @@ func (m *transferResourceModel) parse(t *transfer.Transfer) diag.Diagnostics {
 	m.ProjectID = types.StringValue(t.GetProjectId())
 	m.Name = types.StringValue(t.GetName())
 	if len(t.GetDataObjects().GetIncludeObjects()) > 0 {
+		m.DataObjects = []types.String{}
 		for _, o := range t.GetDataObjects().GetIncludeObjects() {
 			m.DataObjects = append(m.DataObjects, types.StringValue(o))
 		}
