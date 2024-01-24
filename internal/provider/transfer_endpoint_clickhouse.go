@@ -60,27 +60,57 @@ type endpointClickhouseTargetSettings struct {
 func transferEndpointClickhouseConnectionSchemaBlock() schema.SingleNestedBlock {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"database": schema.StringAttribute{Optional: true},
-			"user":     schema.StringAttribute{Optional: true},
-			"password": schema.StringAttribute{Optional: true, Sensitive: true},
+			"database": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Database",
+			},
+			"user": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Database user",
+			},
+			"password": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Database user password",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"address": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"cluster_id": schema.StringAttribute{Optional: true},
+					"cluster_id": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Cluster ID",
+					},
 				},
 				Blocks: map[string]schema.Block{
 					"on_premise": schema.SingleNestedBlock{
 						Attributes: map[string]schema.Attribute{
-							"http_port":   schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(8443)},
-							"native_port": schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(8443)},
+							"http_port": schema.Int64Attribute{
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(8443),
+								MarkdownDescription: "HTTP port",
+							},
+							"native_port": schema.Int64Attribute{
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(8443),
+								MarkdownDescription: "Native port",
+							},
 						},
 						Blocks: map[string]schema.Block{
 							"shard": schema.ListNestedBlock{
 								NestedObject: schema.NestedBlockObject{
 									Attributes: map[string]schema.Attribute{
-										"name":  schema.StringAttribute{Optional: true},
-										"hosts": schema.ListAttribute{ElementType: types.StringType, Optional: true},
+										"name": schema.StringAttribute{
+											Optional:            true,
+											MarkdownDescription: "Name",
+										},
+										"hosts": schema.ListAttribute{
+											ElementType:         types.StringType,
+											Optional:            true,
+											MarkdownDescription: "List of hosts",
+										},
 									},
 								},
 							},
@@ -96,8 +126,16 @@ func transferEndpointClickhouseConnectionSchemaBlock() schema.SingleNestedBlock 
 func transferEndpointChSourceSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"include_tables": schema.ListAttribute{ElementType: types.StringType, Optional: true},
-			"exclude_tables": schema.ListAttribute{ElementType: types.StringType, Optional: true},
+			"include_tables": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				MarkdownDescription: "List of tables to include",
+			},
+			"exclude_tables": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				MarkdownDescription: "List of tables to exclude",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"connection": transferEndpointClickhouseConnectionSchemaBlock(),
@@ -166,16 +204,17 @@ func transferEndpointChTargetSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"clickhouse_cluster_name": schema.StringAttribute{
-				MarkdownDescription: "clickhouse_cluster_name",
+				MarkdownDescription: "ClickHouse cluster name",
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
 			"clickhouse_cleanup_policy": schema.StringAttribute{
-				Optional:   true,
-				Computed:   true,
-				Validators: []validator.String{transferEndpointCleanupPolicyValidator()},
-				Default:    stringdefault.StaticString("DISABLED"),
+				Optional:            true,
+				Computed:            true,
+				Validators:          []validator.String{transferEndpointCleanupPolicyValidator()},
+				Default:             stringdefault.StaticString("DISABLED"),
+				MarkdownDescription: "ClickHouse cleanup policy",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -183,8 +222,14 @@ func transferEndpointChTargetSchema() schema.Block {
 			"alt_name": schema.ListNestedBlock{
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"from_name": schema.StringAttribute{Optional: true},
-						"to_name":   schema.StringAttribute{Optional: true},
+						"from_name": schema.StringAttribute{
+							Optional:            true,
+							MarkdownDescription: "",
+						},
+						"to_name": schema.StringAttribute{
+							Optional:            true,
+							MarkdownDescription: "",
+						},
 					},
 				},
 			},

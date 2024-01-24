@@ -51,26 +51,26 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Transfer id",
+				MarkdownDescription: "Transfer ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of transfer",
+				MarkdownDescription: "Transfer name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description",
+				MarkdownDescription: "Transfer description",
 				Default:             stringdefault.StaticString(""),
 			},
 			"type": schema.StringAttribute{
@@ -83,14 +83,14 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 			},
 			"source": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Source endpoint_id",
+				MarkdownDescription: "Source endpoint ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"target": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Target endpoint_id",
+				MarkdownDescription: "Target endpoint ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -99,7 +99,7 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
-				MarkdownDescription: "Activation of transfer",
+				MarkdownDescription: "Transfer activation state",
 			},
 			"transformation": transferTransformationSchema(),
 			"runtime":        transferRuntimeSchema(),
@@ -458,8 +458,15 @@ func transferRuntimeSchema() schema.Attribute {
 		Attributes: map[string]schema.Attribute{
 			"dedicated": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"vpc_id": schema.StringAttribute{Optional: true},
-					"flavor": schema.StringAttribute{Required: true, Validators: []validator.String{transferRuntimeFlavorValidator()}},
+					"vpc_id": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "VPC ID",
+					},
+					"flavor": schema.StringAttribute{
+						Required:            true,
+						Validators:          []validator.String{transferRuntimeFlavorValidator()},
+						MarkdownDescription: "Flavor",
+					},
 				},
 				Optional: true,
 			},

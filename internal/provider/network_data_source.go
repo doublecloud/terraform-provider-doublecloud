@@ -49,24 +49,24 @@ func (d *NetworkDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Network identifier",
+				MarkdownDescription: "Network ID",
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of network",
+				MarkdownDescription: "Network name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Description of network",
+				MarkdownDescription: "Network description",
 			},
 			"region_id": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Region of network",
+				MarkdownDescription: "Network region",
 			},
 			"ipv4_cidr_block": schema.StringAttribute{
 				Optional:            true,
@@ -74,7 +74,7 @@ func (d *NetworkDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 			},
 			"cloud_type": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Cloud type (aws, gcp, azure)",
+				MarkdownDescription: "Cloud provider (`aws`, `gcp`, or `azure`)",
 			},
 		},
 	}

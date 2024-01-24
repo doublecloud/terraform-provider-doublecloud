@@ -295,50 +295,50 @@ func (r *ClickhouseClusterResource) Metadata(ctx context.Context, req resource.M
 func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Clickhouse Cluster resource",
+		MarkdownDescription: "ClickHouse Cluster resource",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "ID of the ClickHouse cluster.",
+				MarkdownDescription: "Cluster ID",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ID of the project that the ClickHouse cluster belongs to.",
+				MarkdownDescription: "ID of the project where the ClickHouse cluster is created",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"cloud_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Type of the cloud where instances should be hosted.",
+				MarkdownDescription: "Cloud provider where the cluster is created. Possible values: `aws` and `gcp`",
 				Validators:          []validator.String{cloudTypeValidator()},
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"region_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ID of the region to place instances.",
+				MarkdownDescription: "ID of the region where resources are created",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of the ClickHouse cluster.",
+				MarkdownDescription: "Cluster name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description of the ClickHouse cluster.",
+				MarkdownDescription: "Cluster description",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"version": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Version of ClickHouse DBMS.",
+				MarkdownDescription: "Version of the ClickHouse DBMS",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"network_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ID of the network that the ClickHouse cluster belongs to.",
+				MarkdownDescription: "ID of the network where the cluster is created",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},
@@ -349,55 +349,58 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 						Attributes: map[string]schema.Attribute{
 							"resource_preset_id": schema.StringAttribute{
 								Optional:            true,
-								MarkdownDescription: "ID of the preset for computational resources available to a host (CPU, memory, etc.).",
+								MarkdownDescription: "ID of the computational resources preset available to a host (CPU, memory, etc.)",
 							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
-								MarkdownDescription: "Volume of the storage available to a host, in bytes.",
+								MarkdownDescription: "Storage volume available to a host in bytes",
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
-								MarkdownDescription: "Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.",
+								MarkdownDescription: "Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
 								Computed:            true,
 								Default:             int64default.StaticInt64(1),
-								MarkdownDescription: "Number of hosts per shard.",
+								MarkdownDescription: "Number of hosts per shard",
 							},
 							"shard_count": schema.Int64Attribute{
 								Optional:            true,
 								Computed:            true,
 								Default:             int64default.StaticInt64(1),
-								MarkdownDescription: "Number of shards in the cluster.",
+								MarkdownDescription: "Number of shards in the cluster",
 							},
 						},
+						MarkdownDescription: "Resources available to ClickHouse hosts",
 					},
 					"dedicated_keeper": schema.SingleNestedBlock{
 						Attributes: map[string]schema.Attribute{
 							"resource_preset_id": schema.StringAttribute{
 								Optional:            true,
-								MarkdownDescription: "ID of the preset for computational resources available to a host (CPU, memory, etc.).",
+								MarkdownDescription: "ID of the computational resources preset available to a host (CPU, memory, etc.)",
 							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
-								MarkdownDescription: "Volume of the storage available to a host, in bytes.",
+								MarkdownDescription: "Volume of the storage available to a host in bytes",
 							},
 							"max_disk_size": schema.Int64Attribute{
 								Optional:            true,
-								MarkdownDescription: "Limit for automatical storage volume scale, in bytes. Autoscaling disabled if not set.",
+								MarkdownDescription: "Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled",
 							},
 							"replica_count": schema.Int64Attribute{
 								Optional:            true,
 								Computed:            true,
 								Default:             int64default.StaticInt64(1),
-								MarkdownDescription: "Number of keeper hosts.",
+								MarkdownDescription: "Number of keeper hosts",
 							},
 						},
+						MarkdownDescription: "Resources available to dedicated ClickHouse Keeper hosts",
 					},
 				},
+				MarkdownDescription: "Cluster resources",
 			},
 			"access": AccessSchemaBlock(),
 			"config": clickhouseConfigSchemaBlock(),
@@ -1112,80 +1115,234 @@ func clickhouseConfigSchemaBlock() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"log_level": schema.StringAttribute{
-				Optional:   true,
-				Computed:   true,
-				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
-				Validators: []validator.String{clickhouseConfigLogLevelValidator()},
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
+				Validators:          []validator.String{clickhouseConfigLogLevelValidator()},
+				MarkdownDescription: "Level of logged events, such as `ERROR` or `TRACE`",
 			},
-			"max_connections":                               schema.Int64Attribute{Optional: true},
-			"max_concurrent_queries":                        schema.Int64Attribute{Optional: true},
-			"keep_alive_timeout":                            schema.StringAttribute{Optional: true},
-			"uncompressed_cache_size":                       schema.Int64Attribute{Optional: true},
-			"mark_cache_size":                               schema.Int64Attribute{Optional: true},
-			"max_table_size_to_drop":                        schema.Int64Attribute{Optional: true},
-			"max_partition_size_to_drop":                    schema.Int64Attribute{Optional: true},
-			"timezone":                                      schema.StringAttribute{Optional: true},
-			"background_pool_size":                          schema.Int64Attribute{Optional: true},
-			"background_schedule_pool_size":                 schema.Int64Attribute{Optional: true},
-			"background_fetches_pool_size":                  schema.Int64Attribute{Optional: true},
-			"background_move_pool_size":                     schema.Int64Attribute{Optional: true},
-			"background_common_pool_size":                   schema.Int64Attribute{Optional: true},
-			"background_merges_mutations_concurrency_ratio": schema.Int64Attribute{Optional: true},
-			"total_memory_profiler_step":                    schema.Int64Attribute{Optional: true},
-			"total_memory_tracker_sample_probability":       schema.Float64Attribute{Optional: true},
-			"background_message_broker_schedule_pool_size":  schema.Int64Attribute{Optional: true},
+			"max_connections": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum number of inbound client connections",
+			},
+			"max_concurrent_queries": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum number of requests processed simultaneously",
+			},
+			"keep_alive_timeout": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Time in seconds for which ClickHouse waits for incoming requests before closing the connection",
+			},
+			"uncompressed_cache_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Cache size in bytes for uncompressed data used by table engines in the MergeTree family",
+			},
+			"mark_cache_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Approximate size in bytes of the mark cache used by table engines in the MergeTree family",
+			},
+			"max_table_size_to_drop": schema.Int64Attribute{Optional: true,
+				MarkdownDescription: "Maximum size in bytes of a table in the MergeTree family that can be deleted using the `DROP TABLE` query",
+			},
+			"max_partition_size_to_drop": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum partition size in bytes for the MergeTree family at which a table can be deleted using the `DROP TABLE` query",
+			},
+			"timezone": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Cluster time zone from the IANA Time Zone Database, such as `Africa/Abidjan`",
+			},
+			"background_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing background merges and mutations for tables with MergeTree engines",
+			},
+			"background_schedule_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads for background jobs for replicated tables, streams in Apache Kafka, and DNS cache updates",
+			},
+			"background_fetches_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing background fetches for replicated tables",
+			},
+			"background_move_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing background moves of data parts for tables with MergeTree engines",
+			},
+			"background_common_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads performing various operations (mostly garbage collection) for tables with MergeTree engines",
+			},
+			"background_merges_mutations_concurrency_ratio": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Ratio of the number of threads to the number of background merges and mutations that can be executed concurrently",
+			},
+			"total_memory_profiler_step": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "RAM in bytes for a stack trace at each memory allocation step",
+			},
+			"total_memory_tracker_sample_probability": schema.Float64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Allows collecting and logging informaiton about random memory allocation and release with the specified probability",
+			},
+			"background_message_broker_schedule_pool_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of threads for executing background message translation operations",
+			},
 			// merge_tree, compression, ...
-			"query_log_retention_size": schema.Int64Attribute{Optional: true},
-			"query_log_retention_time": schema.StringAttribute{Optional: true},
-
-			"query_thread_log_enabled":        schema.BoolAttribute{Optional: true},
-			"query_thread_log_retention_size": schema.Int64Attribute{Optional: true},
-			"query_thread_log_retention_time": schema.StringAttribute{Optional: true},
-
-			"query_views_log_enabled":        schema.BoolAttribute{Optional: true},
-			"query_views_log_retention_size": schema.Int64Attribute{Optional: true},
-			"query_views_log_retention_time": schema.StringAttribute{Optional: true},
-
-			"part_log_retention_size": schema.Int64Attribute{Optional: true},
-			"part_log_retention_time": schema.StringAttribute{Optional: true},
-
-			"metric_log_enabled":        schema.BoolAttribute{Optional: true},
-			"metric_log_retention_size": schema.Int64Attribute{Optional: true},
-			"metric_log_retention_time": schema.StringAttribute{Optional: true},
-
-			"asynchronous_metric_log_enabled":        schema.BoolAttribute{Optional: true},
-			"asynchronous_metric_log_retention_size": schema.Int64Attribute{Optional: true},
-			"asynchronous_metric_log_retention_time": schema.StringAttribute{Optional: true},
-
-			"trace_log_enabled":        schema.BoolAttribute{Optional: true},
-			"trace_log_retention_size": schema.Int64Attribute{Optional: true},
-			"trace_log_retention_time": schema.StringAttribute{Optional: true},
-
-			"text_log_enabled":        schema.BoolAttribute{Optional: true},
-			"text_log_retention_size": schema.Int64Attribute{Optional: true},
-			"text_log_retention_time": schema.StringAttribute{Optional: true},
-			"text_log_level": schema.StringAttribute{
-				Optional:   true,
-				Computed:   true,
-				Default:    stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
-				Validators: []validator.String{clickhouseConfigLogLevelValidator()},
+			"query_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the query log table in bytes",
+			},
+			"query_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the query log table in the duration string format, such as `2h45m`",
 			},
 
-			"opentelemetry_span_log_enabled":        schema.BoolAttribute{Optional: true},
-			"opentelemetry_span_log_retention_size": schema.Int64Attribute{Optional: true},
-			"opentelemetry_span_log_retention_time": schema.StringAttribute{Optional: true},
+			"query_thread_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging query threads",
+			},
+			"query_thread_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the query thread log table in bytes",
+			},
+			"query_thread_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the query thread log table in the duration string format, such as `2h45m`",
+			},
 
-			"session_log_enabled":        schema.BoolAttribute{Optional: true},
-			"session_log_retention_size": schema.Int64Attribute{Optional: true},
-			"session_log_retention_time": schema.StringAttribute{Optional: true},
+			"query_views_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging query views",
+			},
+			"query_views_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the query views log table in bytes",
+			},
+			"query_views_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the query views log table in the duration string format, such as `2h45m`",
+			},
 
-			"zookeeper_log_enabled":        schema.BoolAttribute{Optional: true},
-			"zookeeper_log_retention_size": schema.Int64Attribute{Optional: true},
-			"zookeeper_log_retention_time": schema.StringAttribute{Optional: true},
+			"part_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the part log table in bytes",
+			},
+			"part_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the part log table in the duration string format, such as `2h45m`",
+			},
 
-			"asynchronous_insert_log_enabled":        schema.BoolAttribute{Optional: true},
-			"asynchronous_insert_log_retention_size": schema.Int64Attribute{Optional: true},
-			"asynchronous_insert_log_retention_time": schema.StringAttribute{Optional: true},
+			"metric_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging metric values from the `system.metrics` and the `system.events` tables to `system.metric_log`",
+			},
+			"metric_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the metric log table in bytes",
+			},
+			"metric_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the metric log table in the duration string format, such as `2h45m`",
+			},
+
+			"asynchronous_metric_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging asynchronous metrics",
+			},
+			"asynchronous_metric_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the asynchronous insert log table in bytes",
+			},
+			"asynchronous_metric_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`",
+			},
+
+			"trace_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging stack traces collected by the query profiler",
+			},
+			"trace_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the trace log table in bytes",
+			},
+			"trace_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the trace log table in the duration string format, such as `2h45m`",
+			},
+
+			"text_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable system logs",
+			},
+			"text_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the text log table in bytes",
+			},
+			"text_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the text log table in the duration string format, such as `2h45m`",
+			},
+			"text_log_level": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(clickhouse.ClickhouseConfig_LOG_LEVEL_INFORMATION.String()),
+				Validators:          []validator.String{clickhouseConfigLogLevelValidator()},
+				MarkdownDescription: "Level of logging, such as `ERROR` or `TRACE`",
+			},
+
+			"opentelemetry_span_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable log trace and metric values from a distributed application",
+			},
+			"opentelemetry_span_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the opentelemetry span log table in bytes",
+			},
+			"opentelemetry_span_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the opentelemetry span log table in the duration string format, such as `2h45m`",
+			},
+
+			"session_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging successful and failed login/logout events",
+			},
+			"session_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the session log table in bytes",
+			},
+			"session_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the session log in the duration string format, such as `2h45m`",
+			},
+
+			"zookeeper_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging parameters of requests to the ZooKeeper server and responses from it",
+			},
+			"zookeeper_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the ZooKeeper log table in bytes",
+			},
+			"zookeeper_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the ZooKeeper log table in the duration string format, such as `2h45m`",
+			},
+
+			"asynchronous_insert_log_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Enable logging asynchronous inserts",
+			},
+			"asynchronous_insert_log_retention_size": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum size of the asynchronous insert log table in bytes",
+			},
+			"asynchronous_insert_log_retention_time": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"kafka": clickhouseKafkaSchemaBlock(),
@@ -1197,34 +1354,41 @@ func clickhouseConfigSchemaBlock() schema.Block {
 func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"security_protocol": schema.StringAttribute{
-			Optional:      true,
-			Computed:      true,
-			Validators:    []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Optional:            true,
+			Computed:            true,
+			Validators:          []validator.String{clickhouseConfigKafkaSecurityProtocolValidator()},
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			MarkdownDescription: "Security protocol used for authentication",
 		},
 		"sasl_mechanism": schema.StringAttribute{
-			Optional:      true,
-			Computed:      true,
-			Validators:    []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
-			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Optional:            true,
+			Computed:            true,
+			Validators:          []validator.String{clickhouseConfigKafkaSaslMechanismValidator()},
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			MarkdownDescription: "SASL authentication mechanism",
 		},
 		"sasl_username": schema.StringAttribute{
-			Optional: true,
+			Optional:            true,
+			MarkdownDescription: "Apache Kafka® account username",
 		},
 		"sasl_password": schema.StringAttribute{
-			Optional:  true,
-			Sensitive: true,
+			Optional:            true,
+			Sensitive:           true,
+			MarkdownDescription: "Apache Kafka® account password",
 		},
 		"enable_ssl_certificate_verification": schema.BoolAttribute{
-			Optional:      true,
-			Computed:      true,
-			PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+			Optional:            true,
+			Computed:            true,
+			PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+			MarkdownDescription: "Enable SSL certificate verification",
 		},
 		"max_poll_interval_ms": schema.StringAttribute{
-			Optional: true,
+			Optional:            true,
+			MarkdownDescription: "Maximum interval in milliseconds between making poll calls to get messages for high-level consumers",
 		},
 		"session_timeout_ms": schema.StringAttribute{
-			Optional: true,
+			Optional:            true,
+			MarkdownDescription: "Timeout to maintain a client group session",
 		},
 	}
 }

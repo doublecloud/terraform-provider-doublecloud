@@ -152,14 +152,17 @@ func AccessSchemaBlock() schema.Block {
 				Validators:          []validator.List{listvalidator.ValueStringsAre(stringvalidator.OneOf(accessDataServiceOneofValues()...))},
 			},
 			"ipv4_cidr_blocks": schema.ListNestedAttribute{
-				Optional:     true,
-				NestedObject: CIDRBlockAttributeSchema(),
+				Optional:            true,
+				NestedObject:        CIDRBlockAttributeSchema(),
+				MarkdownDescription: "IPv4 CIDR blocks",
 			},
 			"ipv6_cidr_blocks": schema.ListNestedAttribute{
-				Optional:     true,
-				NestedObject: CIDRBlockAttributeSchema(),
+				Optional:            true,
+				NestedObject:        CIDRBlockAttributeSchema(),
+				MarkdownDescription: "IPv6 CIDR blocks",
 			},
 		},
+		MarkdownDescription: "Access control configuration",
 	}
 }
 
@@ -172,7 +175,7 @@ func CIDRBlockAttributeSchema() schema.NestedAttributeObject {
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Description of CIDR block",
+				MarkdownDescription: "CIDR block description",
 			},
 		},
 	}

@@ -17,14 +17,14 @@ Transfer data source
 
 ### Required
 
-- `project_id` (String) Project identifier
+- `project_id` (String) Project ID
 
 ### Optional
 
-- `description` (String) Description of transfer
-- `id` (String) Transfer identifier
-- `name` (String) Name of transfer
-- `status` (String) Status of transfer
-- `type` (String) Type of transfer
+- `description` (String) Transfer description
+- `id` (String) Transfer ID
+- `name` (String) Transfer name
+- `status` (String) Transfer status
+- `type` (String) Transfer type
 
 
