@@ -200,7 +200,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 		{
 			name:   "ipv4MissedNetworkConfig",
 			config: ipv4MissedNetworkConfig,
-			err:    regexp.MustCompile(`IPv4 CIDR block is required for non BYOC networks`),
+			err:    regexp.MustCompile(`IPv4 CIDR block is required for non-BYOC networks.`),
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
