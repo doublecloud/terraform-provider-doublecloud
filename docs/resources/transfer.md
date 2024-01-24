@@ -47,6 +47,7 @@ resource "doublecloud_transfer" "sample-pg2ch" {
 ### Optional
 
 - `activated` (Boolean) Transfer activation state
+- `data_objects` (List of String) List of objects for transfer. For example a table name: "public.my_table"
 - `description` (String) Transfer description
 - `runtime` (Attributes) (see [below for nested schema](#nestedatt--runtime))
 - `transformation` (Attributes) (see [below for nested schema](#nestedatt--transformation))
