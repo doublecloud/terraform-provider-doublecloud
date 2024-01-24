@@ -74,21 +74,71 @@ func transferUnexpectedFieldBehaviorValidator() validator.String {
 func transferEndpointS3SourceSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
-			"dataset":      schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"path_pattern": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"schema":       schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"dataset": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Dataset",
+			},
+			"path_pattern": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Path pattern",
+			},
+			"schema": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Schema",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"format": transferEndpointS3SourceFormatSchema(),
 			"provider": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"bucket":                schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"aws_access_key_id":     schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"aws_secret_access_key": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"path_prefix":           schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"endpoint":              schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"use_ssl":               schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"verify_ssl_cert":       schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+					"bucket": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Bucket",
+					},
+					"aws_access_key_id": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Access key ID",
+					},
+					"aws_secret_access_key": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Secret access key",
+					},
+					"path_prefix": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Path prefix",
+					},
+					"endpoint": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Endpoint",
+					},
+					"use_ssl": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "",
+					},
+					"verify_ssl_cert": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "",
+					},
 				},
 			},
 		},
@@ -100,35 +150,105 @@ func transferEndpointS3SourceFormatSchema() schema.Block {
 		Blocks: map[string]schema.Block{
 			"csv": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"delimiter":                 schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"quote_char":                schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"escape_char":               schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"encoding":                  schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"double_quote":              schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"newlines_in_values":        schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"block_size":                schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-					"additional_reader_options": schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-					"advanced_options":          schema.StringAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+					"delimiter": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Delimiter",
+					},
+					"quote_char": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Quote character",
+					},
+					"escape_char": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Escape character",
+					},
+					"encoding": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "",
+					},
+					"double_quote": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Replace double quotes with single quotes",
+					},
+					"newlines_in_values": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Allow newline characters in values",
+					},
+					"block_size": schema.Int64Attribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Block size",
+					},
+					"additional_reader_options": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "",
+					},
+					"advanced_options": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Advanced options",
+					},
 				},
 			},
 			"parquet": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"buffer_size": schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
-					"columns":     schema.ListAttribute{ElementType: types.StringType, Optional: true},
-					"batch_size":  schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+					"buffer_size": schema.Int64Attribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Buffer size",
+					},
+					"columns": schema.ListAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						MarkdownDescription: "List of columns",
+					},
+					"batch_size": schema.Int64Attribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Batch size",
+					},
 				},
 			},
 			"avro": schema.SingleNestedBlock{},
 			"jsonl": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"newlines_in_values": schema.BoolAttribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-					"unexpected_field_behavior": schema.StringAttribute{
-						Optional:      true,
-						Computed:      true,
-						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
-						Validators:    []validator.String{transferUnexpectedFieldBehaviorValidator()},
+					"newlines_in_values": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Allow newline characters in values",
 					},
-					"block_size": schema.Int64Attribute{Optional: true, Computed: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+					"unexpected_field_behavior": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+						Validators:          []validator.String{transferUnexpectedFieldBehaviorValidator()},
+						MarkdownDescription: "",
+					},
+					"block_size": schema.Int64Attribute{
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+						MarkdownDescription: "Block size",
+					},
 				},
 			},
 		},

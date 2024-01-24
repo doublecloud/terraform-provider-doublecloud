@@ -44,24 +44,24 @@ resource "doublecloud_workbook" "example_workbook" {
 
 ### Required
 
-- `project_id` (String) Project identifier
-- `title` (String) Title of resource
+- `project_id` (String) Project ID
+- `title` (String) Resource title
 
 ### Optional
 
-- `config` (String) Workbook configuration (json encoded)
+- `config` (String) JSON-encoded workbook configuration
 - `connect` (Block Set) (see [below for nested schema](#nestedblock--connect))
 
 ### Read-Only
 
-- `id` (String) Workbook identifier
+- `id` (String) Workbook ID
 
 <a id="nestedblock--connect"></a>
 ### Nested Schema for `connect`
 
 Required:
 
-- `config` (String) [Configuration of connection (json encoded)](https://double.cloud/docs/en/public-api/api-reference/visualization/configs/Connection)
+- `config` (String) [JSON-encoded connection configuration](https://double.cloud/docs/en/public-api/api-reference/visualization/configs/Connection)
 - `name` (String) Connection name
 - `secret` (String) Secret
 

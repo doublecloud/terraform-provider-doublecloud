@@ -61,14 +61,14 @@ var (
 		Attributes: map[string]resourceschema.Attribute{
 			"id": resourceschema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Network Connection identifier",
+				MarkdownDescription: "Network Connection ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"network_id": resourceschema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Network identifier",
+				MarkdownDescription: "Network ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -76,7 +76,7 @@ var (
 			"description": resourceschema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description of network connection",
+				MarkdownDescription: "Network connection description",
 				Default:             stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -92,7 +92,7 @@ var (
 						Attributes: map[string]resourceschema.Attribute{
 							"vpc_id": resourceschema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "ID of the VPC",
+								MarkdownDescription: "VPC ID",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
@@ -106,14 +106,14 @@ var (
 							},
 							"region_id": resourceschema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "ID of the AWS region",
+								MarkdownDescription: "AWS region ID",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
 							},
 							"ipv4_cidr_block": resourceschema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "Customer IPv4 CIDR block.\nDoubleCloud will create route to this CIDR using Peering Connection.",
+								MarkdownDescription: "Customer's IPv4 CIDR block.\n    DoubleCloud will create a route to this CIDR using the Peering Connection.",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
@@ -121,7 +121,7 @@ var (
 							"ipv6_cidr_block": resourceschema.StringAttribute{
 								Optional:            true,
 								Computed:            true,
-								MarkdownDescription: "Customer IPv6 CIDR block.\nDoubleCloud will create route to this CIDR using Peering Connection.",
+								MarkdownDescription: "Customer's IPv6 CIDR block.\n    DoubleCloud will create a route to this CIDR using the Peering Connection.",
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
@@ -171,14 +171,14 @@ var (
 					},
 					"peer_network_url": resourceschema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "The URL of the peer network",
+						MarkdownDescription: "Peer network URL",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
 					"managed_network_url": resourceschema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "The URL of the managed GCP network",
+						MarkdownDescription: "URL of the managed GCP network",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},

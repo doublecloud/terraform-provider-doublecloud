@@ -17,18 +17,18 @@ Kafka data source
 
 ### Required
 
-- `project_id` (String) Project identifier
+- `project_id` (String) Project ID
 
 ### Optional
 
-- `cloud_type` (String) Cloud type (aws, gcp, azure)
-- `connection_info` (Attributes) (see [below for nested schema](#nestedatt--connection_info))
-- `description` (String) Description of cluster
-- `id` (String) Cluster identifier
-- `name` (String) Name of cluster
-- `private_connection_info` (Attributes) (see [below for nested schema](#nestedatt--private_connection_info))
-- `region_id` (String) Region of cluster
-- `version` (String) Version of ClickHouse DBMS
+- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
+- `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
+- `description` (String) Cluster description
+- `id` (String) Cluster ID
+- `name` (String) Cluster name
+- `private_connection_info` (Attributes) Private connection info (see [below for nested schema](#nestedatt--private_connection_info))
+- `region_id` (String) Region where the cluster is located
+- `version` (String) Version of the ClickHouse DBMS
 
 <a id="nestedatt--connection_info"></a>
 ### Nested Schema for `connection_info`
@@ -36,7 +36,7 @@ Kafka data source
 Optional:
 
 - `connection_string` (String) String to use in clients
-- `password` (String) Password for Apache Kafka® user
+- `password` (String) Password for the Apache Kafka® user
 - `user` (String) Apache Kafka® user
 
 
@@ -46,7 +46,7 @@ Optional:
 Optional:
 
 - `connection_string` (String) String to use in clients
-- `password` (String) Password for Apache Kafka® user
+- `password` (String) Password for the Apache Kafka® user
 - `user` (String) Apache Kafka® user
 
 

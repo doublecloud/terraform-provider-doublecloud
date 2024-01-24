@@ -39,23 +39,23 @@ resource "doublecloud_transfer" "sample-pg2ch" {
 
 ### Required
 
-- `name` (String) Name of transfer
-- `project_id` (String) Project identifier
-- `source` (String) Source endpoint_id
-- `target` (String) Target endpoint_id
+- `name` (String) Transfer name
+- `project_id` (String) Project ID
+- `source` (String) Source endpoint ID
+- `target` (String) Target endpoint ID
 
 ### Optional
 
-- `activated` (Boolean) Activation of transfer
+- `activated` (Boolean) Transfer activation state
 - `data_objects` (List of String) List of objects for transfer. For example a table name: "public.my_table"
-- `description` (String) Description
+- `description` (String) Transfer description
 - `runtime` (Attributes) (see [below for nested schema](#nestedatt--runtime))
 - `transformation` (Attributes) (see [below for nested schema](#nestedatt--transformation))
 - `type` (String) Transfer type
 
 ### Read-Only
 
-- `id` (String) Transfer id
+- `id` (String) Transfer ID
 
 <a id="nestedatt--runtime"></a>
 ### Nested Schema for `runtime`
@@ -69,11 +69,11 @@ Optional:
 
 Required:
 
-- `flavor` (String)
+- `flavor` (String) Flavor
 
 Optional:
 
-- `vpc_id` (String)
+- `vpc_id` (String) VPC ID
 
 
 
