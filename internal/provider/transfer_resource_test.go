@@ -183,8 +183,8 @@ func TestAccTransferResource(t *testing.T) {
 						data_objects = ["foo.barovich", "bar.fooovich"]
 					}`, testProjectId)),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testTransferResource, "data_objects[0]", "foo.barovich"),
-					resource.TestCheckResourceAttr(testTransferResource, "data_objects[1]", "bar.fooovich"),
+					resource.TestCheckResourceAttr(testTransferResource, "data_objects.0", "foo.barovich"),
+					resource.TestCheckResourceAttr(testTransferResource, "data_objects.1", "bar.fooovich"),
 				),
 			},
 			// Delete occurs automatically
