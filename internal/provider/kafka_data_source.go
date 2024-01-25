@@ -164,7 +164,7 @@ func (d *KafkaDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		}
 	}
 
-	response, err := d.svc.Get(ctx, &kafka.GetClusterRequest{ClusterId: data.Id.ValueString()})
+	response, err := d.svc.Get(ctx, &kafka.GetClusterRequest{ClusterId: data.Id.ValueString(), Sensitive: true})
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get", err.Error())
 		return
