@@ -14,6 +14,8 @@ resource "doublecloud_kafka_cluster" "input-kafka" {
     }
   }
 
+  config {}
+
   schema_registry {
     enabled = false
   }

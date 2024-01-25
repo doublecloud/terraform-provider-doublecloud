@@ -20,8 +20,8 @@ resource "doublecloud_clickhouse_cluster" "target-clickhouse" {
     kafka {
       security_protocol = "SASL_SSL"
       sasl_mechanism    = "SCRAM_SHA_512"
-      sasl_username = coalesce(data.doublecloud_kafka.input-kafka.connection_info, {user: ""}).user
-      sasl_password = coalesce(data.doublecloud_kafka.input-kafka.connection_info, {password: ""}).password
+      sasl_username     = data.doublecloud_kafka.input-kafka.connection_info.user
+      sasl_password     = data.doublecloud_kafka.input-kafka.connection_info.password
     }
   }
 
