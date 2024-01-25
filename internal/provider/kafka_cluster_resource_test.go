@@ -38,6 +38,11 @@ func TestAccKafkaClusterResource(t *testing.T) {
 		SchemaRegistry: &schemaRegistryModel{
 			Enabled: types.BoolValue(false),
 		},
+
+		Config: &KafkaClusterConfigModel{
+			MessageMaxBytes:   types.Int64Value(1024),
+			LogRetentionHours: types.Int64Value(168),
+		},
 	}
 
 	m2 := m
@@ -46,6 +51,8 @@ func TestAccKafkaClusterResource(t *testing.T) {
 	r2 := r1
 	m2.Resources = &r2
 	m2.Resources.Kafka.DiskSize = types.Int64Value(51539607552)
+	m2.Config.MessageMaxBytes = types.Int64Value(2048)
+	m2.Config.LogRetentionHours = types.Int64Value(336)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -71,16 +78,22 @@ func TestAccKafkaClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testAccKafkaId, "private_connection_info.connection_string"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "private_connection_info.user", "admin"),
 					resource.TestCheckResourceAttrSet(testAccKafkaId, "private_connection_info.password"),
+
+					resource.TestCheckResourceAttr(testAccKafkaId, "config.message_max_bytes", "1024"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "config.log_retention_hours", "168"),
 				),
 			},
 			// Update and Read testing
-			// {
-			// 	Config: testAccKafkaClusterResourceConfigUpdated(&m2),
-			// 	Check: resource.ComposeAggregateTestCheckFunc(
-			// 		resource.TestCheckResourceAttr("doublecloud_kafka_cluster.test", "name", "terraform-kafka-changed"),
-			// 		resource.TestCheckResourceAttr("doublecloud_kafka_cluster.test", "resources.kafka.disk_size", "51539607552"),
-			// 	),
-			// },
+			{
+				Config: testAccKafkaClusterResourceConfigUpdated(&m2),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testAccKafkaId, "name", "terraform-kafka-changed"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.disk_size", "51539607552"),
+
+					resource.TestCheckResourceAttr(testAccKafkaId, "config.message_max_bytes", "2048"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "config.log_retention_hours", "336"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -97,12 +110,17 @@ resource "doublecloud_kafka_cluster" "tf-acc-kafka" {
   network_id = %[5]q
 
   resources {
-	kafka {
-		resource_preset_id = %[6]q
-		disk_size =  %[7]q
-		broker_count = %[8]q
-		zone_count =  %[9]q
-	}
+    kafka {
+      resource_preset_id = %[6]q
+      disk_size =  %[7]q
+      broker_count = %[8]q
+      zone_count =  %[9]q
+    }
+  }
+
+  config {
+	message_max_bytes = 1024
+	log_retention_hours = 168
   }
 
   schema_registry {
@@ -143,12 +161,17 @@ resource "doublecloud_kafka_cluster" "tf-acc-kafka" {
   network_id = %[5]q
 
   resources {
-	kafka {
-		resource_preset_id = %[6]q
-		disk_size =  %[7]q
-		broker_count = %[8]q
-		zone_count =  %[9]q
-	}
+    kafka {
+      resource_preset_id = %[6]q
+      disk_size =  %[7]q
+      broker_count = %[8]q
+      zone_count =  %[9]q
+    }
+  }
+
+  config {
+	message_max_bytes = 2048
+	log_retention_hours = 336
   }
 
   schema_registry {

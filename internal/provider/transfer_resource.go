@@ -51,26 +51,26 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Transfer id",
+				MarkdownDescription: "Transfer ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Project identifier",
+				MarkdownDescription: "Project ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of transfer",
+				MarkdownDescription: "Transfer name",
 			},
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Description",
+				MarkdownDescription: "Transfer description",
 				Default:             stringdefault.StaticString(""),
 			},
 			"type": schema.StringAttribute{
@@ -83,14 +83,14 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 			},
 			"source": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Source endpoint_id",
+				MarkdownDescription: "Source endpoint ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"target": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Target endpoint_id",
+				MarkdownDescription: "Target endpoint ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -99,7 +99,12 @@ func (r *TransferResource) Schema(ctx context.Context, req resource.SchemaReques
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
-				MarkdownDescription: "Activation of transfer",
+				MarkdownDescription: "Transfer activation state",
+			},
+			"data_objects": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				MarkdownDescription: "List of objects for transfer. For example a table name: \"public.my_table\"",
 			},
 			"transformation": transferTransformationSchema(),
 			"runtime":        transferRuntimeSchema(),
@@ -324,6 +329,7 @@ type transferResourceModel struct {
 	Target         types.String            `tfsdk:"target"`
 	Type           types.String            `tfsdk:"type"`
 	Activated      types.Bool              `tfsdk:"activated"`
+	DataObjects    []types.String          `tfsdk:"data_objects"`
 	Transformation *transferTransformation `tfsdk:"transformation"`
 	Runtime        *transferRuntime        `tfsdk:"runtime"`
 }
@@ -344,6 +350,13 @@ func (m *transferResourceModel) CreateRequest() (*transfer.CreateTransferRequest
 	r.ProjectId = m.ProjectID.ValueString()
 	r.SourceId = m.Source.ValueString()
 	r.TargetId = m.Target.ValueString()
+	if len(m.DataObjects) > 0 {
+		var res []string
+		for _, s := range m.DataObjects {
+			res = append(res, s.ValueString())
+		}
+		r.DataObjects = &transfer.DataObjects{IncludeObjects: res}
+	}
 	r.Type = transfer.TransferType(transfer.TransferType_value[m.Type.ValueString()])
 	if m.Transformation != nil {
 		r.Transformation = new(transfer.Transformation)
@@ -371,6 +384,12 @@ func (m *transferResourceModel) parse(t *transfer.Transfer) diag.Diagnostics {
 	m.Id = types.StringValue(t.GetId())
 	m.ProjectID = types.StringValue(t.GetProjectId())
 	m.Name = types.StringValue(t.GetName())
+	if len(t.GetDataObjects().GetIncludeObjects()) > 0 {
+		m.DataObjects = []types.String{}
+		for _, o := range t.GetDataObjects().GetIncludeObjects() {
+			m.DataObjects = append(m.DataObjects, types.StringValue(o))
+		}
+	}
 	m.Description = types.StringValue(t.GetDescription())
 	m.Source = types.StringValue(t.GetSource().GetId())
 	m.Target = types.StringValue(t.GetTarget().GetId())
@@ -408,6 +427,12 @@ func (m *transferResourceModel) UpdateRequest() (*transfer.UpdateTransferRequest
 	if m.Transformation != nil {
 		r.Transformation = new(transfer.Transformation)
 		diags.Append(m.Transformation.convert(requestTypeUpdate, r.Transformation)...)
+	}
+	if len(m.DataObjects) > 0 {
+		r.DataObjects = &transfer.DataObjects{IncludeObjects: nil}
+		for _, s := range m.DataObjects {
+			r.DataObjects.IncludeObjects = append(r.DataObjects.IncludeObjects, s.ValueString())
+		}
 	}
 	if m.Runtime != nil {
 		settings := &transfer.Settings{Settings: &transfer.Settings_AutoSettings{AutoSettings: &transfer.AutoSettings{}}}
@@ -458,8 +483,15 @@ func transferRuntimeSchema() schema.Attribute {
 		Attributes: map[string]schema.Attribute{
 			"dedicated": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"vpc_id": schema.StringAttribute{Optional: true},
-					"flavor": schema.StringAttribute{Required: true, Validators: []validator.String{transferRuntimeFlavorValidator()}},
+					"vpc_id": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "VPC ID",
+					},
+					"flavor": schema.StringAttribute{
+						Required:            true,
+						Validators:          []validator.String{transferRuntimeFlavorValidator()},
+						MarkdownDescription: "Flavor",
+					},
 				},
 				Optional: true,
 			},

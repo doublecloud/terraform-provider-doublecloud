@@ -3,12 +3,12 @@
 page_title: "doublecloud_kafka_cluster Resource - terraform-provider-doublecloud"
 subcategory: ""
 description: |-
-  Kafka cluster resource
+  Kafka Cluster resource
 ---
 
 # doublecloud_kafka_cluster (Resource)
 
-Kafka cluster resource
+Kafka Cluster resource
 
 ## Example Usage
 
@@ -50,25 +50,26 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 
 ### Required
 
-- `cloud_type` (String) Cloud type (aws, gcp, azure)
-- `name` (String) Name of cluster
-- `network_id` (String) Network of cluster
-- `project_id` (String) Project Id
-- `region_id` (String) Region of cluster
+- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
+- `name` (String) Cluster name
+- `network_id` (String) Cluster network
+- `project_id` (String) Project ID
+- `region_id` (String) Region where the cluster is located
 
 ### Optional
 
-- `access` (Block, Optional) (see [below for nested schema](#nestedblock--access))
-- `description` (String) Description of cluster
-- `resources` (Block, Optional) Resources of cluster (see [below for nested schema](#nestedblock--resources))
+- `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
+- `config` (Block, Optional) Cluster configuration (see [below for nested schema](#nestedblock--config))
+- `description` (String) Cluster description
+- `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
 - `schema_registry` (Block, Optional) Schema Registry configuration (see [below for nested schema](#nestedblock--schema_registry))
 - `version` (String) Version of Apache Kafka
 
 ### Read-Only
 
-- `connection_info` (Attributes) (see [below for nested schema](#nestedatt--connection_info))
-- `id` (String) Cluster Id
-- `private_connection_info` (Attributes) (see [below for nested schema](#nestedatt--private_connection_info))
+- `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
+- `id` (String) Cluster ID
+- `private_connection_info` (Attributes) Private connection info (see [below for nested schema](#nestedatt--private_connection_info))
 
 <a id="nestedblock--access"></a>
 ### Nested Schema for `access`
@@ -76,8 +77,8 @@ resource "doublecloud_clickhouse_kafka" "example-kafka" {
 Optional:
 
 - `data_services` (List of String) List of allowed services
-- `ipv4_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
-- `ipv6_cidr_blocks` (Attributes List) (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
+- `ipv4_cidr_blocks` (Attributes List) IPv4 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
+- `ipv6_cidr_blocks` (Attributes List) IPv6 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
 
 <a id="nestedatt--access--ipv4_cidr_blocks"></a>
 ### Nested Schema for `access.ipv4_cidr_blocks`
@@ -88,7 +89,7 @@ Required:
 
 Optional:
 
-- `description` (String) Description of CIDR block
+- `description` (String) CIDR block description
 
 
 <a id="nestedatt--access--ipv6_cidr_blocks"></a>
@@ -100,8 +101,21 @@ Required:
 
 Optional:
 
-- `description` (String) Description of CIDR block
+- `description` (String) CIDR block description
 
+
+
+<a id="nestedblock--config"></a>
+### Nested Schema for `config`
+
+Optional:
+
+- `log_retention_bytes` (Number)
+- `log_retention_hours` (Number)
+- `log_retention_minutes` (Number)
+- `log_retention_ms` (Number)
+- `message_max_bytes` (Number)
+- `replica_fetch_max_bytes` (Number)
 
 
 <a id="nestedblock--resources"></a>
@@ -116,14 +130,14 @@ Optional:
 
 Required:
 
-- `broker_count` (Number)
-- `disk_size` (Number)
-- `resource_preset_id` (String)
-- `zone_count` (Number)
+- `broker_count` (Number) Number of brokers
+- `disk_size` (Number) Disk size
+- `resource_preset_id` (String) Resource preset ID
+- `zone_count` (Number) Number of zones
 
 Optional:
 
-- `max_disk_size` (Number)
+- `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
 
 
 
@@ -132,7 +146,7 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean)
+- `enabled` (Boolean) Enable the Schema Registry
 
 
 <a id="nestedatt--connection_info"></a>
@@ -141,7 +155,7 @@ Optional:
 Read-Only:
 
 - `connection_string` (String) String to use in clients
-- `password` (String) Password for Apache Kafka® user
+- `password` (String) Password for the Apache Kafka® user
 - `user` (String) Apache Kafka® user
 
 
@@ -151,7 +165,7 @@ Read-Only:
 Read-Only:
 
 - `connection_string` (String) String to use in clients
-- `password` (String) Password for Apache Kafka® user
+- `password` (String) Password for the Apache Kafka® user
 - `user` (String) Apache Kafka® user
 
 
