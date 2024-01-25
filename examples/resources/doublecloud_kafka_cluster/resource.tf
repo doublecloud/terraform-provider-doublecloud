@@ -1,4 +1,4 @@
-resource "doublecloud_clickhouse_kafka" "example-kafka" {
+resource "doublecloud_kafka_cluster" "example-kafka" {
   project_id = var.project_id
   name = "example-clickhouse"
   region_id = "eu-central-1"
