@@ -21,12 +21,15 @@ Kafka data source
 
 ### Optional
 
-- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
 - `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
-- `description` (String) Cluster description
 - `id` (String) Cluster ID
 - `name` (String) Cluster name
 - `private_connection_info` (Attributes) Private connection info (see [below for nested schema](#nestedatt--private_connection_info))
+
+### Read-Only
+
+- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
+- `description` (String) Cluster description
 - `region_id` (String) Region where the cluster is located
 - `version` (String) Version of the ClickHouse DBMS
 
