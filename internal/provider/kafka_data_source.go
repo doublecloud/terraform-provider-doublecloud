@@ -82,27 +82,29 @@ func (d *KafkaDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 				MarkdownDescription: "Cluster name",
 			},
 			"description": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Cluster description",
 			},
 			"region_id": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Region where the cluster is located",
 			},
 			"cloud_type": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Cloud provider (`aws`, `gcp`, or `azure`)",
 			},
 			"version": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Version of the ClickHouse DBMS",
 			},
 			"connection_info": schema.SingleNestedAttribute{
+				Computed:            true,
 				Optional:            true,
 				Attributes:          kafkaConnectionInfoSchema(),
 				MarkdownDescription: "Public connection info",
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
+				Computed:            true,
 				Optional:            true,
 				Attributes:          kafkaConnectionInfoSchema(),
 				MarkdownDescription: "Private connection info",
