@@ -30,7 +30,7 @@ variable "project_id" {
 }
 
 // Authorization in Double.Cloud work with key.json files, so we must specify were it located
-variable "path_to_dc_key" {
+variable "dc_key_path" {
   type        = string
   default     = "~/.config/auth_key.json"
   description = "Path to DC key"

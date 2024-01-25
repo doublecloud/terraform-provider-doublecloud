@@ -14,5 +14,5 @@ terraform {
 
 provider "doublecloud" {
   # See https://double.cloud/docs/en/public-api/tutorials/transfer-api-quickstart on how to obtain this file
-  authorized_key = file(var.path_to_dc_key)
+  authorized_key = file(var.dc_key_path)
 }
