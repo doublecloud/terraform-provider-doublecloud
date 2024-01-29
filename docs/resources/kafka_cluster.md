@@ -15,7 +15,7 @@ Kafka Cluster resource
 ```terraform
 resource "doublecloud_kafka_cluster" "example-kafka" {
   project_id = var.project_id
-  name = "example-clickhouse"
+  name = "example-kafka"
   region_id = "eu-central-1"
   cloud_type = "aws"
   network_id = data.doublecloud_network.default.id
