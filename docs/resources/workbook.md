@@ -64,5 +64,3 @@ Required:
 - `config` (String) [JSON-encoded connection configuration](https://double.cloud/docs/en/public-api/api-reference/visualization/configs/Connection)
 - `name` (String) Connection name
 - `secret` (String) Secret
-
-

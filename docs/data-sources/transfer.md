@@ -26,5 +26,3 @@ Transfer data source
 - `name` (String) Transfer name
 - `status` (String) Transfer status
 - `type` (String) Transfer type
-
-

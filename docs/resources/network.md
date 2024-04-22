@@ -70,5 +70,3 @@ Required:
 - `project_name` (String) Name of the project where is the imported network is located
 - `service_account_email` (String) Service account email
 - `subnetwork_name` (String) Name of the subnetwork to import
-
-

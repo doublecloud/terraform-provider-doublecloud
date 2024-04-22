@@ -203,5 +203,3 @@ Optional:
 - `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
 - `replica_count` (Number) Number of keeper hosts
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
-
-

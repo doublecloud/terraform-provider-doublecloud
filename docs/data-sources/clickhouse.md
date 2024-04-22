@@ -63,5 +63,3 @@ Read-Only:
 - `password` (String) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
 - `user` (String) ClickHouse user
-
-
