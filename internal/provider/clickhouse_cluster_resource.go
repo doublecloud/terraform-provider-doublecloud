@@ -22,6 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -56,11 +58,10 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 
 	if v := m.Clickhouse; v != nil {
 		r.Clickhouse = &clickhouse.ClusterResources_Clickhouse{}
-		if v := m.Clickhouse.ResourcePresetId; !v.IsNull() {
-			r.Clickhouse.ResourcePresetId = v.ValueString()
-		} else {
-			diags.AddError("missed resource_preset_id", "clickhouse resource_preset_id must be set")
-		}
+		r.Clickhouse.ResourcePresetId = m.Clickhouse.ResourcePresetId.ValueString()
+		r.Clickhouse.MinResourcePresetId = wrapperspb.String(m.Clickhouse.MinResourcePresetId.ValueString())
+		r.Clickhouse.MaxResourcePresetId = wrapperspb.String(m.Clickhouse.MaxResourcePresetId.ValueString())
+
 		if v := m.Clickhouse.DiskSize; !v.IsNull() {
 			r.Clickhouse.DiskSize = wrapperspb.Int64(v.ValueInt64())
 		} else {
@@ -83,11 +84,9 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 	}
 	if v := m.Keeper; v != nil {
 		r.DedicatedKeeper = &clickhouse.ClusterResources_Keeper{}
-		if v := m.Keeper.ResourcePresetId; !v.IsNull() {
-			r.DedicatedKeeper.ResourcePresetId = v.ValueString()
-		} else {
-			diags.AddError("missed resource_preset_id", "keeper resource_preset_id must be set")
-		}
+		r.DedicatedKeeper.ResourcePresetId = m.Keeper.ResourcePresetId.ValueString()
+		r.DedicatedKeeper.MinResourcePresetId = wrapperspb.String(m.Keeper.MinResourcePresetId.ValueString())
+		r.DedicatedKeeper.MaxResourcePresetId = wrapperspb.String(m.Keeper.MaxResourcePresetId.ValueString())
 		if v := m.Keeper.DiskSize; !v.IsNull() {
 			r.DedicatedKeeper.DiskSize = wrapperspb.Int64(v.ValueInt64())
 		} else {
@@ -107,18 +106,22 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 }
 
 type clickhouseClusterResourcesClickhouse struct {
-	ResourcePresetId types.String `tfsdk:"resource_preset_id"`
-	DiskSize         types.Int64  `tfsdk:"disk_size"`
-	MaxDiskSize      types.Int64  `tfsdk:"max_disk_size"`
-	ReplicaCount     types.Int64  `tfsdk:"replica_count"`
-	ShardCount       types.Int64  `tfsdk:"shard_count"`
+	ResourcePresetId    types.String `tfsdk:"resource_preset_id"`
+	MinResourcePresetId types.String `tfsdk:"min_resource_preset_id"`
+	MaxResourcePresetId types.String `tfsdk:"max_resource_preset_id"`
+	DiskSize            types.Int64  `tfsdk:"disk_size"`
+	MaxDiskSize         types.Int64  `tfsdk:"max_disk_size"`
+	ReplicaCount        types.Int64  `tfsdk:"replica_count"`
+	ShardCount          types.Int64  `tfsdk:"shard_count"`
 }
 
 type clickhouseClusterResourcesKeeper struct {
-	ResourcePresetId types.String `tfsdk:"resource_preset_id"`
-	DiskSize         types.Int64  `tfsdk:"disk_size"`
-	MaxDiskSize      types.Int64  `tfsdk:"max_disk_size"`
-	ReplicaCount     types.Int64  `tfsdk:"replica_count"`
+	ResourcePresetId    types.String `tfsdk:"resource_preset_id"`
+	MinResourcePresetId types.String `tfsdk:"min_resource_preset_id"`
+	MaxResourcePresetId types.String `tfsdk:"max_resource_preset_id"`
+	DiskSize            types.Int64  `tfsdk:"disk_size"`
+	MaxDiskSize         types.Int64  `tfsdk:"max_disk_size"`
+	ReplicaCount        types.Int64  `tfsdk:"replica_count"`
 }
 
 type clickhouseConfig struct {
@@ -351,6 +354,14 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 								Optional:            true,
 								MarkdownDescription: "ID of the computational resources preset available to a host (CPU, memory, etc.)",
 							},
+							"min_resource_preset_id": schema.StringAttribute{
+								Optional:            true,
+								MarkdownDescription: "ID of the minimal computational resources preset available to a host (CPU, memory, etc.)",
+							},
+							"max_resource_preset_id": schema.StringAttribute{
+								Optional:            true,
+								MarkdownDescription: "ID of the maximal computational resources preset available to a host (CPU, memory, etc.)",
+							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
 								PlanModifiers:       []planmodifier.Int64{&suppressAutoscaledDiskDiff{}},
@@ -374,12 +385,21 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							},
 						},
 						MarkdownDescription: "Resources available to ClickHouse hosts",
+						Validators:          []validator.Object{&clusterResourcesValidator{}},
 					},
 					"dedicated_keeper": schema.SingleNestedBlock{
 						Attributes: map[string]schema.Attribute{
 							"resource_preset_id": schema.StringAttribute{
 								Optional:            true,
 								MarkdownDescription: "ID of the computational resources preset available to a host (CPU, memory, etc.)",
+							},
+							"min_resource_preset_id": schema.StringAttribute{
+								Optional:            true,
+								MarkdownDescription: "ID of the minimal computational resources preset available to a host (CPU, memory, etc.)",
+							},
+							"max_resource_preset_id": schema.StringAttribute{
+								Optional:            true,
+								MarkdownDescription: "ID of the maximal computational resources preset available to a host (CPU, memory, etc.)",
 							},
 							"disk_size": schema.Int64Attribute{
 								Optional:            true,
@@ -398,6 +418,7 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 							},
 						},
 						MarkdownDescription: "Resources available to dedicated ClickHouse Keeper hosts",
+						Validators:          []validator.Object{&clusterResourcesValidator{}},
 					},
 				},
 				MarkdownDescription: "Cluster resources",
@@ -565,6 +586,11 @@ func (r *ClickhouseClusterResource) Update(ctx context.Context, req resource.Upd
 	}
 	dcOperation, err := r.svc.Update(ctx, rq)
 	if err != nil {
+		if e, ok := status.FromError(err); ok && e.Code() == codes.FailedPrecondition && e.Message() == "no changes detected" {
+			resp.Diagnostics.AddWarning("no changes detected", err.Error())
+			return
+		}
+
 		resp.Diagnostics.AddError("failed to update", err.Error())
 		return
 	}
@@ -649,11 +675,25 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 		m.Clickhouse = &clickhouseClusterResourcesClickhouse{}
 	}
 	m.Clickhouse.ResourcePresetId = types.StringValue(rs.Clickhouse.ResourcePresetId)
+	if v := rs.Clickhouse.MinResourcePresetId; v != nil {
+		m.Clickhouse.MinResourcePresetId = types.StringValue(v.GetValue())
+		m.Clickhouse.ResourcePresetId = types.StringNull()
+	} else {
+		m.Clickhouse.MinResourcePresetId = types.StringNull()
+	}
+	if v := rs.Clickhouse.MaxResourcePresetId; v != nil {
+		m.Clickhouse.MaxResourcePresetId = types.StringValue(v.GetValue())
+		m.Clickhouse.ResourcePresetId = types.StringNull()
+	} else {
+		m.Clickhouse.MaxResourcePresetId = types.StringNull()
+	}
 	m.Clickhouse.DiskSize = types.Int64Value(rs.Clickhouse.DiskSize.GetValue())
 	m.Clickhouse.ReplicaCount = types.Int64Value(rs.Clickhouse.ReplicaCount.GetValue())
 	m.Clickhouse.ShardCount = types.Int64Value(rs.Clickhouse.ShardCount.GetValue())
 	if v := rs.Clickhouse.MaxDiskSize; v != nil {
 		m.Clickhouse.MaxDiskSize = types.Int64Value(v.GetValue())
+	} else {
+		m.Clickhouse.MaxDiskSize = types.Int64Null()
 	}
 
 	if v := rs.GetDedicatedKeeper(); v != nil {
@@ -664,7 +704,19 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 			m.Keeper = nil
 		} else {
 			m.Keeper = new(clickhouseClusterResourcesKeeper)
-			m.Keeper.ResourcePresetId = types.StringValue(v.ResourcePresetId)
+			m.Clickhouse.ResourcePresetId = types.StringValue(rs.Clickhouse.ResourcePresetId)
+			if v := rs.DedicatedKeeper.MinResourcePresetId; v != nil {
+				m.Keeper.MinResourcePresetId = types.StringValue(v.GetValue())
+				m.Keeper.ResourcePresetId = types.StringNull()
+			} else {
+				m.Keeper.MinResourcePresetId = types.StringNull()
+			}
+			if v := rs.DedicatedKeeper.MaxResourcePresetId; v != nil {
+				m.Keeper.MaxResourcePresetId = types.StringValue(v.GetValue())
+				m.Keeper.ResourcePresetId = types.StringNull()
+			} else {
+				m.Keeper.MaxResourcePresetId = types.StringNull()
+			}
 			m.Keeper.DiskSize = types.Int64Value(v.DiskSize.GetValue())
 			m.Keeper.ReplicaCount = types.Int64Value(v.ReplicaCount.GetValue())
 			if v := rs.Clickhouse.MaxDiskSize; v != nil {

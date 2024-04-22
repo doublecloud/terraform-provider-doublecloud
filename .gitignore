@@ -4,3 +4,6 @@ authorized_key.json
 CHANGELOG.md
 terraform-provider-doublecloud
 env.fish
+*.code-workspace
+vendor
+

@@ -28,7 +28,7 @@ func TestAccKafkaClusterResource(t *testing.T) {
 
 		Resources: &KafkaResourcesModel{
 			Kafka: KafkaResourcesKafkaModel{
-				ResourcePresetId: types.StringValue("s1-c2-m4"),
+				ResourcePresetId: types.StringValue("s2-c2-m4"),
 				DiskSize:         types.Int64Value(34359738368),
 				BrokerCount:      types.Int64Value(1),
 				ZoneCount:        types.Int64Value(1),
@@ -53,6 +53,18 @@ func TestAccKafkaClusterResource(t *testing.T) {
 	m2.Resources.Kafka.DiskSize = types.Int64Value(51539607552)
 	m2.Config.MessageMaxBytes = types.Int64Value(2048)
 	m2.Config.LogRetentionHours = types.Int64Value(336)
+
+	m3 := m2
+	m3.Resources = &KafkaResourcesModel{
+		Kafka: KafkaResourcesKafkaModel{
+			MinResourcePresetId: types.StringValue("s2-c2-m8"),
+			MaxResourcePresetId: types.StringValue("s2-c4-m16"),
+			DiskSize:            types.Int64Value(51539607552),
+			MaxDiskSize:         types.Int64Value(137438953472),
+			BrokerCount:         types.Int64Value(1),
+			ZoneCount:           types.Int64Value(1),
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -92,6 +104,15 @@ func TestAccKafkaClusterResource(t *testing.T) {
 
 					resource.TestCheckResourceAttr(testAccKafkaId, "config.message_max_bytes", "2048"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "config.log_retention_hours", "336"),
+				),
+			},
+			// Enable autoscaling
+			{
+				Config: testAccKafkaClusterResourceConfigAutoscalingEnabled(&m3),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.min_resource_preset_id", "s2-c2-m8"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.max_resource_preset_id", "s2-c4-m16"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.max_disk_size", "137438953472"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -201,6 +222,61 @@ resource "doublecloud_kafka_cluster" "tf-acc-kafka" {
 	)
 }
 
+//nolint:unused
+func testAccKafkaClusterResourceConfigAutoscalingEnabled(m *KafkaClusterModel) string {
+	return fmt.Sprintf(`
+resource "doublecloud_kafka_cluster" "tf-acc-kafka" {
+  project_id = %[1]q
+  name = %[2]q
+  region_id = %[3]q
+  cloud_type = %[4]q
+  network_id = %[5]q
+
+  resources {
+    kafka {
+      min_resource_preset_id = %[6]q
+      max_resource_preset_id = %[7]q
+      disk_size =  %[8]q
+      max_disk_size  = %[9]q
+      broker_count = %[10]q
+      zone_count =  %[11]q
+    }
+  }
+
+  config {
+	message_max_bytes = 2048
+	log_retention_hours = 336
+  }
+
+  schema_registry {
+	enabled = true
+  }
+
+  access {
+	data_services = ["transfer"]
+
+	ipv4_cidr_blocks = [
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		}
+	]
+  }
+}
+`, m.ProjectID.ValueString(),
+		m.Name.ValueString(),
+		m.RegionID.ValueString(),
+		m.CloudType.ValueString(),
+		m.NetworkId.ValueString(),
+		m.Resources.Kafka.MinResourcePresetId.ValueString(),
+		m.Resources.Kafka.MaxResourcePresetId.ValueString(),
+		m.Resources.Kafka.DiskSize.String(),
+		m.Resources.Kafka.MaxDiskSize.String(),
+		m.Resources.Kafka.BrokerCount.String(),
+		m.Resources.Kafka.ZoneCount.String(),
+	)
+}
+
 func init() {
 	resource.AddTestSweepers("kafka", &resource.Sweeper{
 		Name:         "kafka",
@@ -233,9 +309,6 @@ func sweepKafkas(_ string) error {
 }
 
 func sweepKafka(conf *Config, t *kafka.Cluster) error {
-	op, err := conf.sdk.WrapOperation(conf.sdk.Kafka().Cluster().Delete(conf.ctx, &kafka.DeleteClusterRequest{ClusterId: t.Id}))
-	if err != nil {
-		return err
-	}
-	return op.Wait(conf.ctx)
+	_, err := conf.sdk.Kafka().Cluster().Delete(conf.ctx, &kafka.DeleteClusterRequest{ClusterId: t.Id})
+	return err
 }

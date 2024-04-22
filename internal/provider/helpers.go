@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -108,5 +110,58 @@ func (*suppressAutoscaledDiskDiff) PlanModifyInt64(ctx context.Context, req plan
 		rsp.PlanValue = req.StateValue
 	} else {
 		rsp.RequiresReplace = true
+	}
+}
+
+type clusterResourcesValidator struct{}
+
+func (*clusterResourcesValidator) Description(context.Context) string {
+	return "validate resource configuration"
+}
+
+func (v *clusterResourcesValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+var _ validator.Object = &clusterResourcesValidator{}
+
+func (*clusterResourcesValidator) ValidateObject(ctx context.Context, req validator.ObjectRequest, rsp *validator.ObjectResponse) {
+	if req.ConfigValue.IsNull() {
+		return
+	}
+
+	presetPresent := !req.ConfigValue.Attributes()["resource_preset_id"].IsNull()
+	minPresetPresent := !req.ConfigValue.Attributes()["min_resource_preset_id"].IsNull()
+	maxPresetPresent := !req.ConfigValue.Attributes()["max_resource_preset_id"].IsNull()
+
+	if presetPresent && minPresetPresent {
+		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
+			req.Path,
+			`Attribute "resource_preset_id" cannot be specified when "min_resource_preset_id" is specified`,
+		))
+		return
+	}
+	if presetPresent && maxPresetPresent {
+		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
+			req.Path,
+			`Attribute "resource_preset_id" cannot be specified when "max_resource_preset_id" is specified`,
+		))
+		return
+	}
+
+	if minPresetPresent != maxPresetPresent {
+		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
+			req.Path,
+			`Attribute "min_resource_preset_id" must be specified when "max_resource_preset_id" is specified`,
+		))
+		return
+	}
+
+	if !presetPresent && !minPresetPresent {
+		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
+			req.Path,
+			`At least one attribute out of [resource_preset_id, (min_resource_preset_id, max_resource_preset_id)] must be specified`,
+		))
+		return
 	}
 }
