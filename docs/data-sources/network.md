@@ -27,5 +27,3 @@ Network data source
 - `id` (String) Network ID
 - `ipv4_cidr_block` (String) The IPv4 network range for the subnet, in CIDR notation. For example, 10.0.0.0/16.
 - `region_id` (String) Network region
-
-

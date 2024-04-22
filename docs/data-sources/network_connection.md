@@ -61,5 +61,3 @@ Read-Only:
 - `managed_network_url` (String) URL of the managed GCP network
 - `name` (String) Name of this peering
 - `peer_network_url` (String) Peer network URL
-
-

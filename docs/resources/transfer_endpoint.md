@@ -1275,5 +1275,3 @@ Optional:
 - `client_id` (String, Sensitive) Client ID
 - `client_secret` (String, Sensitive) Client secret
 - `refresh_token` (String, Sensitive) Refresh token
-
-

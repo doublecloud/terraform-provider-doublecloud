@@ -18,5 +18,3 @@ Network Connection Accepter resource
 ### Required
 
 - `id` (String) Network Connection ID
-
-

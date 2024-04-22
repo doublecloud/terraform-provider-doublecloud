@@ -103,7 +103,7 @@ Optional:
 - `tables` (Attributes) Tables. (see [below for nested schema](#nestedatt--transformation--transformers--convert_to_string--tables))
 
 <a id="nestedatt--transformation--transformers--convert_to_string--columns"></a>
-### Nested Schema for `transformation.transformers.convert_to_string.tables`
+### Nested Schema for `transformation.transformers.convert_to_string.columns`
 
 Optional:
 
@@ -166,5 +166,3 @@ Optional:
 
 - `exclude` (List of String) Excluded tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
 - `include` (List of String) Included tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
-
-

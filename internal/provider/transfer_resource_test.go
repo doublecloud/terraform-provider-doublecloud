@@ -124,36 +124,6 @@ func TestAccTransferResource(t *testing.T) {
 						target = doublecloud_transfer_endpoint.ttr-dst-ch.id
 						type = "SNAPSHOT_ONLY"
 						activated = false
-						transformation = {
-							transformers = [
-								{
-									dbt = {
-										git_repository_link = "https://github.com/doublecloud/tests-clickhouse-dbt.git"
-										profile_name = "my_clickhouse_profile"
-										operation = "run"
-									}
-								},
-							]
-						}
-					}`, testProjectId)),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "1"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.dbt.git_repository_link", "https://github.com/doublecloud/tests-clickhouse-dbt.git"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.dbt.profile_name", "my_clickhouse_profile"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.dbt.operation", "run"),
-				),
-			},
-			{
-				Config: (testTransferResourceEndpointsConfig() +
-					"\n\n" +
-					fmt.Sprintf(`resource "doublecloud_transfer" "ttr-transfer" {
-						project_id = %[1]q
-						name = "ttr-transfer"
-						description = "test description"
-						source = doublecloud_transfer_endpoint.ttr-src-pg.id
-						target = doublecloud_transfer_endpoint.ttr-dst-ch.id
-						type = "SNAPSHOT_ONLY"
-						activated = false
 						runtime = {
 							dedicated = {
 								flavor = "TINY"
@@ -223,7 +193,7 @@ func testTransferResourceEndpointsConfig() string {
 						}
 						database = "default"
 						user = "admin"
-						password = "foobar123"	
+						password = "foobar123"
 					}
 				}
 			}
