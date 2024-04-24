@@ -148,7 +148,7 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 				}
 			}
 			provider {
-
+				bucket = "cdc-production"
 			}
 		}
 	}
@@ -197,7 +197,9 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 					columns = ["event_id", "event_type"]
 				}
 			}
-			provider {}
+			provider {
+				bucket = "cdc-production"
+			}
 		}
 	}
 }
@@ -220,7 +222,9 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 					batch_size = 100
 				}
 			}
-			provider {}
+			provider {
+				bucket = "cdc-production"
+			}
 		}
 	}
 }
@@ -239,7 +243,9 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 			format {
 				avro {}
 			}
-			provider {}
+			provider {
+				bucket = "cdc-production"
+			}
 		}
 	}
 }
@@ -261,7 +267,9 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 					block_size = 65536
 				}
 			}
-			provider {}
+			provider {
+				bucket = "cdc-production"
+			}
 		}
 	}
 }
@@ -284,7 +292,9 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 					block_size = 524288
 				}
 			}
-			provider {}
+			provider {
+				bucket = "cdc-production"
+			}
 		}
 	}
 }
