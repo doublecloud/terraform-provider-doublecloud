@@ -22,8 +22,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -586,11 +584,6 @@ func (r *ClickhouseClusterResource) Update(ctx context.Context, req resource.Upd
 	}
 	dcOperation, err := r.svc.Update(ctx, rq)
 	if err != nil {
-		if e, ok := status.FromError(err); ok && e.Code() == codes.FailedPrecondition && e.Message() == "no changes detected" {
-			resp.Diagnostics.AddWarning("no changes detected", err.Error())
-			return
-		}
-
 		resp.Diagnostics.AddError("failed to update", err.Error())
 		return
 	}
@@ -704,14 +697,14 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 			m.Keeper = nil
 		} else {
 			m.Keeper = new(clickhouseClusterResourcesKeeper)
-			m.Clickhouse.ResourcePresetId = types.StringValue(rs.Clickhouse.ResourcePresetId)
-			if v := rs.DedicatedKeeper.MinResourcePresetId; v != nil {
+			m.Clickhouse.ResourcePresetId = types.StringValue(v.ResourcePresetId)
+			if v := v.MinResourcePresetId; v != nil {
 				m.Keeper.MinResourcePresetId = types.StringValue(v.GetValue())
 				m.Keeper.ResourcePresetId = types.StringNull()
 			} else {
 				m.Keeper.MinResourcePresetId = types.StringNull()
 			}
-			if v := rs.DedicatedKeeper.MaxResourcePresetId; v != nil {
+			if v := v.MaxResourcePresetId; v != nil {
 				m.Keeper.MaxResourcePresetId = types.StringValue(v.GetValue())
 				m.Keeper.ResourcePresetId = types.StringNull()
 			} else {
@@ -719,7 +712,7 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 			}
 			m.Keeper.DiskSize = types.Int64Value(v.DiskSize.GetValue())
 			m.Keeper.ReplicaCount = types.Int64Value(v.ReplicaCount.GetValue())
-			if v := rs.Clickhouse.MaxDiskSize; v != nil {
+			if v := v.MaxDiskSize; v != nil {
 				m.Keeper.MaxDiskSize = types.Int64Value(v.GetValue())
 			}
 		}

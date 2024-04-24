@@ -28,7 +28,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 		NetworkId: types.StringValue(testNetworkId),
 		Resources: &clickhouseClusterResources{
 			Clickhouse: &clickhouseClusterResourcesClickhouse{
-				ResourcePresetId: types.StringValue("s2-c2-m8"),
+				ResourcePresetId: types.StringValue("g2-c2-m8"),
 				DiskSize:         types.Int64Value(34359738368),
 				ReplicaCount:     types.Int64Value(1),
 			},
@@ -52,7 +52,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 	m2.Name = types.StringValue(fmt.Sprintf("%v-changed", testAccClickhouseName))
 	m2.Resources = &clickhouseClusterResources{
 		Clickhouse: &clickhouseClusterResourcesClickhouse{
-			ResourcePresetId: types.StringValue("s2-c2-m8"),
+			ResourcePresetId: types.StringValue("g2-c2-m8"),
 			DiskSize:         types.Int64Value(51539607552),
 			ReplicaCount:     types.Int64Value(1),
 		},
@@ -75,8 +75,8 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 	m3 := m2
 	m3.Resources = &clickhouseClusterResources{
 		Clickhouse: &clickhouseClusterResourcesClickhouse{
-			MinResourcePresetId: types.StringValue("s2-c2-m8"),
-			MaxResourcePresetId: types.StringValue("s2-c4-m16"),
+			MinResourcePresetId: types.StringValue("g2-c2-m8"),
+			MaxResourcePresetId: types.StringValue("g2-c4-m16"),
 			DiskSize:            types.Int64Value(51539607552),
 			MaxDiskSize:         types.Int64Value(68719476736),
 			ReplicaCount:        types.Int64Value(1),
@@ -93,7 +93,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testAccClickhouseId, "region_id", "eu-central-1"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "name", m.Name.ValueString()),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.resource_preset_id", "s2-c2-m8"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.resource_preset_id", "g2-c2-m8"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.disk_size", "34359738368"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.log_level", "LOG_LEVEL_INFORMATION"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.security_protocol", "PLAINTEXT"),
@@ -108,7 +108,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 				Config: convertClickHouseModelToHCL(&m2),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testAccClickhouseId, "name", m2.Name.ValueString()),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.resource_preset_id", "s2-c2-m8"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.resource_preset_id", "g2-c2-m8"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.disk_size", "51539607552"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.log_level", "LOG_LEVEL_TRACE"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.max_connections", "120"),
@@ -126,8 +126,9 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 			{
 				Config: convertClickHouseModelToHCL(&m3),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.min_resource_preset_id", "s2-c2-m8"),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.max_resource_preset_id", "s2-c4-m16"),
+					resource.TestCheckNoResourceAttr(testAccClickhouseId, "resources.clickhouse.resource_preset_id"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.min_resource_preset_id", "g2-c2-m8"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.max_resource_preset_id", "g2-c4-m16"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.max_disk_size", "68719476736"),
 				),
 			},

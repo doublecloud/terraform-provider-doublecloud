@@ -28,7 +28,7 @@ func TestAccKafkaClusterResource(t *testing.T) {
 
 		Resources: &KafkaResourcesModel{
 			Kafka: KafkaResourcesKafkaModel{
-				ResourcePresetId: types.StringValue("s2-c2-m4"),
+				ResourcePresetId: types.StringValue("g2-c2-m4"),
 				DiskSize:         types.Int64Value(34359738368),
 				BrokerCount:      types.Int64Value(1),
 				ZoneCount:        types.Int64Value(1),
@@ -57,8 +57,8 @@ func TestAccKafkaClusterResource(t *testing.T) {
 	m3 := m2
 	m3.Resources = &KafkaResourcesModel{
 		Kafka: KafkaResourcesKafkaModel{
-			MinResourcePresetId: types.StringValue("s2-c2-m8"),
-			MaxResourcePresetId: types.StringValue("s2-c4-m16"),
+			MinResourcePresetId: types.StringValue("g2-c2-m8"),
+			MaxResourcePresetId: types.StringValue("g2-c4-m16"),
 			DiskSize:            types.Int64Value(51539607552),
 			MaxDiskSize:         types.Int64Value(137438953472),
 			BrokerCount:         types.Int64Value(1),
@@ -110,8 +110,9 @@ func TestAccKafkaClusterResource(t *testing.T) {
 			{
 				Config: testAccKafkaClusterResourceConfigAutoscalingEnabled(&m3),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.min_resource_preset_id", "s2-c2-m8"),
-					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.max_resource_preset_id", "s2-c4-m16"),
+					resource.TestCheckNoResourceAttr(testAccKafkaId, "resources.kafka.resource_preset_id"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.min_resource_preset_id", "g2-c2-m8"),
+					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.max_resource_preset_id", "g2-c4-m16"),
 					resource.TestCheckResourceAttr(testAccKafkaId, "resources.kafka.max_disk_size", "137438953472"),
 				),
 			},

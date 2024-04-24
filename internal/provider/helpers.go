@@ -139,14 +139,12 @@ func (*clusterResourcesValidator) ValidateObject(ctx context.Context, req valida
 			req.Path,
 			`Attribute "resource_preset_id" cannot be specified when "min_resource_preset_id" is specified`,
 		))
-		return
 	}
 	if presetPresent && maxPresetPresent {
 		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
 			req.Path,
 			`Attribute "resource_preset_id" cannot be specified when "max_resource_preset_id" is specified`,
 		))
-		return
 	}
 
 	if minPresetPresent != maxPresetPresent {
@@ -154,7 +152,6 @@ func (*clusterResourcesValidator) ValidateObject(ctx context.Context, req valida
 			req.Path,
 			`Attribute "min_resource_preset_id" must be specified when "max_resource_preset_id" is specified`,
 		))
-		return
 	}
 
 	if !presetPresent && !minPresetPresent {
@@ -162,6 +159,5 @@ func (*clusterResourcesValidator) ValidateObject(ctx context.Context, req valida
 			req.Path,
 			`At least one attribute out of [resource_preset_id, (min_resource_preset_id, max_resource_preset_id)] must be specified`,
 		))
-		return
 	}
 }
