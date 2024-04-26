@@ -137,6 +137,67 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 	})
 }
 
+func TestAccClickhouseDedicatedKeeperClusterResource(t *testing.T) {
+	t.Parallel()
+	m := clickhouseClusterModel{
+		ProjectId: types.StringValue(testProjectId),
+		Name:      types.StringValue(testAccClickhouseName + "-keeper"),
+		RegionId:  types.StringValue("eu-central-1"),
+		CloudType: types.StringValue("aws"),
+		NetworkId: types.StringValue(testNetworkId),
+		Resources: &clickhouseClusterResources{
+			Clickhouse: &clickhouseClusterResourcesClickhouse{
+				ResourcePresetId: types.StringValue("g2-c2-m8"),
+				DiskSize:         types.Int64Value(34359738368),
+				ReplicaCount:     types.Int64Value(1),
+			},
+			Keeper: &clickhouseClusterResourcesKeeper{
+				ResourcePresetId: types.StringValue("g2-c2-m8"),
+				DiskSize:         types.Int64Value(34359738368),
+				ReplicaCount:     types.Int64Value(1),
+			},
+		},
+	}
+
+	m2 := m
+	m2.Resources = &clickhouseClusterResources{
+		Clickhouse: m.Resources.Clickhouse,
+		Keeper: &clickhouseClusterResourcesKeeper{
+			MinResourcePresetId: types.StringValue("g2-c2-m8"),
+			MaxResourcePresetId: types.StringValue("g2-c4-m16"),
+			DiskSize:            types.Int64Value(34359738368),
+			MaxDiskSize:         types.Int64Value(51539607552),
+			ReplicaCount:        types.Int64Value(1),
+		},
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read testing
+			{
+				Config: convertClickHouseModelToHCL(&m),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.dedicated_keeper.resource_preset_id", "g2-c2-m8"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.dedicated_keeper.disk_size", "34359738368"),
+				),
+			},
+			// Enable autoscaling
+			{
+				Config: convertClickHouseModelToHCL(&m2),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckNoResourceAttr(testAccClickhouseId, "resources.dedicated_keeper.resource_preset_id"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.dedicated_keeper.min_resource_preset_id", "g2-c2-m8"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.dedicated_keeper.max_resource_preset_id", "g2-c4-m16"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.dedicated_keeper.max_disk_size", "51539607552"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 const clickhouseHCLTemplateRaw = `
 resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
     project_id = "{{ .ProjectId.ValueString }}"
@@ -158,10 +219,26 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
           max_disk_size          = "{{ .Resources.Clickhouse.MaxDiskSize.ValueInt64 }}"{{end}}
           replica_count          = {{ .Resources.Clickhouse.ReplicaCount.ValueInt64 }}
       }
+      {{- if ne .Resources.Keeper nil }}
+      dedicated_keeper {
+          {{- if not .Resources.Keeper.ResourcePresetId.IsNull }}
+          resource_preset_id     = "{{ .Resources.Keeper.ResourcePresetId.ValueString }}"{{end}}
+          {{- if not .Resources.Keeper.MinResourcePresetId.IsNull }}
+          min_resource_preset_id = "{{ .Resources.Keeper.MinResourcePresetId.ValueString }}"{{end}}
+          {{- if not .Resources.Keeper.MaxResourcePresetId.IsNull }}
+          max_resource_preset_id = "{{ .Resources.Keeper.MaxResourcePresetId.ValueString }}"{{end}}
+          disk_size              = {{ .Resources.Keeper.DiskSize.ValueInt64 }}
+          {{- if not .Resources.Keeper.MaxDiskSize.IsNull }}
+          max_disk_size          = "{{ .Resources.Keeper.MaxDiskSize.ValueInt64 }}"{{end}}
+          replica_count          = {{ .Resources.Keeper.ReplicaCount.ValueInt64 }}
+      }
+      {{- end }}
     }
 
     config {
-      log_level = "{{ .Config.LogLevel.ValueString }}"
+    {{- if ne .Config nil }}
+      {{- if not .Config.LogLevel.IsNull }}
+      log_level = "{{ .Config.LogLevel.ValueString }}"{{end}}
       max_connections = 120
 
       kafka {
@@ -175,20 +252,22 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
           {{- if not .Config.Kafka.SessionTimeoutMs.IsNull }}
           session_timeout_ms = "{{ .Config.Kafka.SessionTimeoutMs.ValueString }}"{{ end }}
       }
+     {{- end}}
     }
-
     access {
       data_services = ["transfer"]
 
+      {{- if ne .Access nil }}
       ipv4_cidr_blocks = [
-{{- $length := len .Access.Ipv4CIDRBlocks }}
-{{- range $i, $block := .Access.Ipv4CIDRBlocks }}
+        {{- $length := len .Access.Ipv4CIDRBlocks }}
+        {{- range $i, $block := .Access.Ipv4CIDRBlocks }}
         {
             value = "{{ $block.Value.ValueString }}"
             description = "{{ $block.Description.ValueString }}"
         },
-{{- end}}
+        {{- end}}
       ]
+      {{- end}}
     }
   }`
 

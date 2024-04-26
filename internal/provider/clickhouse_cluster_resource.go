@@ -697,7 +697,7 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 			m.Keeper = nil
 		} else {
 			m.Keeper = new(clickhouseClusterResourcesKeeper)
-			m.Clickhouse.ResourcePresetId = types.StringValue(v.ResourcePresetId)
+			m.Keeper.ResourcePresetId = types.StringValue(v.ResourcePresetId)
 			if v := v.MinResourcePresetId; v != nil {
 				m.Keeper.MinResourcePresetId = types.StringValue(v.GetValue())
 				m.Keeper.ResourcePresetId = types.StringNull()
@@ -714,6 +714,8 @@ func (m *clickhouseClusterResources) parse(rs *clickhouse.ClusterResources) diag
 			m.Keeper.ReplicaCount = types.Int64Value(v.ReplicaCount.GetValue())
 			if v := v.MaxDiskSize; v != nil {
 				m.Keeper.MaxDiskSize = types.Int64Value(v.GetValue())
+			} else {
+				m.Keeper.MaxDiskSize = types.Int64Null()
 			}
 		}
 	} else {
