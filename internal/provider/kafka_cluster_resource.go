@@ -61,11 +61,13 @@ type schemaRegistryModel struct {
 }
 
 type KafkaResourcesKafkaModel struct {
-	ResourcePresetId types.String `tfsdk:"resource_preset_id"`
-	DiskSize         types.Int64  `tfsdk:"disk_size"`
-	MaxDiskSize      types.Int64  `tfsdk:"max_disk_size"`
-	BrokerCount      types.Int64  `tfsdk:"broker_count"`
-	ZoneCount        types.Int64  `tfsdk:"zone_count"`
+	ResourcePresetId    types.String `tfsdk:"resource_preset_id"`
+	MinResourcePresetId types.String `tfsdk:"min_resource_preset_id"`
+	MaxResourcePresetId types.String `tfsdk:"max_resource_preset_id"`
+	DiskSize            types.Int64  `tfsdk:"disk_size"`
+	MaxDiskSize         types.Int64  `tfsdk:"max_disk_size"`
+	BrokerCount         types.Int64  `tfsdk:"broker_count"`
+	ZoneCount           types.Int64  `tfsdk:"zone_count"`
 }
 
 type KafkaClusterConfigModel struct {
@@ -158,8 +160,16 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 					"kafka": schema.SingleNestedBlock{
 						Attributes: map[string]schema.Attribute{
 							"resource_preset_id": schema.StringAttribute{
-								Required:            true,
+								Optional:            true,
 								MarkdownDescription: "Resource preset ID",
+							},
+							"min_resource_preset_id": schema.StringAttribute{
+								Optional:            true,
+								MarkdownDescription: "ID of the minimal computational resources preset available to a host (CPU, memory, etc.)",
+							},
+							"max_resource_preset_id": schema.StringAttribute{
+								Optional:            true,
+								MarkdownDescription: "ID of the maximal computational resources preset available to a host (CPU, memory, etc.)",
 							},
 							"disk_size": schema.Int64Attribute{
 								Required:            true,
@@ -179,6 +189,7 @@ func (r *KafkaClusterResource) Schema(ctx context.Context, req resource.SchemaRe
 								MarkdownDescription: "Number of zones",
 							},
 						},
+						Validators: []validator.Object{&clusterResourcesValidator{}},
 					},
 				},
 			},
@@ -245,10 +256,12 @@ func createKafkaClusterRequest(m *KafkaClusterModel) (*kafka.CreateClusterReques
 
 	rq.Resources = &kafka.ClusterResources{
 		Kafka: &kafka.ClusterResources_Kafka{
-			ResourcePresetId: m.Resources.Kafka.ResourcePresetId.ValueString(),
-			DiskSize:         wrapperspb.Int64(m.Resources.Kafka.DiskSize.ValueInt64()),
-			BrokerCount:      wrapperspb.Int64(m.Resources.Kafka.BrokerCount.ValueInt64()),
-			ZoneCount:        wrapperspb.Int64(m.Resources.Kafka.ZoneCount.ValueInt64()),
+			ResourcePresetId:    m.Resources.Kafka.ResourcePresetId.ValueString(),
+			MinResourcePresetId: wrapperspb.String(m.Resources.Kafka.MinResourcePresetId.ValueString()),
+			MaxResourcePresetId: wrapperspb.String(m.Resources.Kafka.MaxResourcePresetId.ValueString()),
+			DiskSize:            wrapperspb.Int64(m.Resources.Kafka.DiskSize.ValueInt64()),
+			BrokerCount:         wrapperspb.Int64(m.Resources.Kafka.BrokerCount.ValueInt64()),
+			ZoneCount:           wrapperspb.Int64(m.Resources.Kafka.ZoneCount.ValueInt64()),
 		},
 	}
 	if v := m.Resources.Kafka.MaxDiskSize; !v.IsNull() {
@@ -426,6 +439,14 @@ func (r *KafkaClusterResource) Read(ctx context.Context, req resource.ReadReques
 	if v := rs.GetResources().GetKafka().GetMaxDiskSize(); v != nil {
 		data.Resources.Kafka.MaxDiskSize = types.Int64Value(v.GetValue())
 	}
+	if v := rs.GetResources().GetKafka().GetMinResourcePresetId(); v != nil {
+		data.Resources.Kafka.MinResourcePresetId = types.StringValue(v.GetValue())
+		data.Resources.Kafka.ResourcePresetId = types.StringNull()
+	}
+	if v := rs.GetResources().GetKafka().GetMaxResourcePresetId(); v != nil {
+		data.Resources.Kafka.MaxResourcePresetId = types.StringValue(v.GetValue())
+		data.Resources.Kafka.ResourcePresetId = types.StringNull()
+	}
 
 	if access := rs.GetAccess(); access != nil {
 		if data.Access == nil {
@@ -492,10 +513,12 @@ func updateKafkaClusterRequest(m *KafkaClusterModel) (*kafka.UpdateClusterReques
 
 	rq.Resources = &kafka.ClusterResources{
 		Kafka: &kafka.ClusterResources_Kafka{
-			ResourcePresetId: m.Resources.Kafka.ResourcePresetId.ValueString(),
-			DiskSize:         wrapperspb.Int64(m.Resources.Kafka.DiskSize.ValueInt64()),
-			BrokerCount:      wrapperspb.Int64(m.Resources.Kafka.BrokerCount.ValueInt64()),
-			ZoneCount:        wrapperspb.Int64(m.Resources.Kafka.ZoneCount.ValueInt64()),
+			ResourcePresetId:    m.Resources.Kafka.ResourcePresetId.ValueString(),
+			MinResourcePresetId: wrapperspb.String(m.Resources.Kafka.MinResourcePresetId.ValueString()),
+			MaxResourcePresetId: wrapperspb.String(m.Resources.Kafka.MaxResourcePresetId.ValueString()),
+			DiskSize:            wrapperspb.Int64(m.Resources.Kafka.DiskSize.ValueInt64()),
+			BrokerCount:         wrapperspb.Int64(m.Resources.Kafka.BrokerCount.ValueInt64()),
+			ZoneCount:           wrapperspb.Int64(m.Resources.Kafka.ZoneCount.ValueInt64()),
 		},
 	}
 	if v := m.Resources.Kafka.MaxDiskSize; !v.IsNull() {

@@ -189,6 +189,8 @@ Optional:
 
 - `disk_size` (Number) Storage volume available to a host in bytes
 - `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
+- `max_resource_preset_id` (String) ID of the maximal computational resources preset available to a host (CPU, memory, etc.)
+- `min_resource_preset_id` (String) ID of the minimal computational resources preset available to a host (CPU, memory, etc.)
 - `replica_count` (Number) Number of hosts per shard
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
 - `shard_count` (Number) Number of shards in the cluster
@@ -201,5 +203,7 @@ Optional:
 
 - `disk_size` (Number) Volume of the storage available to a host in bytes
 - `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
+- `max_resource_preset_id` (String) ID of the maximal computational resources preset available to a host (CPU, memory, etc.)
+- `min_resource_preset_id` (String) ID of the minimal computational resources preset available to a host (CPU, memory, etc.)
 - `replica_count` (Number) Number of keeper hosts
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)

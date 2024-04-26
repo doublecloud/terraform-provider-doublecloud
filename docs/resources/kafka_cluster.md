@@ -132,12 +132,14 @@ Required:
 
 - `broker_count` (Number) Number of brokers
 - `disk_size` (Number) Disk size
-- `resource_preset_id` (String) Resource preset ID
 - `zone_count` (Number) Number of zones
 
 Optional:
 
 - `max_disk_size` (Number) Maximum storage volume the cluster can automatically scale up to in bytes. If not set, autoscaling is disabled
+- `max_resource_preset_id` (String) ID of the maximal computational resources preset available to a host (CPU, memory, etc.)
+- `min_resource_preset_id` (String) ID of the minimal computational resources preset available to a host (CPU, memory, etc.)
+- `resource_preset_id` (String) Resource preset ID
 
 
 
