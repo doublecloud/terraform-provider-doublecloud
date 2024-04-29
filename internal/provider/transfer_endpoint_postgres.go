@@ -415,7 +415,7 @@ func parseTransferEndpointPostgresSource(ctx context.Context, e *endpoint.Postgr
 	c.SlotByteLagLimit = types.Int64Value(e.SlotByteLagLimit)
 	c.ServiceSchema = types.StringValue(e.ServiceSchema)
 
-	if c.ObjectTransferSettings != nil {
+	if e.ObjectTransferSettings != nil {
 		if c.ObjectTransferSettings == nil {
 			c.ObjectTransferSettings = &endpointPostgresObjectTransferSettings{}
 		}
