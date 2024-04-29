@@ -127,23 +127,31 @@ func transferEndpointMysqlObjectTransferSchemaBlock() schema.Block {
 		Attributes: map[string]schema.Attribute{
 			"view": schema.StringAttribute{
 				MarkdownDescription: "CREATE VIEW ...",
+				Computed:            true,
 				Optional:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"routine": schema.StringAttribute{
 				MarkdownDescription: "CREATE PROCEDURE ... ; CREATE FUNCTION ... ;",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"trigger": schema.StringAttribute{
 				MarkdownDescription: "CREATE TRIGGER ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"tables": schema.StringAttribute{
 				MarkdownDescription: "CREATE TABLE ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}
@@ -277,18 +285,10 @@ func (m *endpointMysqlObjectTransferSettings) convert() *endpoint.MysqlObjectTra
 		return stage
 	}
 
-	if !m.View.IsNull() {
-		stage.View = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.View.ValueString()])
-	}
-	if !m.Routine.IsNull() {
-		stage.Routine = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Routine.ValueString()])
-	}
-	if !m.Trigger.IsNull() {
-		stage.Trigger = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Trigger.ValueString()])
-	}
-	if !m.Tables.IsNull() {
-		stage.Tables = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Tables.ValueString()])
-	}
+	stage.View = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.View.ValueString()])
+	stage.Routine = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Routine.ValueString()])
+	stage.Trigger = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Trigger.ValueString()])
+	stage.Tables = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Tables.ValueString()])
 
 	return stage
 }
@@ -353,6 +353,16 @@ func (m *endpointMysqlConnection) parse(e *endpoint.MysqlConnection) {
 	}
 }
 
+func (m *endpointMysqlObjectTransferSettings) parse(e *endpoint.MysqlObjectTransferSettings) {
+	if e == nil {
+		m = nil
+	}
+	m.View = types.StringValue(e.GetView().String())
+	m.Routine = types.StringValue(e.GetRoutine().String())
+	m.Trigger = types.StringValue(e.GetView().String())
+	m.Tables = types.StringValue(e.GetTables().String())
+}
+
 func (m *endpointMysqlSourceSettings) parse(e *endpoint.MysqlSource) diag.Diagnostics {
 	var diag diag.Diagnostics
 
@@ -364,8 +374,15 @@ func (m *endpointMysqlSourceSettings) parse(e *endpoint.MysqlSource) diag.Diagno
 	m.ExcludeTablesRegex = convertSliceToTFStrings(e.ExcludeTablesRegex)
 	m.Timezone = types.StringValue(e.Timezone)
 
-	// TODO: Fix bug with default empty block
-	// parse ObjectTransferSettings
+	if e.ObjectTransferSettings != nil {
+		if m.ObjectTransferSettings == nil {
+			m.ObjectTransferSettings = &endpointMysqlObjectTransferSettings{}
+		}
+		m.ObjectTransferSettings.parse(e.ObjectTransferSettings)
+	} else {
+		m.ObjectTransferSettings = nil
+	}
+
 	return diag
 }
 

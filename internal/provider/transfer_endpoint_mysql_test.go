@@ -31,12 +31,14 @@ func TestAccTransferEndpointMysqlResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.database", "production"),
 					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.user", "dc-transfer"),
 					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.password", "foobar123"),
+					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.object_transfer_settings.tables", "BEFORE_DATA"),
 
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "name", testEMysqlTargetName),
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.connection.on_premise.port", "3306"),
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.database", "production"),
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.user", "dc-transfer"),
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.password", "foobar123"),
+					resource.TestCheckNoResourceAttr(testEMysqlTargetId, "settings.mysql_target.object_transfer_settings"),
 				),
 			},
 			// Update and Read testing
@@ -49,6 +51,8 @@ func TestAccTransferEndpointMysqlResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.user", "dc-transfer"),
 					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.password", "foobar124"),
 					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.timezone", "Africa/Johannesburg"),
+					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.object_transfer_settings.tables", "AFTER_DATA"),
+					resource.TestCheckResourceAttr(testEMysqlSourceId, "settings.mysql_source.object_transfer_settings.view", "NEVER"),
 
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "name", testEMysqlTargetName),
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.connection.on_premise.port", "3307"),
@@ -57,6 +61,7 @@ func TestAccTransferEndpointMysqlResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.password", "foobar124"),
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.cleanup_policy", "DROP"),
 					resource.TestCheckResourceAttr(testEMysqlTargetId, "settings.mysql_target.timezone", "Europe/Zurich"),
+					resource.TestCheckNoResourceAttr(testEMysqlTargetId, "settings.mysql_target.object_transfer_settings.tables"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -80,6 +85,10 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 			database = "production"
 			user = "dc-transfer"
 			password = "foobar123"
+
+			object_transfer_settings {
+				tables = "BEFORE_DATA"
+			}
 		}
 	}
 }
@@ -125,6 +134,7 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 
 			object_transfer_settings {
 				tables = "AFTER_DATA"
+				view = "NEVER"
 			}
 		}
 	}
