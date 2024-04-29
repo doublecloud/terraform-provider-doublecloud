@@ -353,8 +353,6 @@ func convertPostgresConnection(m *endpointPostgresConnection) (*endpoint.Postgre
 	return options, diag
 }
 
-// func convertObjectTransferSettings(m *endpointPostgresObjectTransferSettings) *endpoint.PostgresObjectTransferSettings {
-
 func (m *endpointPostgresObjectTransferSettings) convert() *endpoint.PostgresObjectTransferSettings {
 	stage := &endpoint.PostgresObjectTransferSettings{}
 
