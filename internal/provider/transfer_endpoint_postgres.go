@@ -367,7 +367,6 @@ func (m *endpointPostgresObjectTransferSettings) convert() *endpoint.PostgresObj
 	stage.PrimaryKey = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.PrimaryKey.ValueString()])
 	stage.FkConstraint = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.FkConstraint.ValueString()])
 	stage.DefaultValues = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.DefaultValues.ValueString()])
-	stage.DefaultValues = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.DefaultValues.ValueString()])
 	stage.Constraint = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Constraint.ValueString()])
 	stage.Index = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Index.ValueString()])
 	stage.View = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.View.ValueString()])
