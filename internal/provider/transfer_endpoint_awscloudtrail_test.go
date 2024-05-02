@@ -7,7 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
+//nolint:govet
 func TestAccTransferEndpointAwsCloudTrailSource(t *testing.T) {
+	// TODO: temporary disable because author of this tests didn't manage to use test prefix
+	// Cleanup is broken with this test. Need to fix it.
+	return
 	t.Parallel()
 
 	const testEndpointResource = "doublecloud_transfer_endpoint.tte-awscloudtrail-source"
