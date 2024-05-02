@@ -31,8 +31,7 @@ func TestAccTransferEndpointPostgresResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.database", "production"),
 					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.user", "dc-transfer"),
 					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.password", "foobar123"),
-					// resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.object_transfer_settings.table", "BEFORE_DATA"),
-					resource.TestCheckNoResourceAttr(testEPgTargetId, "settings.postgres_target.object_transfer_settings"),
+					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.object_transfer_settings.table", "BEFORE_DATA"),
 
 					resource.TestCheckResourceAttr(testEPgTargetId, "name", testEPgTargetName),
 					resource.TestCheckResourceAttr(testEPgTargetId, "settings.postgres_target.connection.on_premise.port", "5432"),
@@ -53,8 +52,7 @@ func TestAccTransferEndpointPostgresResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.password", "foobar124"),
 					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.slot_byte_lag_limit", "8388608"),
 					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.service_schema", "prod"),
-					resource.TestCheckNoResourceAttr(testEPgTargetId, "settings.postgres_target.object_transfer_settings"),
-					// resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.object_transfer_settings.table", "AFTER_DATA"),
+					resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.object_transfer_settings.table", "AFTER_DATA"),
 					// resource.TestCheckResourceAttr(testEPgSourceId, "settings.postgres_source.object_transfer_settings.view", "NEVER"),
 
 					resource.TestCheckResourceAttr(testEPgTargetId, "name", testEPgTargetName),
@@ -88,9 +86,9 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 			user = "dc-transfer"
 			password = "foobar123"
 
-			// object_transfer_settings {
-			// 	table = "BEFORE_DATA"
-			// }
+			object_transfer_settings {
+				table = "BEFORE_DATA"
+			}
 		}
 	}
 }
@@ -135,10 +133,10 @@ resource "doublecloud_transfer_endpoint" %[1]q {
 			slot_byte_lag_limit = 8388608
 			service_schema = "prod"
 
-			// object_transfer_settings {
-			// 	table = "AFTER_DATA"
-			// 	view = "NEVER"
-			// }
+			object_transfer_settings {
+				table = "AFTER_DATA"
+				view = "NEVER"
+			}
 		}
 	}
 }
