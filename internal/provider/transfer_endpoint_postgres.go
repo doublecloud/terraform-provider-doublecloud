@@ -310,7 +310,9 @@ func postgresSourceEndpointSettings(m *endpointPostgresSourceSettings) (*transfe
 	settings.PostgresSource.Database = m.Database.ValueString()
 	settings.PostgresSource.User = m.User.ValueString()
 	settings.PostgresSource.Password = &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: m.Password.ValueString()}}
-	settings.PostgresSource.ObjectTransferSettings = &endpoint.PostgresObjectTransferSettings{}
+	if m.ObjectTransferSettings != nil {
+		settings.PostgresSource.ObjectTransferSettings = &endpoint.PostgresObjectTransferSettings{}
+	}
 
 	if m.IncludeTables != nil {
 		settings.PostgresSource.IncludeTables = convertSliceTFStrings(m.IncludeTables)
@@ -415,10 +417,8 @@ func parseTransferEndpointPostgresSource(ctx context.Context, e *endpoint.Postgr
 	c.SlotByteLagLimit = types.Int64Value(e.SlotByteLagLimit)
 	c.ServiceSchema = types.StringValue(e.ServiceSchema)
 
-	if e.ObjectTransferSettings != nil {
-		if c.ObjectTransferSettings == nil {
-			c.ObjectTransferSettings = &endpointPostgresObjectTransferSettings{}
-		}
+	// Do not fill the block if user haven't defined it
+	if e.ObjectTransferSettings != nil && c.ObjectTransferSettings != nil {
 		c.ObjectTransferSettings.parse(e.ObjectTransferSettings)
 	} else {
 		c.ObjectTransferSettings = nil
