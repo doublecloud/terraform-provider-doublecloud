@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -139,91 +140,127 @@ func transferEndpointPostgresObjectTransferSchemaBlock() schema.Block {
 			"sequence": schema.StringAttribute{
 				MarkdownDescription: "CREATE SEQUENCE ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"sequence_owned_by": schema.StringAttribute{
 				MarkdownDescription: "CREATE SEQUENCE ... OWNED BY ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"sequence_set": schema.StringAttribute{
-				Optional:   true,
-				Validators: []validator.String{transferObjectTransferStageValidator()},
+				Optional:      true,
+				Computed:      true,
+				Validators:    []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"table": schema.StringAttribute{
 				MarkdownDescription: "CREATE TABLE ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"primary_key": schema.StringAttribute{
 				MarkdownDescription: "ALTER TABLE ... ADD PRIMARY KEY ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"fk_constraint": schema.StringAttribute{
 				MarkdownDescription: "ALTER TABLE ... ADD FOREIGN KEY ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"default_values": schema.StringAttribute{
 				MarkdownDescription: "ALTER TABLE ... ALTER COLUMN ... SET DEFAULT ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"constraint": schema.StringAttribute{
 				MarkdownDescription: "ALTER TABLE ... ADD CONSTRAINT ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"index": schema.StringAttribute{
 				MarkdownDescription: "CREATE INDEX ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"view": schema.StringAttribute{
 				MarkdownDescription: "CREATE VIEW ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"materialized_view": schema.StringAttribute{
 				MarkdownDescription: "CREATE MATERIALIZED VIEW ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"function": schema.StringAttribute{
 				MarkdownDescription: "CREATE FUNCTION ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"trigger": schema.StringAttribute{
 				MarkdownDescription: "CREATE TRIGGER ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"type": schema.StringAttribute{
 				MarkdownDescription: "CREATE TYPE ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"rule": schema.StringAttribute{
 				MarkdownDescription: "CREATE RULE ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"collation": schema.StringAttribute{
 				MarkdownDescription: "CREATE COLLATION ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"policy": schema.StringAttribute{
 				MarkdownDescription: "CREATE POLICY ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"cast": schema.StringAttribute{
 				MarkdownDescription: "CREATE CAST ...",
 				Optional:            true,
+				Computed:            true,
 				Validators:          []validator.String{transferObjectTransferStageValidator()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}
@@ -273,7 +310,9 @@ func postgresSourceEndpointSettings(m *endpointPostgresSourceSettings) (*transfe
 	settings.PostgresSource.Database = m.Database.ValueString()
 	settings.PostgresSource.User = m.User.ValueString()
 	settings.PostgresSource.Password = &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: m.Password.ValueString()}}
-	settings.PostgresSource.ObjectTransferSettings = &endpoint.PostgresObjectTransferSettings{}
+	if m.ObjectTransferSettings != nil {
+		settings.PostgresSource.ObjectTransferSettings = &endpoint.PostgresObjectTransferSettings{}
+	}
 
 	if m.IncludeTables != nil {
 		settings.PostgresSource.IncludeTables = convertSliceTFStrings(m.IncludeTables)
@@ -289,7 +328,7 @@ func postgresSourceEndpointSettings(m *endpointPostgresSourceSettings) (*transfe
 	}
 
 	if m.ObjectTransferSettings != nil {
-		settings.PostgresSource.ObjectTransferSettings = convertObjectTransferSettings(m.ObjectTransferSettings)
+		settings.PostgresSource.ObjectTransferSettings = m.ObjectTransferSettings.convert()
 	}
 
 	return settings, diags
@@ -316,70 +355,31 @@ func convertPostgresConnection(m *endpointPostgresConnection) (*endpoint.Postgre
 	return options, diag
 }
 
-func convertObjectTransferSettings(m *endpointPostgresObjectTransferSettings) *endpoint.PostgresObjectTransferSettings {
+func (m *endpointPostgresObjectTransferSettings) convert() *endpoint.PostgresObjectTransferSettings {
 	stage := &endpoint.PostgresObjectTransferSettings{}
 
 	if m == nil {
 		return stage
 	}
 
-	if !m.Sequence.IsNull() {
-		stage.Sequence = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Sequence.ValueString()])
-	}
-	if !m.SequenceOwnedBy.IsNull() {
-		stage.SequenceOwnedBy = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.SequenceOwnedBy.ValueString()])
-	}
-	if !m.SequenceSet.IsNull() {
-		stage.SequenceSet = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.SequenceSet.ValueString()])
-	}
-	if !m.Table.IsNull() {
-		stage.Table = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Table.ValueString()])
-	}
-	if !m.PrimaryKey.IsNull() {
-		stage.PrimaryKey = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.PrimaryKey.ValueString()])
-	}
-	if !m.FkConstraint.IsNull() {
-		stage.FkConstraint = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.FkConstraint.ValueString()])
-	}
-	if !m.DefaultValues.IsNull() {
-		stage.DefaultValues = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.DefaultValues.ValueString()])
-	}
-	if !m.DefaultValues.IsNull() {
-		stage.DefaultValues = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.DefaultValues.ValueString()])
-	}
-	if !m.Constraint.IsNull() {
-		stage.Constraint = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Constraint.ValueString()])
-	}
-	if !m.Index.IsNull() {
-		stage.Index = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Index.ValueString()])
-	}
-	if !m.View.IsNull() {
-		stage.View = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.View.ValueString()])
-	}
-	if !m.MaterializedView.IsNull() {
-		stage.MaterializedView = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.MaterializedView.ValueString()])
-	}
-	if !m.Function.IsNull() {
-		stage.Function = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Function.ValueString()])
-	}
-	if !m.Trigger.IsNull() {
-		stage.Trigger = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Trigger.ValueString()])
-	}
-	if !m.Type.IsNull() {
-		stage.Type = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Type.ValueString()])
-	}
-	if !m.Rule.IsNull() {
-		stage.Rule = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Rule.ValueString()])
-	}
-	if !m.Collation.IsNull() {
-		stage.Collation = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Collation.ValueString()])
-	}
-	if !m.Policy.IsNull() {
-		stage.Policy = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Policy.ValueString()])
-	}
-	if !m.Cast.IsNull() {
-		stage.Cast = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Cast.ValueString()])
-	}
+	stage.Sequence = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Sequence.ValueString()])
+	stage.SequenceOwnedBy = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.SequenceOwnedBy.ValueString()])
+	stage.SequenceSet = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.SequenceSet.ValueString()])
+	stage.Table = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Table.ValueString()])
+	stage.PrimaryKey = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.PrimaryKey.ValueString()])
+	stage.FkConstraint = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.FkConstraint.ValueString()])
+	stage.DefaultValues = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.DefaultValues.ValueString()])
+	stage.Constraint = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Constraint.ValueString()])
+	stage.Index = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Index.ValueString()])
+	stage.View = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.View.ValueString()])
+	stage.MaterializedView = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.MaterializedView.ValueString()])
+	stage.Function = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Function.ValueString()])
+	stage.Trigger = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Trigger.ValueString()])
+	stage.Type = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Type.ValueString()])
+	stage.Rule = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Rule.ValueString()])
+	stage.Collation = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Collation.ValueString()])
+	stage.Policy = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Policy.ValueString()])
+	stage.Cast = endpoint.ObjectTransferStage(endpoint.ObjectTransferStage_value[m.Cast.ValueString()])
 	return stage
 }
 
@@ -417,8 +417,12 @@ func parseTransferEndpointPostgresSource(ctx context.Context, e *endpoint.Postgr
 	c.SlotByteLagLimit = types.Int64Value(e.SlotByteLagLimit)
 	c.ServiceSchema = types.StringValue(e.ServiceSchema)
 
-	// TODO: Fix bug with default empty block
-	// parse ObjectTransferSettings
+	// Do not fill the block if user haven't defined it
+	if e.ObjectTransferSettings != nil && c.ObjectTransferSettings != nil {
+		c.ObjectTransferSettings.parse(e.ObjectTransferSettings)
+	} else {
+		c.ObjectTransferSettings = nil
+	}
 	return diag
 }
 
@@ -458,4 +462,28 @@ func parseTransferEndpointPostgresConnection(e *endpoint.PostgresConnection, m *
 			}
 		}
 	}
+}
+
+func (m *endpointPostgresObjectTransferSettings) parse(e *endpoint.PostgresObjectTransferSettings) {
+	if e == nil {
+		m = nil
+	}
+	m.Sequence = types.StringValue(e.GetSequence().String())
+	m.SequenceOwnedBy = types.StringValue(e.GetSequenceOwnedBy().String())
+	m.SequenceSet = types.StringValue(e.GetSequenceSet().String())
+	m.Table = types.StringValue(e.GetTable().String())
+	m.PrimaryKey = types.StringValue(e.GetPrimaryKey().String())
+	m.FkConstraint = types.StringValue(e.GetFkConstraint().String())
+	m.DefaultValues = types.StringValue(e.GetDefaultValues().String())
+	m.Constraint = types.StringValue(e.GetConstraint().String())
+	m.Index = types.StringValue(e.GetIndex().String())
+	m.View = types.StringValue(e.GetView().String())
+	m.MaterializedView = types.StringValue(e.GetMaterializedView().String())
+	m.Function = types.StringValue(e.GetFunction().String())
+	m.Trigger = types.StringValue(e.GetTrigger().String())
+	m.Type = types.StringValue(e.GetType().String())
+	m.Rule = types.StringValue(e.GetRule().String())
+	m.Collation = types.StringValue(e.GetCollation().String())
+	m.Policy = types.StringValue(e.GetPolicy().String())
+	m.Cast = types.StringValue(e.GetCast().String())
 }
