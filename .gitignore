@@ -6,4 +6,4 @@ terraform-provider-doublecloud
 env.fish
 *.code-workspace
 vendor
-
+.idea
