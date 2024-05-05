@@ -25,6 +25,8 @@ func convertSchemaAttributes(resAttrs map[string]resourceschema.Attribute, dataA
 		switch attr := attrInterface.(type) {
 		case resourceschema.StringAttribute:
 			dataAttrs[name] = convertStringAttribute(attr)
+		case resourceschema.Int64Attribute:
+			dataAttrs[name] = convertInt64Attribute(attr)
 		case resourceschema.SingleNestedAttribute:
 			dataAttrs[name] = convertSingleNestedAttribute(attr, diags)
 		default:
@@ -45,6 +47,16 @@ func protoEnumValidator(keys map[int32]string) validator.String {
 
 func convertStringAttribute(attr resourceschema.StringAttribute) *dataschema.StringAttribute {
 	return &dataschema.StringAttribute{
+		Computed:            true,
+		Sensitive:           attr.Sensitive,
+		Description:         attr.Description,
+		MarkdownDescription: attr.MarkdownDescription,
+		DeprecationMessage:  attr.DeprecationMessage,
+	}
+}
+
+func convertInt64Attribute(attr resourceschema.Int64Attribute) *dataschema.Int64Attribute {
+	return &dataschema.Int64Attribute{
 		Computed:            true,
 		Sensitive:           attr.Sensitive,
 		Description:         attr.Description,

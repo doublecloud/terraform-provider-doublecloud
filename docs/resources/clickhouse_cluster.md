@@ -65,6 +65,11 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 - `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
 - `version` (String) Version of the ClickHouse DBMS
 
+### Read-Only
+
+- `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
+- `private_connection_info` (Attributes) Private connection info (see [below for nested schema](#nestedatt--private_connection_info))
+
 <a id="nestedblock--access"></a>
 ### Nested Schema for `access`
 
@@ -207,3 +212,36 @@ Optional:
 - `min_resource_preset_id` (String) ID of the minimal computational resources preset available to a host (CPU, memory, etc.)
 - `replica_count` (Number) Number of keeper hosts
 - `resource_preset_id` (String) ID of the computational resources preset available to a host (CPU, memory, etc.)
+
+
+
+<a id="nestedatt--connection_info"></a>
+### Nested Schema for `connection_info`
+
+Read-Only:
+
+- `host` (String) Host to connect to
+- `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_uri` (String) URI to connect to using the HTTPS protocol
+- `jdbc_uri` (String) URI to connect to using the JDBC protocol
+- `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `odbc_uri` (String) URI to connect to using the ODBC protocol
+- `password` (String) Password for the ClickHouse user
+- `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
+- `user` (String) ClickHouse user
+
+
+<a id="nestedatt--private_connection_info"></a>
+### Nested Schema for `private_connection_info`
+
+Read-Only:
+
+- `host` (String) Host to connect to
+- `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_uri` (String) URI to connect to using the HTTPS protocol
+- `jdbc_uri` (String) URI to connect to using the JDBC protocol
+- `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `odbc_uri` (String) URI to connect to using the ODBC protocol
+- `password` (String) Password for the ClickHouse user
+- `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
+- `user` (String) ClickHouse user

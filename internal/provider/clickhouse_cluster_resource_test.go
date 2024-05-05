@@ -101,6 +101,12 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.0.description", "Office in Berlin"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.user", "admin"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.https_port", "8443"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.tcp_port_secure", "9440"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.user", "admin"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.https_port", "8443"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.tcp_port_secure", "9440"),
 				),
 			},
 			// Update and Read testing
