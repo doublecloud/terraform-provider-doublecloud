@@ -312,6 +312,7 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 		},
 		"password": schema.StringAttribute{
 			Computed:            true,
+			Sensitive:           true,
 			MarkdownDescription: "Password for the ClickHouse user",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
@@ -580,7 +581,10 @@ func (r *ClickhouseClusterResource) Create(ctx context.Context, req resource.Cre
 
 	// Update computed fields
 	{
-		response, err := r.svc.Get(ctx, &clickhouse.GetClusterRequest{ClusterId: data.Id.ValueString()})
+		response, err := r.svc.Get(ctx, &clickhouse.GetClusterRequest{
+			ClusterId: data.Id.ValueString(),
+			Sensitive: true,
+		})
 		if err != nil {
 			resp.Diagnostics.AddError("failed to get", err.Error())
 			return
@@ -602,7 +606,10 @@ func (r *ClickhouseClusterResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	response, err := r.svc.Get(ctx, &clickhouse.GetClusterRequest{ClusterId: data.Id.ValueString()})
+	response, err := r.svc.Get(ctx, &clickhouse.GetClusterRequest{
+		ClusterId: data.Id.ValueString(),
+		Sensitive: true,
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get", err.Error())
 		return

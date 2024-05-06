@@ -226,7 +226,7 @@ Read-Only:
 - `jdbc_uri` (String) URI to connect to using the JDBC protocol
 - `native_protocol` (String) Connection string for the ClickHouse native protocol
 - `odbc_uri` (String) URI to connect to using the ODBC protocol
-- `password` (String) Password for the ClickHouse user
+- `password` (String, Sensitive) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
 - `user` (String) ClickHouse user
 
@@ -242,6 +242,6 @@ Read-Only:
 - `jdbc_uri` (String) URI to connect to using the JDBC protocol
 - `native_protocol` (String) Connection string for the ClickHouse native protocol
 - `odbc_uri` (String) URI to connect to using the ODBC protocol
-- `password` (String) Password for the ClickHouse user
+- `password` (String, Sensitive) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
 - `user` (String) ClickHouse user
