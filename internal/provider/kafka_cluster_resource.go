@@ -626,6 +626,7 @@ func kafkaConnectionInfoResSchema() map[string]schema.Attribute {
 		},
 		"password": schema.StringAttribute{
 			Computed:            true,
+			Sensitive:           true,
 			MarkdownDescription: "Password for the Apache Kafka® user",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},

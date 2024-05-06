@@ -157,7 +157,7 @@ Optional:
 Read-Only:
 
 - `connection_string` (String) String to use in clients
-- `password` (String) Password for the Apache Kafka® user
+- `password` (String, Sensitive) Password for the Apache Kafka® user
 - `user` (String) Apache Kafka® user
 
 
@@ -167,5 +167,5 @@ Read-Only:
 Read-Only:
 
 - `connection_string` (String) String to use in clients
-- `password` (String) Password for the Apache Kafka® user
+- `password` (String, Sensitive) Password for the Apache Kafka® user
 - `user` (String) Apache Kafka® user
