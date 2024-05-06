@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
@@ -49,52 +51,41 @@ type ClickhouseConnectionInfo struct {
 	OdbcUri        types.String `tfsdk:"odbc_uri"`
 }
 
+func (ci ClickhouseConnectionInfo) convert(diags diag.Diagnostics) types.Object {
+	res, d := types.ObjectValue(map[string]attr.Type{
+		"host":            types.StringType,
+		"user":            types.StringType,
+		"password":        types.StringType,
+		"https_port":      types.Int64Type,
+		"tcp_port_secure": types.Int64Type,
+		"native_protocol": types.StringType,
+		"https_uri":       types.StringType,
+		"jdbc_uri":        types.StringType,
+		"odbc_uri":        types.StringType,
+	},
+		map[string]attr.Value{
+			"host":            ci.Host,
+			"user":            ci.User,
+			"password":        ci.Password,
+			"https_port":      ci.HttpsPort,
+			"tcp_port_secure": ci.TcpPortSecure,
+			"native_protocol": ci.NativeProtocol,
+			"https_uri":       ci.HttpsUri,
+			"jdbc_uri":        ci.JdbcUri,
+			"odbc_uri":        ci.OdbcUri,
+		},
+	)
+	diags.Append(d...)
+	return res
+}
+
 func (d *ClickhouseDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_clickhouse"
 }
 
-func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
-	return map[string]schema.Attribute{
-		"host": schema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "Host to connect to",
-		},
-		"user": schema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "ClickHouse user",
-		},
-		"password": schema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "Password for the ClickHouse user",
-		},
-		"https_port": schema.Int64Attribute{
-			Computed:            true,
-			MarkdownDescription: "Port to connect to using the HTTPS protocol",
-		},
-		"tcp_port_secure": schema.Int64Attribute{
-			Computed:            true,
-			MarkdownDescription: "Port to connect to using the TCP/native protocol",
-		},
-		"native_protocol": schema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "Connection string for the ClickHouse native protocol",
-		},
-		"https_uri": schema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "URI to connect to using the HTTPS protocol",
-		},
-		"jdbc_uri": schema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "URI to connect to using the JDBC protocol",
-		},
-		"odbc_uri": schema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "URI to connect to using the ODBC protocol",
-		},
-	}
-}
-
 func (d *ClickhouseDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	connInfo := make(map[string]schema.Attribute)
+	resp.Diagnostics.Append(convertSchemaAttributes(clickhouseConenctionInfoSchema(), connInfo)...)
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Clickhouse data source",
 		Attributes: map[string]schema.Attribute{
@@ -130,12 +121,12 @@ func (d *ClickhouseDataSource) Schema(ctx context.Context, req datasource.Schema
 			},
 			"connection_info": schema.SingleNestedAttribute{
 				Computed:            true,
-				Attributes:          clickhouseConenctionInfoSchema(),
+				Attributes:          connInfo,
 				MarkdownDescription: "Public connection info",
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
 				Computed:            true,
-				Attributes:          clickhouseConenctionInfoSchema(),
+				Attributes:          connInfo,
 				MarkdownDescription: "Private connection info",
 			},
 		},

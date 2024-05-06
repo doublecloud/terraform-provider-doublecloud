@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"strings"
 	"time"
 
@@ -39,6 +41,9 @@ type clickhouseClusterModel struct {
 	Access    *AccessModel      `tfsdk:"access"`
 	NetworkId types.String      `tfsdk:"network_id"`
 	Config    *clickhouseConfig `tfsdk:"config"`
+
+	ConnectionInfo        types.Object `tfsdk:"connection_info"`
+	PrivateConnectionInfo types.Object `tfsdk:"private_connection_info"`
 
 	// TODO: support mw
 	// https://github.com/doublecloud/api/blob/main/doublecloud/v1/maintenance.proto
@@ -293,6 +298,56 @@ func (r *ClickhouseClusterResource) Metadata(ctx context.Context, req resource.M
 	resp.TypeName = req.ProviderTypeName + "_clickhouse_cluster"
 }
 
+func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"host": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Host to connect to",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"user": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "ClickHouse user",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"password": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Password for the ClickHouse user",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"https_port": schema.Int64Attribute{
+			Computed:            true,
+			MarkdownDescription: "Port to connect to using the HTTPS protocol",
+			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+		},
+		"tcp_port_secure": schema.Int64Attribute{
+			Computed:            true,
+			MarkdownDescription: "Port to connect to using the TCP/native protocol",
+			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+		},
+		"native_protocol": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Connection string for the ClickHouse native protocol",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"https_uri": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "URI to connect to using the HTTPS protocol",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"jdbc_uri": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "URI to connect to using the JDBC protocol",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"odbc_uri": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "URI to connect to using the ODBC protocol",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+	}
+}
+
 func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
@@ -341,6 +396,18 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 				MarkdownDescription: "ID of the network where the cluster is created",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+			},
+			"connection_info": schema.SingleNestedAttribute{
+				Computed:            true,
+				Attributes:          clickhouseConenctionInfoSchema(),
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Public connection info",
+			},
+			"private_connection_info": schema.SingleNestedAttribute{
+				Computed:            true,
+				Attributes:          clickhouseConenctionInfoSchema(),
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Private connection info",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -641,6 +708,8 @@ func (m *clickhouseClusterModel) parse(rs *clickhouse.Cluster) diag.Diagnostics 
 	m.Description = types.StringValue(rs.Description)
 	m.Version = types.StringValue(rs.Version)
 	m.NetworkId = types.StringValue(rs.NetworkId)
+	m.ConnectionInfo = parseClickhouseConnectionInfo(rs.GetConnectionInfo()).convert(diags)
+	m.PrivateConnectionInfo = parseClickhousePrivateConnectionInfo(rs.GetPrivateConnectionInfo()).convert(diags)
 
 	if m.Resources == nil {
 		m.Resources = &clickhouseClusterResources{}
