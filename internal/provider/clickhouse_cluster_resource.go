@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
@@ -1061,7 +1062,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.MaxConcurrentQueries = types.Int64Value(v.Value)
 	}
 	if v := rs.KeepAliveTimeout; v != nil {
-		m.KeepAliveTimeout = types.StringValue(v.String())
+		m.KeepAliveTimeout = types.StringValue(v.AsDuration().String())
 	}
 	if v := rs.UncompressedCacheSize; v != nil {
 		m.UncompressedCacheSize = types.Int64Value(v.Value)
@@ -1120,7 +1121,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.QueryLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.QueryLogRetentionTime; v != nil {
-		m.QueryLogRetentionTime = types.StringValue(v.String())
+		m.QueryLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.QueryThreadLogEnabled; v != nil {
@@ -1130,7 +1131,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.QueryThreadLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.QueryThreadLogRetentionTime; v != nil {
-		m.QueryThreadLogRetentionTime = types.StringValue(v.String())
+		m.QueryThreadLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.QueryViewsLogEnabled; v != nil {
@@ -1140,14 +1141,14 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.QueryViewsLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.QueryViewsLogRetentionTime; v != nil {
-		m.QueryViewsLogRetentionTime = types.StringValue(v.String())
+		m.QueryViewsLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.PartLogRetentionSize; v != nil {
 		m.PartLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.PartLogRetentionTime; v != nil {
-		m.PartLogRetentionTime = types.StringValue(v.String())
+		m.PartLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.MetricLogEnabled; v != nil {
@@ -1157,7 +1158,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.MetricLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.MetricLogRetentionTime; v != nil {
-		m.MetricLogRetentionTime = types.StringValue(v.String())
+		m.MetricLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.AsynchronousMetricLogEnabled; v != nil {
@@ -1167,7 +1168,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.AsynchronousMetricLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.AsynchronousMetricLogRetentionTime; v != nil {
-		m.AsynchronousMetricLogRetentionTime = types.StringValue(v.String())
+		m.AsynchronousMetricLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.TraceLogEnabled; v != nil {
@@ -1177,7 +1178,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.TraceLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.TraceLogRetentionTime; v != nil {
-		m.TraceLogRetentionTime = types.StringValue(v.String())
+		m.TraceLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.TextLogEnabled; v != nil {
@@ -1187,7 +1188,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.TextLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.TextLogRetentionTime; v != nil {
-		m.TextLogRetentionTime = types.StringValue(v.String())
+		m.TextLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 	m.TextLogLevel = types.StringValue(rs.TextLogLevel.String())
 
@@ -1198,7 +1199,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.OpentelemetrySpanLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.OpentelemetrySpanLogRetentionTime; v != nil {
-		m.OpentelemetrySpanLogRetentionTime = types.StringValue(v.String())
+		m.OpentelemetrySpanLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.SessionLogEnabled; v != nil {
@@ -1208,7 +1209,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.SessionLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.SessionLogRetentionTime; v != nil {
-		m.SessionLogRetentionTime = types.StringValue(v.String())
+		m.SessionLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.ZookeeperLogEnabled; v != nil {
@@ -1218,7 +1219,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.ZookeeperLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.ZookeeperLogRetentionTime; v != nil {
-		m.ZookeeperLogRetentionTime = types.StringValue(v.String())
+		m.ZookeeperLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	if v := rs.AsynchronousInsertLogEnabled; v != nil {
@@ -1228,7 +1229,7 @@ func (m *clickhouseConfig) parse(rs *clickhouse.ClickhouseConfig) diag.Diagnosti
 		m.AsynchronousInsertLogRetentionSize = types.Int64Value(v.Value)
 	}
 	if v := rs.AsynchronousInsertLogRetentionTime; v != nil {
-		m.AsynchronousInsertLogRetentionTime = types.StringValue(v.String())
+		m.AsynchronousInsertLogRetentionTime = types.StringValue(v.AsDuration().String())
 	}
 
 	return diags
@@ -1255,6 +1256,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"keep_alive_timeout": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Time in seconds for which ClickHouse waits for incoming requests before closing the connection",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 			"uncompressed_cache_size": schema.Int64Attribute{
 				Optional:            true,
@@ -1319,6 +1321,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"query_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the query log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"query_thread_log_enabled": schema.BoolAttribute{
@@ -1332,6 +1335,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"query_thread_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the query thread log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"query_views_log_enabled": schema.BoolAttribute{
@@ -1345,6 +1349,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"query_views_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the query views log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"part_log_retention_size": schema.Int64Attribute{
@@ -1354,6 +1359,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"part_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the part log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"metric_log_enabled": schema.BoolAttribute{
@@ -1367,6 +1373,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"metric_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the metric log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"asynchronous_metric_log_enabled": schema.BoolAttribute{
@@ -1380,6 +1387,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"asynchronous_metric_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"trace_log_enabled": schema.BoolAttribute{
@@ -1393,6 +1401,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"trace_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the trace log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"text_log_enabled": schema.BoolAttribute{
@@ -1406,6 +1415,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"text_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the text log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 			"text_log_level": schema.StringAttribute{
 				Optional:            true,
@@ -1426,6 +1436,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"opentelemetry_span_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the opentelemetry span log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"session_log_enabled": schema.BoolAttribute{
@@ -1439,6 +1450,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"session_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the session log in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"zookeeper_log_enabled": schema.BoolAttribute{
@@ -1452,6 +1464,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"zookeeper_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the ZooKeeper log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 
 			"asynchronous_insert_log_enabled": schema.BoolAttribute{
@@ -1465,6 +1478,7 @@ func clickhouseConfigSchemaBlock() schema.Block {
 			"asynchronous_insert_log_retention_time": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Retention time of the asynchronous insert log table in the duration string format, such as `2h45m`",
+				PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -1508,10 +1522,12 @@ func clickhouseKafkaSchemaAttributes() map[string]schema.Attribute {
 		"max_poll_interval_ms": schema.StringAttribute{
 			Optional:            true,
 			MarkdownDescription: "Maximum interval in milliseconds between making poll calls to get messages for high-level consumers",
+			PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 		},
 		"session_timeout_ms": schema.StringAttribute{
 			Optional:            true,
 			MarkdownDescription: "Timeout to maintain a client group session",
+			PlanModifiers:       []planmodifier.String{&normalizeAndValidateDuration{}},
 		},
 	}
 }

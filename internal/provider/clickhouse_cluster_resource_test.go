@@ -69,7 +69,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 			SaslMechanism:    types.StringValue("SCRAM_SHA_512"),
 			SaslUsername:     types.StringValue("admin"),
 			SaslPassword:     types.StringValue("Traffic3-Mushiness-Chariot"),
-			SessionTimeoutMs: types.StringValue("1m0s"),
+			SessionTimeoutMs: types.StringValue("1m"),
 		},
 	}
 
@@ -124,7 +124,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_mechanism", "SCRAM_SHA_512"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_username", "admin"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_password", "Traffic3-Mushiness-Chariot"),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.session_timeout_ms", "1m0s"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.session_timeout_ms", "1m"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.1.value", "11.0.0.0/8"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.1.description", "Office in Cupertino"),
