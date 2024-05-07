@@ -35,6 +35,7 @@ func (m *endpointKafkaSourceSettings) parse(e *endpoint.KafkaSource) diag.Diagno
 		m.Auth = nil
 	}
 	parseTransferEndpointKafkaConnection(e.Connection, m.Connection)
+	//lint:ignore
 	if e.TopicName != "" {
 		m.TopicName = types.StringValue(e.TopicName)
 	} else if len(e.TopicNames) == 1 {
