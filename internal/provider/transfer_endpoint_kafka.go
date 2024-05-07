@@ -35,7 +35,11 @@ func (m *endpointKafkaSourceSettings) parse(e *endpoint.KafkaSource) diag.Diagno
 		m.Auth = nil
 	}
 	parseTransferEndpointKafkaConnection(e.Connection, m.Connection)
-	if len(e.TopicNames) == 1 {
+	//nolint:staticcheck
+	if e.TopicName != "" {
+		//nolint:staticcheck
+		m.TopicName = types.StringValue(e.TopicName)
+	} else if len(e.TopicNames) == 1 {
 		m.TopicName = types.StringValue(e.TopicNames[0])
 	} else {
 		diags.AddError("Invalid topic name", "Should contain at exactly one topic for terraform managed endpoints")
