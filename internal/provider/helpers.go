@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -171,5 +172,40 @@ func (*clusterResourcesValidator) ValidateObject(ctx context.Context, req valida
 			req.Path,
 			`At least one attribute out of [resource_preset_id, (min_resource_preset_id, max_resource_preset_id)] must be specified`,
 		))
+	}
+}
+
+type normalizeAndValidateDuration struct{}
+
+var _ planmodifier.String = &normalizeAndValidateDuration{}
+
+func (*normalizeAndValidateDuration) Description(context.Context) string {
+	return "validate duration value and normalize value to correct diff check"
+}
+
+func (s *normalizeAndValidateDuration) MarkdownDescription(ctx context.Context) string {
+	return s.Description(ctx)
+}
+
+func (*normalizeAndValidateDuration) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, rsp *planmodifier.StringResponse) {
+	// Ignore if it's creation/deletion or no diff
+	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() || req.PlanValue.Equal(req.StateValue) {
+		return
+	}
+
+	duration, err := time.ParseDuration(req.PlanValue.ValueString())
+	if err != nil {
+		rsp.Diagnostics.AddAttributeError(req.Path, "parse duration value", err.Error())
+		return
+	}
+
+	currentDuration, err := time.ParseDuration(req.StateValue.ValueString())
+	if err != nil {
+		rsp.Diagnostics.AddError("parse actual duration value", err.Error())
+		return
+	}
+
+	if duration == currentDuration {
+		rsp.PlanValue = req.StateValue
 	}
 }
