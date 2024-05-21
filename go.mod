@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/doublecloud/go-genproto v0.0.0-20240430040646-e4eb5018c1bf
+	github.com/doublecloud/go-genproto v0.0.0-20240521040605-29dded8070f8
 	github.com/doublecloud/go-sdk v0.0.0-20240327104120-8bc9604259ad
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
