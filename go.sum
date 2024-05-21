@@ -38,6 +38,8 @@ github.com/doublecloud/go-genproto v0.0.0-20240430040646-e4eb5018c1bf h1:bpAGwCa
 github.com/doublecloud/go-genproto v0.0.0-20240430040646-e4eb5018c1bf/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-sdk v0.0.0-20240327104120-8bc9604259ad h1:uUZdkQtefWMZlTDXdmcRFKClM3FLn6/FjhvGGEIybQQ=
 github.com/doublecloud/go-sdk v0.0.0-20240327104120-8bc9604259ad/go.mod h1:BOcoNh31FaZe/9QFQfh1Rwyd/+DGlAxbX2qk6WqoX9Y=
+github.com/doublecloud/go-sdk v0.0.0-20240521212542-a211abfb30e1 h1:1wIYbMYrMhjUv5gv1Ex6W2ZDwlqkqz2akPa2sRb+/PI=
+github.com/doublecloud/go-sdk v0.0.0-20240521212542-a211abfb30e1/go.mod h1:BOcoNh31FaZe/9QFQfh1Rwyd/+DGlAxbX2qk6WqoX9Y=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
