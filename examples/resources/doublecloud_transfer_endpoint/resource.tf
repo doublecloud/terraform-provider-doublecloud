@@ -1,5 +1,5 @@
 resource "doublecloud_transfer_endpoint" "sample-pg2ch-source" {
-  name = "sample-pg2ch-source"
+  name       = "sample-pg2ch-source"
   project_id = var.project_id
   settings {
     postgres_source {
@@ -12,25 +12,25 @@ resource "doublecloud_transfer_endpoint" "sample-pg2ch-source" {
         }
       }
       database = "postgres"
-      user = "postgres"
+      user     = "postgres"
       password = var.postgresql_postgres_password
     }
   }
 }
 
 resource "doublecloud_transfer_endpoint" "sample-pg2ch-target" {
-  name = "sample-pg2ch-target"
+  name       = "sample-pg2ch-target"
   project_id = var.project_id
   settings {
     clickhouse_target {
       clickhouse_cleanup_policy = "DROP"
       connection {
         address {
-            cluster_id = "chcexampleexampleexa"
+          cluster_id = "chcexampleexampleexa"
         }
         database = "default"
         password = var.clickhouse_admin_password
-        user = "admin"
+        user     = "admin"
       }
     }
   }

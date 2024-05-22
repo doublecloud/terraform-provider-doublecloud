@@ -33,4 +33,6 @@ provider "doublecloud" {
 
 - `authorized_key` (String, Sensitive) Path to the authorized key
 - `endpoint` (String) API endpoint
+- `federation_endpoint` (String) Federation Endpoint which is used to authorized in federation
+- `federation_id` (String) Federation ID to authorize, if provided authorized_key is ignored
 - `token_url` (String) Token resolver URL
