@@ -14,7 +14,7 @@ Transfer endpoint resource
 
 ```terraform
 resource "doublecloud_transfer_endpoint" "sample-pg2ch-source" {
-  name = "sample-pg2ch-source"
+  name       = "sample-pg2ch-source"
   project_id = var.project_id
   settings {
     postgres_source {
@@ -27,25 +27,25 @@ resource "doublecloud_transfer_endpoint" "sample-pg2ch-source" {
         }
       }
       database = "postgres"
-      user = "postgres"
+      user     = "postgres"
       password = var.postgresql_postgres_password
     }
   }
 }
 
 resource "doublecloud_transfer_endpoint" "sample-pg2ch-target" {
-  name = "sample-pg2ch-target"
+  name       = "sample-pg2ch-target"
   project_id = var.project_id
   settings {
     clickhouse_target {
       clickhouse_cleanup_policy = "DROP"
       connection {
         address {
-            cluster_id = "chcexampleexampleexa"
+          cluster_id = "chcexampleexampleexa"
         }
         database = "default"
         password = var.clickhouse_admin_password
-        user = "admin"
+        user     = "admin"
       }
     }
   }
@@ -83,6 +83,7 @@ Optional:
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
 - `linkedinads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source))
+- `metrika_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--metrika_source))
 - `mongo_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source))
 - `mongo_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target))
 - `mysql_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source))
@@ -625,6 +626,25 @@ Optional:
 - `client_secret` (String, Sensitive) Client Secret for the LinkedIn Ads developer application
 - `refresh_token` (String, Sensitive) Key to refresh the expired access token
 
+
+
+
+<a id="nestedblock--settings--metrika_source"></a>
+### Nested Schema for `settings.metrika_source`
+
+Optional:
+
+- `counter_ids` (List of Number) List of counter IDs
+- `metrika_stream` (Block List) Configuration for Metrika streams (see [below for nested schema](#nestedblock--settings--metrika_source--metrika_stream))
+- `token` (String, Sensitive) Access token
+
+<a id="nestedblock--settings--metrika_source--metrika_stream"></a>
+### Nested Schema for `settings.metrika_source.metrika_stream`
+
+Optional:
+
+- `columns` (List of String) The columns included in the Metrika stream
+- `stream_type` (String) The type of the Metrika stream
 
 
 

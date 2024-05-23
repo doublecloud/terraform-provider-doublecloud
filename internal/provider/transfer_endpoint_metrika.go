@@ -9,9 +9,9 @@ import (
 )
 
 type endpointMetrikaSourceSettings struct {
-	CounterIDs    []types.Int64            `tfsdk:"counter_ids"`
-	Token         types.String             `tfsdk:"token"`
-	MetrikaStream []*endpointMetrikaStream `tfsdk:"metrika_stream"`
+	CounterIDs     []types.Int64            `tfsdk:"counter_ids"`
+	Token          types.String             `tfsdk:"token"`
+	MetrikaStreams []*endpointMetrikaStream `tfsdk:"metrika_stream"`
 }
 
 type endpointMetrikaStream struct {
@@ -76,9 +76,9 @@ func (m *endpointMetrikaSourceSettings) parse(e *endpoint.MetrikaSource) diag.Di
 			diags = append(diags, parsedStream.parse(stream)...)
 			metrikaStreams[i] = parsedStream
 		}
-		m.MetrikaStream = metrikaStreams
+		m.MetrikaStreams = metrikaStreams
 	} else {
-		m.MetrikaStream = []*endpointMetrikaStream{}
+		m.MetrikaStreams = []*endpointMetrikaStream{}
 	}
 
 	return diags
@@ -121,9 +121,9 @@ func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_Me
 
 	metrikaSource.Token = &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: m.Token.ValueString()}}
 
-	if len(m.MetrikaStream) > 0 {
-		metrikaStreams := make([]*endpoint.MetrikaStream, len(m.MetrikaStream))
-		for i, stream := range m.MetrikaStream {
+	if len(m.MetrikaStreams) > 0 {
+		metrikaStreams := make([]*endpoint.MetrikaStream, len(m.MetrikaStreams))
+		for i, stream := range m.MetrikaStreams {
 			convertedStream, diag := stream.convert()
 			diags = append(diags, diag...)
 			metrikaStreams[i] = convertedStream
