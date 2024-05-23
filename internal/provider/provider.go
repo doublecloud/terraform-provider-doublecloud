@@ -28,9 +28,11 @@ type DoubleCloudProvider struct {
 
 // DoubleCloudProviderModel describes the provider data model.
 type DoubleCloudProviderModel struct {
-	AuthorizedKey types.String `tfsdk:"authorized_key"`
-	Endpoint      types.String `tfsdk:"endpoint"`
-	TokenURL      types.String `tfsdk:"token_url"`
+	AuthorizedKey      types.String `tfsdk:"authorized_key"`
+	FederationID       types.String `tfsdk:"federation_id"`
+	FederationEndpoint types.String `tfsdk:"federation_endpoint"`
+	Endpoint           types.String `tfsdk:"endpoint"`
+	TokenURL           types.String `tfsdk:"token_url"`
 }
 
 type Config struct {
@@ -79,6 +81,14 @@ func (p *DoubleCloudProvider) Schema(ctx context.Context, req provider.SchemaReq
 				Optional:            true,
 				Sensitive:           true,
 			},
+			"federation_id": schema.StringAttribute{
+				MarkdownDescription: "Federation ID to authorize, if provided authorized_key is ignored",
+				Optional:            true,
+			},
+			"federation_endpoint": schema.StringAttribute{
+				MarkdownDescription: "Federation Endpoint which is used to authorized in federation",
+				Optional:            true,
+			},
 			"endpoint": schema.StringAttribute{
 				MarkdownDescription: "API endpoint",
 				Optional:            true,
@@ -94,6 +104,13 @@ func configureCredentials(data *DoubleCloudProviderModel) (dc.Credentials, error
 	envToken := os.Getenv("DC_TOKEN")
 	if envToken != "" {
 		return dc.NewIAMTokenCredentials(envToken), nil
+	}
+
+	if !data.FederationID.IsNull() {
+		return dc.NewFederationCredentials(&dc.FederationConfig{
+			FederationID:       data.FederationID.ValueString(),
+			FederationEndpoint: data.FederationEndpoint.ValueString(),
+		}), nil
 	}
 
 	var key *iamkey.Key
