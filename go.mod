@@ -5,8 +5,8 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/doublecloud/go-genproto v0.0.0-20240521040605-29dded8070f8
-	github.com/doublecloud/go-sdk v0.0.0-20240522152627-eac7c995b434
+	github.com/doublecloud/go-genproto v0.0.0-20240529145340-26557b3e1c45
+	github.com/doublecloud/go-sdk v0.0.0-20240530101206-971882315327
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/terraform-plugin-docs v0.19.0

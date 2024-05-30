@@ -643,7 +643,6 @@ Optional:
 
 Optional:
 
-- `columns` (List of String) The columns included in the Metrika stream
 - `stream_type` (String) The type of the Metrika stream
 
 

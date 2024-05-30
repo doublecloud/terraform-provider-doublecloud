@@ -15,8 +15,7 @@ type endpointMetrikaSourceSettings struct {
 }
 
 type endpointMetrikaStream struct {
-	StreamType types.String   `tfsdk:"stream_type"`
-	Columns    []types.String `tfsdk:"columns"`
+	StreamType types.String `tfsdk:"stream_type"`
 }
 
 func transferEndpointMetrikaStreamSchema() schema.Block {
@@ -26,11 +25,6 @@ func transferEndpointMetrikaStreamSchema() schema.Block {
 				"stream_type": schema.StringAttribute{
 					Optional:    true,
 					Description: "The type of the Metrika stream",
-				},
-				"columns": schema.ListAttribute{
-					ElementType: types.StringType,
-					Optional:    true,
-					Description: "The columns included in the Metrika stream",
 				},
 			},
 		},
@@ -89,15 +83,6 @@ func (m *endpointMetrikaStream) parse(e *endpoint.MetrikaStream) diag.Diagnostic
 	if e == nil {
 		m = nil
 	}
-	if len(e.GetColumns()) > 0 {
-		columns := make([]types.String, len(e.Columns))
-		for i, column := range e.Columns {
-			columns[i] = types.StringValue(column)
-		}
-		m.Columns = columns
-	} else {
-		m.Columns = []types.String{}
-	}
 
 	if e.GetType() != endpoint.MetrikaStreamType_METRIKA_STREAM_TYPE_UNSPECIFIED {
 		m.StreamType = types.StringValue(e.GetType().String())
@@ -137,18 +122,5 @@ func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_Me
 }
 
 func (m *endpointMetrikaStream) convert() (*endpoint.MetrikaStream, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	metrikaStream := &endpoint.MetrikaStream{}
-	if len(m.Columns) > 0 {
-		columns := make([]string, len(m.Columns))
-		for i, column := range m.Columns {
-			columns[i] = column.ValueString()
-		}
-		metrikaStream.Columns = columns
-	} else {
-		metrikaStream.Columns = []string{}
-	}
-	metrikaStream.Type = endpoint.MetrikaStreamType(endpoint.MetrikaStreamType_value[m.StreamType.ValueString()])
-
-	return metrikaStream, diags
+	return &endpoint.MetrikaStream{Type: endpoint.MetrikaStreamType(endpoint.MetrikaStreamType_value[m.StreamType.ValueString()])}, diag.Diagnostics{}
 }
