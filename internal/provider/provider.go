@@ -176,6 +176,8 @@ func (p *DoubleCloudProvider) Resources(ctx context.Context) []func() resource.R
 		NewNetworkConnectionResource,
 		NewNetworkConnectionAccepterResource,
 		NewLogsExportResource,
+		NewIAMOrganizationGroup,
+		NewIAMOrganizationSamlFederation,
 	}
 }
 
