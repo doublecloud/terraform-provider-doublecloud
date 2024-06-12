@@ -19,17 +19,26 @@ type endpointMongoSourceSettings struct {
 }
 
 type endpointMongoConnection struct {
+	ConnectionType *endpointMongoConnectionType `tfsdk:"connection_type"`
+	User           types.String                 `tfsdk:"user"`
+	Password       types.String                 `tfsdk:"password"`
+	AuthSource     types.String                 `tfsdk:"auth_source"`
+}
+
+type endpointMongoConnectionType struct {
 	OnPremise  *endpointMongoConnectionOnPremise `tfsdk:"on_premise"`
-	User       types.String                      `tfsdk:"user"`
-	Password   types.String                      `tfsdk:"password"`
-	AuthSource types.String                      `tfsdk:"auth_source"`
+	Srv        *endpointMongoConnectionSrv       `tfsdk:"srv"`
+	TLSMode    *endpointTLSMode                  `tfsdk:"tls_mode"`
+	ReplicaSet types.String                      `tfsdk:"replica_set"`
 }
 
 type endpointMongoConnectionOnPremise struct {
-	Hosts      []types.String   `tfsdk:"hosts"`
-	Port       types.Int64      `tfsdk:"port"`
-	TLSMode    *endpointTLSMode `tfsdk:"tls_mode"`
-	ReplicaSet types.String     `tfsdk:"replica_set"`
+	Hosts []types.String `tfsdk:"hosts"`
+	Port  types.Int64    `tfsdk:"port"`
+}
+
+type endpointMongoConnectionSrv struct {
+	Hostname types.String `tfsdk:"hostname"`
 }
 
 type endpointMongoCollection struct {
@@ -94,25 +103,44 @@ func transferEndpointMongoConnectionSchema() schema.Block {
 			},
 		},
 		Blocks: map[string]schema.Block{
-			"on_premise": schema.SingleNestedBlock{
+			"connection_type": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
-					"hosts": schema.ListAttribute{
-						ElementType:         types.StringType,
-						Optional:            true,
-						MarkdownDescription: "List of hosts",
-					},
-					"port": schema.Int64Attribute{
-						Optional:            true,
-						MarkdownDescription: "Port",
-					},
 					"replica_set": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "Replica set",
 					},
 				},
 				Blocks: map[string]schema.Block{
-					"tls_mode": transferEndpointTLSMode(),
+					"tls_mode":   transferEndpointTLSMode(),
+					"srv":        transferEndpointMongoConnectionSrvSchema(),
+					"on_premise": transferEndpointMongoConnectionOnPremiseSchema(),
 				},
+			},
+		},
+	}
+}
+
+func transferEndpointMongoConnectionOnPremiseSchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{
+			"hosts": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				MarkdownDescription: "List of hosts",
+			},
+			"port": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Port",
+			},
+		},
+	}
+}
+func transferEndpointMongoConnectionSrvSchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{
+			"hostname": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "SRV hostname",
 			},
 		},
 	}
@@ -153,23 +181,47 @@ func (m *endpointMongoConnection) convert() (*endpoint.MongoConnectionOptions, d
 
 	options.User = m.User.ValueString()
 	options.Password = &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: m.Password.ValueString()}}
+
 	if !m.AuthSource.IsNull() {
 		options.AuthSource = m.AuthSource.ValueString()
 	}
 
-	if on_premise := m.OnPremise; on_premise != nil {
-		address := &endpoint.MongoConnectionOptions_OnPremise{OnPremise: &endpoint.OnPremiseMongo{}}
-		address.OnPremise.Hosts = convertSliceTFStrings(on_premise.Hosts)
-		if !on_premise.Port.IsNull() {
-			address.OnPremise.Port = on_premise.Port.ValueInt64()
+	replicaSet := m.ConnectionType.ReplicaSet
+	tlsMode := m.ConnectionType.TLSMode
+
+	if srv := m.ConnectionType.Srv; srv != nil {
+		opts := &endpoint.SrvMongo{}
+		if hostname := srv.Hostname; hostname.IsNull() {
+			opts.Hostname = hostname.ValueString()
 		}
-		if !on_premise.ReplicaSet.IsNull() {
-			address.OnPremise.ReplicaSet = on_premise.ReplicaSet.ValueString()
+		if !replicaSet.IsNull() {
+			opts.ReplicaSet = replicaSet.ValueString()
 		}
-		if on_premise.TLSMode != nil {
-			address.OnPremise.TlsMode = convertTLSMode(on_premise.TLSMode)
+		if tlsMode != nil {
+			opts.TlsMode = convertTLSMode(tlsMode)
 		}
-		options.Address = address
+
+		options.Address = &endpoint.MongoConnectionOptions_Srv{Srv: opts}
+	}
+
+	if on_premise := m.ConnectionType.OnPremise; on_premise != nil {
+		opts := &endpoint.OnPremiseMongo{}
+		opts.Hosts = convertSliceTFStrings(on_premise.Hosts)
+		if port := on_premise.Port; !port.IsNull() {
+			opts.Port = port.ValueInt64()
+		}
+		if !replicaSet.IsNull() {
+			opts.ReplicaSet = replicaSet.ValueString()
+		}
+		if tlsMode != nil {
+			opts.TlsMode = convertTLSMode(tlsMode)
+		}
+
+		options.Address = &endpoint.MongoConnectionOptions_OnPremise{OnPremise: opts}
+	}
+
+	if options.Address == nil {
+		diags.AddError("unknown connection", "required one of fields: srv or on_premise")
 	}
 
 	return options, diags
@@ -248,26 +300,51 @@ func (m *endpointMongoConnection) parse(e *endpoint.MongoConnection) diag.Diagno
 	opts := e.GetConnectionOptions()
 	m.User = types.StringValue(opts.User)
 	m.AuthSource = types.StringValue(opts.AuthSource)
+
+	var replicaSet types.String
+	var tlsMode *endpointTLSMode
+	if srv := opts.GetSrv(); srv != nil {
+		if !m.ConnectionType.Srv.Hostname.IsNull() {
+			m.ConnectionType.Srv.Hostname = types.StringValue(srv.Hostname)
+		}
+
+		replicaSet = types.StringValue(srv.ReplicaSet)
+
+		if srv.TlsMode != nil {
+			if disabled := srv.TlsMode.GetDisabled(); disabled != nil {
+				tlsMode = nil
+			}
+			if config := srv.TlsMode.GetEnabled(); config != nil {
+				tlsMode = &endpointTLSMode{CACertificate: types.StringValue(config.CaCertificate)}
+			}
+		}
+	}
 	if on_premise := opts.GetOnPremise(); on_premise != nil {
-		if m.OnPremise.Hosts != nil {
-			m.OnPremise.Hosts = convertSliceToTFStrings(on_premise.Hosts)
+		if m.ConnectionType.OnPremise.Hosts != nil {
+			m.ConnectionType.OnPremise.Hosts = convertSliceToTFStrings(on_premise.Hosts)
 		}
-		if !m.OnPremise.Port.IsNull() {
-			m.OnPremise.Port = types.Int64Value(on_premise.Port)
+
+		if !m.ConnectionType.OnPremise.Port.IsNull() {
+			m.ConnectionType.OnPremise.Port = types.Int64Value(on_premise.Port)
 		}
-		if !m.OnPremise.ReplicaSet.IsNull() {
-			m.OnPremise.ReplicaSet = types.StringValue(on_premise.ReplicaSet)
-		}
-		if m.OnPremise.TLSMode != nil {
+
+		replicaSet = types.StringValue(on_premise.ReplicaSet)
+
+		if on_premise.TlsMode != nil {
 			if disabled := on_premise.TlsMode.GetDisabled(); disabled != nil {
-				m.OnPremise.TLSMode = nil
+				tlsMode = nil
 			}
 			if config := on_premise.TlsMode.GetEnabled(); config != nil {
-				m.OnPremise.TLSMode = &endpointTLSMode{CACertificate: types.StringValue(config.CaCertificate)}
+				tlsMode = &endpointTLSMode{CACertificate: types.StringValue(config.CaCertificate)}
 			}
 		}
-	} else {
-		diags.AddError("unsupported mongo address type", "update your provider")
+	}
+
+	if !m.ConnectionType.ReplicaSet.IsNull() {
+		m.ConnectionType.ReplicaSet = replicaSet
+	}
+	if m.ConnectionType.TLSMode != nil {
+		m.ConnectionType.TLSMode = tlsMode
 	}
 
 	return diags
