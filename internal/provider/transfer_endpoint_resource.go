@@ -58,6 +58,7 @@ type endpointSettings struct {
 	FacebookMarketingSource *transferEndpointFacebookMarketingSourceSettings `tfsdk:"facebookmarketing_source"`
 	SnowflakeSource         *endpointSnowflakeSourceSettings                 `tfsdk:"snowflake_source"`
 	JiraSource              *endpointJiraSourceSettings                      `tfsdk:"jira_source"`
+	RedshiftSource          *endpointRedshiftSourceSettings                  `tfsdk:"redshift_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -110,6 +111,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 				Description: "Settings",
 				Blocks: map[string]schema.Block{
 					"clickhouse_source":        transferEndpointChSourceSchema(),
+					"redshift_source":          transferEndpointRedshiftSourceSchema(),
 					"kafka_source":             transferEndpointKafkaSourceSchema(),
 					"postgres_source":          transferEndpointPostgresSourceSchema(),
 					"mysql_source":             transferEndpointMysqlSourceSchema(),
@@ -435,6 +437,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 			Settings: &transfer.EndpointSettings_JiraSource{JiraSource: result},
 		}, diag
 	}
+	if m.Settings.RedshiftSource != nil {
+		s, d := m.Settings.RedshiftSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -629,6 +638,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.JiraSource = &endpointJiraSourceSettings{}
 		}
 		diag.Append(data.Settings.JiraSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetRedshiftSource(); settings != nil {
+		if data.Settings.RedshiftSource == nil {
+			data.Settings.RedshiftSource = &endpointRedshiftSourceSettings{}
+		}
+		diag.Append(data.Settings.RedshiftSource.parse(settings)...)
 	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")
