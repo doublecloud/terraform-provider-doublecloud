@@ -21,23 +21,23 @@ func transferEndpointRedshiftSourceSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "The hostname of the Redshift cluster.",
 			},
 			"port": schema.Int64Attribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "The port number of the Redshift cluster.",
 			},
 			"database": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "The name of the database to connect to.",
 			},
 			"username": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "The username to use for connecting to the database.",
 			},
 			"password": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				Sensitive:           true,
 				MarkdownDescription: "The password to use for connecting to the database.",
 			},

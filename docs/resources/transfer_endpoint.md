@@ -1182,17 +1182,14 @@ Optional:
 <a id="nestedblock--settings--redshift_source"></a>
 ### Nested Schema for `settings.redshift_source`
 
-Required:
+Optional:
 
 - `database` (String) The name of the database to connect to.
 - `host` (String) The hostname of the Redshift cluster.
 - `password` (String, Sensitive) The password to use for connecting to the database.
 - `port` (Number) The port number of the Redshift cluster.
-- `username` (String) The username to use for connecting to the database.
-
-Optional:
-
 - `schemas` (List of String) A list of schemas to include in the transfer.
+- `username` (String) The username to use for connecting to the database.
 
 
 <a id="nestedblock--settings--s3_source"></a>
