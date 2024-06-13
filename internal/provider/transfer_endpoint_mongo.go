@@ -191,7 +191,7 @@ func (m *endpointMongoConnection) convert() (*endpoint.MongoConnectionOptions, d
 
 	if srv := m.ConnectionType.Srv; srv != nil {
 		opts := &endpoint.SrvMongo{}
-		if hostname := srv.Hostname; hostname.IsNull() {
+		if hostname := srv.Hostname; !hostname.IsNull() {
 			opts.Hostname = hostname.ValueString()
 		}
 		if !replicaSet.IsNull() {
