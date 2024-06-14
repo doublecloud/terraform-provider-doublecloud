@@ -8,7 +8,7 @@ resource "doublecloud_clickhouse_cluster" "beta-clickhouse" {
 
   resources {
     clickhouse {
-      resource_preset_id = "s1-c2-m4"
+      resource_preset_id = "s2-c2-m4"
       disk_size          = 34359738368 // 32 gb, but in bytes.
       replica_count      = 1
     }

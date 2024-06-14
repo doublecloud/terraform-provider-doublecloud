@@ -22,7 +22,7 @@ resource "doublecloud_kafka_cluster" "example-kafka" {
 
   resources {
     kafka {
-      resource_preset_id = "s1-c2-m4"
+      resource_preset_id = "s2-c2-m4"
       disk_size          = 34359738368 # 32GB
       broker_count       = 1
       zone_count         = 1

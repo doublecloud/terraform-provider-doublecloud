@@ -47,7 +47,7 @@ resource "doublecloud_clickhouse_cluster" "dwh" {
 
   resources {
     clickhouse {
-      resource_preset_id = "s1-c2-m4"
+      resource_preset_id = "s2-c2-m4"
       disk_size          = 51539607552
       replica_count      = var.is_prod ? 3 : 1 # for prod it's better to be more then 1 replica
       shard_count        = 1
