@@ -92,6 +92,7 @@ Optional:
 - `object_storage_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_target))
 - `postgres_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_source))
 - `postgres_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--postgres_target))
+- `redshift_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--redshift_source))
 - `s3_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--s3_source))
 - `snowflake_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--snowflake_source))
 
@@ -1176,6 +1177,19 @@ Optional:
 
 
 
+
+
+<a id="nestedblock--settings--redshift_source"></a>
+### Nested Schema for `settings.redshift_source`
+
+Optional:
+
+- `database` (String) The name of the database to connect to.
+- `host` (String) The hostname of the Redshift cluster.
+- `password` (String, Sensitive) The password to use for connecting to the database.
+- `port` (Number) The port number of the Redshift cluster.
+- `schemas` (List of String) A list of schemas to include in the transfer.
+- `username` (String) The username to use for connecting to the database.
 
 
 <a id="nestedblock--settings--s3_source"></a>
