@@ -673,22 +673,39 @@ Optional:
 Optional:
 
 - `auth_source` (String) Authentication database associated with the user
-- `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--on_premise))
+- `connection_type` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--connection_type))
 - `password` (String, Sensitive) Database user password
 - `user` (String) Database user
 
-<a id="nestedblock--settings--mongo_source--connection--on_premise"></a>
-### Nested Schema for `settings.mongo_source.connection.on_premise`
+<a id="nestedblock--settings--mongo_source--connection--connection_type"></a>
+### Nested Schema for `settings.mongo_source.connection.connection_type`
+
+Optional:
+
+- `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--connection_type--on_premise))
+- `replica_set` (String) Replica set
+- `srv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--connection_type--srv))
+- `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--connection_type--tls_mode))
+
+<a id="nestedblock--settings--mongo_source--connection--connection_type--on_premise"></a>
+### Nested Schema for `settings.mongo_source.connection.connection_type.on_premise`
 
 Optional:
 
 - `hosts` (List of String) List of hosts
 - `port` (Number) Port
-- `replica_set` (String) Replica set
-- `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source--connection--on_premise--tls_mode))
 
-<a id="nestedblock--settings--mongo_source--connection--on_premise--tls_mode"></a>
-### Nested Schema for `settings.mongo_source.connection.on_premise.tls_mode`
+
+<a id="nestedblock--settings--mongo_source--connection--connection_type--srv"></a>
+### Nested Schema for `settings.mongo_source.connection.connection_type.srv`
+
+Optional:
+
+- `hostname` (String) SRV hostname
+
+
+<a id="nestedblock--settings--mongo_source--connection--connection_type--tls_mode"></a>
+### Nested Schema for `settings.mongo_source.connection.connection_type.tls_mode`
 
 Optional:
 
@@ -722,22 +739,39 @@ Optional:
 Optional:
 
 - `auth_source` (String) Authentication database associated with the user
-- `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--on_premise))
+- `connection_type` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--connection_type))
 - `password` (String, Sensitive) Database user password
 - `user` (String) Database user
 
-<a id="nestedblock--settings--mongo_target--connection--on_premise"></a>
-### Nested Schema for `settings.mongo_target.connection.on_premise`
+<a id="nestedblock--settings--mongo_target--connection--connection_type"></a>
+### Nested Schema for `settings.mongo_target.connection.connection_type`
+
+Optional:
+
+- `on_premise` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--connection_type--on_premise))
+- `replica_set` (String) Replica set
+- `srv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--connection_type--srv))
+- `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--connection_type--tls_mode))
+
+<a id="nestedblock--settings--mongo_target--connection--connection_type--on_premise"></a>
+### Nested Schema for `settings.mongo_target.connection.connection_type.on_premise`
 
 Optional:
 
 - `hosts` (List of String) List of hosts
 - `port` (Number) Port
-- `replica_set` (String) Replica set
-- `tls_mode` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target--connection--on_premise--tls_mode))
 
-<a id="nestedblock--settings--mongo_target--connection--on_premise--tls_mode"></a>
-### Nested Schema for `settings.mongo_target.connection.on_premise.tls_mode`
+
+<a id="nestedblock--settings--mongo_target--connection--connection_type--srv"></a>
+### Nested Schema for `settings.mongo_target.connection.connection_type.srv`
+
+Optional:
+
+- `hostname` (String) SRV hostname
+
+
+<a id="nestedblock--settings--mongo_target--connection--connection_type--tls_mode"></a>
+### Nested Schema for `settings.mongo_target.connection.connection_type.tls_mode`
 
 Optional:
 
