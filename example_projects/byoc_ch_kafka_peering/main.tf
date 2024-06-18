@@ -89,7 +89,7 @@ resource "doublecloud_clickhouse_cluster" "alpha-clickhouse" {
 
   resources {
     clickhouse {
-      resource_preset_id = "s1-c2-m4"
+      resource_preset_id = "s2-c2-m4"
       disk_size          = 34359738368
       replica_count      = 1
     }
@@ -140,7 +140,7 @@ resource "doublecloud_kafka_cluster" "alpha-kafka" {
 
   resources {
     kafka {
-      resource_preset_id = "s1-c2-m4"
+      resource_preset_id = "s2-c2-m4"
       disk_size          = 34359738368
       broker_count       = 1
       zone_count         = 1

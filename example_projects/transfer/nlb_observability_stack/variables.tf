@@ -74,7 +74,7 @@ variable "clickhouse_cluster_name" {
 
 variable "clickhouse_cluster_resource_preset" {
   type        = string
-  default     = "s1-c2-m4"
+  default     = "s2-c2-m4"
   description = "Specs for the managed ClickHouse cluster created in DoubleCloud"
 }
 
