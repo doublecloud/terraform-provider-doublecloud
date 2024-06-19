@@ -55,6 +55,30 @@ func TestAccTransferResource(t *testing.T) {
 											exclude = ["c2"]
 										}
 									}
+								},
+								{
+									lambda_function = {
+										name = "cloud-function-example"
+										name_space = "example-namespace"
+										options = {
+											cloud_function = "example-cloud-function"
+											cloud_function_url = "https://example.com/function"
+											number_of_retries = 3
+											buffer_size = "10MB"
+											buffer_flush_interval = "1m"
+											invocation_timeout = "30s"
+											headers = [
+												{
+													key = "Authorization"
+													value = "Bearer example-token"
+												},
+												{
+													key = "Content-Type"
+													value = "application/json"
+												}
+											]
+										}
+									}
 								}
 							]
 						}
@@ -66,7 +90,7 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testTransferResource, "target"),
 					resource.TestCheckResourceAttr(testTransferResource, "type", "SNAPSHOT_ONLY"),
 					resource.TestCheckResourceAttr(testTransferResource, "activated", "false"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "3"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.include.0", "t1"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.exclude.0", "t2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.keys.0", "pk_field_1"),
@@ -75,6 +99,18 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.tables.exclude.0", "t2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.columns.include.0", "c1"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.1.convert_to_string.columns.exclude.0", "c2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.name", "cloud-function-example"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.name_space", "example-namespace"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.cloud_function", "example-cloud-function"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.cloud_function_url", "https://example.com/function"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.number_of_retries", "3"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.buffer_size", "10MB"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.buffer_flush_interval", "1m"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.invocation_timeout", "30s"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.0.key", "Authorization"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.0.value", "Bearer example-token"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.1.key", "Content-Type"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.1.value", "application/json"),
 				),
 			},
 			{
