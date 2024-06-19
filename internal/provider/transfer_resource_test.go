@@ -64,8 +64,8 @@ func TestAccTransferResource(t *testing.T) {
 											cloud_function = "example-cloud-function"
 											cloud_function_url = "https://example.com/function"
 											number_of_retries = 3
-											buffer_size = "10MB"
-											buffer_flush_interval = "1m"
+											buffer_size = "10 MB"
+											buffer_flush_interval = "1m0s"
 											invocation_timeout = "30s"
 											headers = [
 												{
@@ -104,8 +104,8 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.cloud_function", "example-cloud-function"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.cloud_function_url", "https://example.com/function"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.number_of_retries", "3"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.buffer_size", "10MB"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.buffer_flush_interval", "1m"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.buffer_size", "10 MB"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.buffer_flush_interval", "1m0s"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.invocation_timeout", "30s"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.0.key", "Authorization"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.0.value", "Bearer example-token"),
