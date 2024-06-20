@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1/endpoint"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -548,6 +549,7 @@ type transferTransformer struct {
 	ConvertToString   *transferTransformerConvertToString   `tfsdk:"convert_to_string"`
 	DBT               *transferTransformerDBT               `tfsdk:"dbt"`
 	TableSplitter     *transferTransformerTableSplitter     `tfsdk:"table_splitter"`
+	CloudFunction     *transferTransformerCloudFunction     `tfsdk:"lambda_function"`
 }
 
 func transferTransformerSchema() schema.Attribute {
@@ -558,6 +560,7 @@ func transferTransformerSchema() schema.Attribute {
 				"convert_to_string":   transferTransformerConvertToStringSchema(),
 				"dbt":                 transferTransformerDBTSchema(),
 				"table_splitter":      transferTransformerTableSplitterSchema(),
+				"lambda_function":     transferTransformerCloudFunctionSchema(),
 			},
 		},
 		Optional: true,
@@ -582,8 +585,12 @@ func (m *transferTransformer) convert(rqt requestType, r *transfer.Transformer) 
 		r.Transformer = &transfer.Transformer_Dbt{Dbt: tr}
 	case m.TableSplitter != nil:
 		tr := new(transfer.TableSplitterTransformer)
-		m.TableSplitter.convert(rqt, tr)
+		diags.Append(m.TableSplitter.convert(rqt, tr)...)
 		r.Transformer = &transfer.Transformer_TableSplitterTransformer{TableSplitterTransformer: tr}
+	case m.CloudFunction != nil:
+		tr := new(transfer.CloudFunctionTransformer)
+		diags.Append(m.CloudFunction.convert(rqt, tr)...)
+		r.Transformer = &transfer.Transformer_CloudFunctionTransformer{CloudFunctionTransformer: tr}
 	default:
 		diags.Append(diag.NewErrorDiagnostic("a transformer is present, but not set to any oneof value", ""))
 	}
@@ -619,6 +626,12 @@ func (m *transferTransformer) parse(t *transfer.Transformer) diag.Diagnostics {
 			m.TableSplitter = new(transferTransformerTableSplitter)
 		}
 		diags.Append(m.TableSplitter.parse(t.GetTableSplitterTransformer())...)
+	case t.GetCloudFunctionTransformer() != nil:
+		if m.CloudFunction == nil {
+			m.clear()
+			m.CloudFunction = new(transferTransformerCloudFunction)
+		}
+		diags.Append(m.CloudFunction.parse(t.GetCloudFunctionTransformer())...)
 	default:
 		m.clear()
 	}
@@ -631,6 +644,7 @@ func (m *transferTransformer) clear() {
 	m.ConvertToString = nil
 	m.DBT = nil
 	m.TableSplitter = nil
+	m.CloudFunction = nil
 }
 
 type transferTransformerReplacePrimaryKey struct {
@@ -962,4 +976,183 @@ func (m *transferTransformerTableSplitter) parse(t *transfer.TableSplitterTransf
 	m.Splitter = types.StringValue(t.GetSplitter())
 
 	return diags
+}
+
+func transferTransformerCloudFunctionSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Table name.",
+			},
+			"name_space": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Named Schema",
+			},
+			"options": optionsSchema(),
+		},
+		Optional:            true,
+		MarkdownDescription: "Lambda function",
+	}
+}
+
+func optionsSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"cloud_function": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Cloud function name",
+			},
+			"cloud_function_url": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Cloud function URL.",
+			},
+			"number_of_retries": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Number of retries.",
+			},
+			"buffer_size": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Buffer size for function.",
+			},
+			"buffer_flush_interval": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Flush interval",
+			},
+			"invocation_timeout": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Invocation timeout.",
+			},
+			"headers": headersSchema(),
+		},
+		MarkdownDescription: "Lambda function config",
+	}
+}
+
+func headersSchema() schema.Attribute {
+	return schema.ListNestedAttribute{
+		Optional: true,
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				"key": schema.StringAttribute{
+					Optional:            true,
+					MarkdownDescription: "Header key.",
+				},
+				"value": schema.StringAttribute{
+					Optional:            true,
+					MarkdownDescription: "Header value.",
+				},
+			},
+		},
+	}
+}
+
+type transferTransformerCloudFunction struct {
+	Name      types.String               `tfsdk:"name"`
+	NameSpace types.String               `tfsdk:"name_space"`
+	Options   *dataTransformationOptions `tfsdk:"options"`
+}
+
+type dataTransformationOptions struct {
+	CloudFunction       types.String   `tfsdk:"cloud_function"`
+	CloudFunctionURL    types.String   `tfsdk:"cloud_function_url"`
+	NumberOfRetries     types.Int64    `tfsdk:"number_of_retries"`
+	BufferSize          types.String   `tfsdk:"buffer_size"`
+	BufferFlushInterval types.String   `tfsdk:"buffer_flush_interval"`
+	InvocationTimeout   types.String   `tfsdk:"invocation_timeout"`
+	Headers             []*HeaderValue `tfsdk:"headers"`
+}
+
+type HeaderValue struct {
+	Key   types.String `tfsdk:"key"`
+	Value types.String `tfsdk:"value"`
+}
+
+func (m *transferTransformerCloudFunction) convert(rqt requestType, r *transfer.CloudFunctionTransformer) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	r.Name = m.Name.ValueString()
+	r.NameSpace = m.NameSpace.ValueString()
+	if m.Options != nil {
+		r.Options = new(endpoint.DataTransformationOptions)
+		diags.Append(m.Options.convert(rqt, r.Options)...)
+	}
+
+	return diags
+}
+
+func (m *dataTransformationOptions) convert(rqt requestType, r *endpoint.DataTransformationOptions) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	r.CloudFunction = m.CloudFunction.ValueString()
+	r.CloudFunctionUrl = m.CloudFunctionURL.ValueString()
+	r.BufferFlushInterval = m.BufferFlushInterval.ValueString()
+	r.BufferSize = m.BufferSize.ValueString()
+	r.NumberOfRetries = m.NumberOfRetries.ValueInt64()
+	r.InvocationTimeout = m.InvocationTimeout.ValueString()
+
+	if m.Headers != nil {
+		r.Headers = make([]*endpoint.HeaderValue, len(m.Headers))
+		for i, header := range m.Headers {
+			r.Headers[i] = &endpoint.HeaderValue{}
+			diags.Append(header.convert(rqt, r.Headers[i])...)
+		}
+	}
+
+	return diags
+}
+
+func (m *HeaderValue) convert(rqt requestType, r *endpoint.HeaderValue) diag.Diagnostics {
+	r.Key = m.Key.ValueString()
+	r.Value = m.Value.ValueString()
+
+	return diag.Diagnostics{}
+}
+
+func (m *transferTransformerCloudFunction) parse(c *transfer.CloudFunctionTransformer) diag.Diagnostics {
+	var diags diag.Diagnostics
+	m.Name = types.StringValue(c.Name)
+	m.NameSpace = types.StringValue(c.NameSpace)
+	if options := c.Options; options != nil {
+		if m.Options == nil {
+			m.Options = new(dataTransformationOptions)
+		}
+		diags.Append(m.Options.parse(options)...)
+	} else {
+		m.Options = nil
+	}
+
+	return diags
+}
+
+func (m *dataTransformationOptions) parse(c *endpoint.DataTransformationOptions) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	m.CloudFunction = types.StringValue(c.CloudFunction)
+	m.CloudFunctionURL = types.StringValue(c.CloudFunctionUrl)
+	m.NumberOfRetries = types.Int64Value(c.NumberOfRetries)
+	m.BufferSize = types.StringValue(c.BufferSize)
+	m.BufferFlushInterval = types.StringValue(c.BufferFlushInterval)
+	m.InvocationTimeout = types.StringValue(c.InvocationTimeout)
+
+	if headers := c.Headers; headers != nil {
+		if m.Headers == nil {
+			m.Headers = make([]*HeaderValue, len(headers))
+		}
+		for i, header := range m.Headers {
+			diags.Append(header.parse(headers[i])...)
+		}
+	} else {
+		m.Headers = nil
+	}
+
+	return diags
+}
+
+func (m *HeaderValue) parse(c *endpoint.HeaderValue) diag.Diagnostics {
+	m.Key = types.StringValue(c.Key)
+	m.Value = types.StringValue(c.Value)
+
+	return diag.Diagnostics{}
 }

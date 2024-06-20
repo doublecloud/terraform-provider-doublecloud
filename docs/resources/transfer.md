@@ -91,6 +91,7 @@ Optional:
 
 - `convert_to_string` (Attributes) Convert columns' values to strings. (see [below for nested schema](#nestedatt--transformation--transformers--convert_to_string))
 - `dbt` (Attributes) Run DBT after snapshot finish. (see [below for nested schema](#nestedatt--transformation--transformers--dbt))
+- `lambda_function` (Attributes) Lambda function (see [below for nested schema](#nestedatt--transformation--transformers--lambda_function))
 - `replace_primary_key` (Attributes) Replace the set of columns marked as PRIMARY KEYs. (see [below for nested schema](#nestedatt--transformation--transformers--replace_primary_key))
 - `table_splitter` (Attributes) Replace the name of the table to a value composed of values of columns of a row. (see [below for nested schema](#nestedatt--transformation--transformers--table_splitter))
 
@@ -130,6 +131,39 @@ Optional:
 - `git_repository_link` (String) A link to a git repository with a DBT project. Must start with `https://`. The root directory of the repository must contain a `dbt_project.yml` file.
 - `operation` (String) Operation; for example, `run`.
 - `profile_name` (String) The name for a profile which will be created automatically using the settings of the destination endpoint. The name must match the `profile` property in the `dbt_project.yml` file.
+
+
+<a id="nestedatt--transformation--transformers--lambda_function"></a>
+### Nested Schema for `transformation.transformers.lambda_function`
+
+Optional:
+
+- `name` (String) Table name.
+- `name_space` (String) Named Schema
+- `options` (Attributes) Lambda function config (see [below for nested schema](#nestedatt--transformation--transformers--lambda_function--options))
+
+<a id="nestedatt--transformation--transformers--lambda_function--options"></a>
+### Nested Schema for `transformation.transformers.lambda_function.options`
+
+Optional:
+
+- `buffer_flush_interval` (String) Flush interval
+- `buffer_size` (String) Buffer size for function.
+- `cloud_function` (String) Cloud function name
+- `cloud_function_url` (String) Cloud function URL.
+- `headers` (Attributes List) (see [below for nested schema](#nestedatt--transformation--transformers--lambda_function--options--headers))
+- `invocation_timeout` (String) Invocation timeout.
+- `number_of_retries` (Number) Number of retries.
+
+<a id="nestedatt--transformation--transformers--lambda_function--options--headers"></a>
+### Nested Schema for `transformation.transformers.lambda_function.options.headers`
+
+Optional:
+
+- `key` (String) Header key.
+- `value` (String) Header value.
+
+
 
 
 <a id="nestedatt--transformation--transformers--replace_primary_key"></a>
