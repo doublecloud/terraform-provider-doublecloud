@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/doublecloud/go-genproto/doublecloud/visualization/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
@@ -401,6 +402,18 @@ func (r *WorkbookResource) Update(ctx context.Context, req resource.UpdateReques
 
 	r.updateConnections(ctx, resp, data)
 
+	getRequest, diag := getWorkbookResourceRequest(data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
+
+	_, err := r.svc.Get(ctx, getRequest)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to get", err.Error())
+		return
+	}
+
 	rq, diag := updateWorkbookRequest(data)
 	if diag.HasError() {
 		resp.Diagnostics.Append(diag...)
@@ -408,17 +421,24 @@ func (r *WorkbookResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 	rs, err := r.svc.Update(ctx, rq)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to update", err.Error())
+		// data-lens have fake operations, if workbook big enough - it may not be updated in 1 min (session alive time)
+		// to bypass this restriction we will try to wait for couple more minutes until we detect change in workbook
+		if !strings.Contains(err.Error(), "stream terminated by RST_STREAM") {
+			resp.Diagnostics.AddError("failed to update", err.Error())
+			return
+		}
+		// Save updated data into Terraform state
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		return
 	}
 	op, err := r.sdk.WrapOperation(rs, err)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to update", err.Error())
+		resp.Diagnostics.AddError("failed to wrap operation", err.Error())
 		return
 	}
 	err = op.Wait(ctx)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to update", err.Error())
+		resp.Diagnostics.AddError("failed to wait operation", err.Error())
 		return
 	}
 
