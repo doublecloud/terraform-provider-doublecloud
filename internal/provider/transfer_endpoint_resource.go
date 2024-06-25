@@ -59,8 +59,8 @@ type endpointSettings struct {
 	SnowflakeSource         *endpointSnowflakeSourceSettings                 `tfsdk:"snowflake_source"`
 	JiraSource              *endpointJiraSourceSettings                      `tfsdk:"jira_source"`
 	RedshiftSource          *endpointRedshiftSourceSettings                  `tfsdk:"redshift_source"`
-	BigquerySource          *endpointBigquerySourceSettings                  `tfsdk:"bigquery_source"`
 	HubspotSource           *endpointHubspotSourceSettings                   `tfsdk:"hubspot_source"`
+	BigquerySource          *endpointBigquerySourceSettings                  `tfsdk:"bigquery_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -137,6 +137,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"mysql_target":          transferEndpointMysqlTargetSchema(),
 					"mongo_target":          transferEndpointMongoTargetSchema(),
 					"object_storage_target": transferEndpointObjectStorageTargetSchema(),
+					"bigquery_target":       transferEndpointBigqueryTargetSettingsSchema(),
 				},
 			},
 		},
