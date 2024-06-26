@@ -82,6 +82,7 @@ Optional:
 - `facebookmarketing_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--facebookmarketing_source))
 - `googleads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--googleads_source))
 - `hubspot_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--hubspot_source))
+- `instagram_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--instagram_source))
 - `jira_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--jira_source))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
@@ -341,6 +342,15 @@ Optional:
 - `access_token` (String, Sensitive) Access token
 
 
+
+
+<a id="nestedblock--settings--instagram_source"></a>
+### Nested Schema for `settings.instagram_source`
+
+Optional:
+
+- `access_token` (String, Sensitive) The value of the access token generated. See [Airbyte documentation](https://docs.airbyte.io/integrations/sources/instagram) for more information
+- `start_date` (String) The date in format YYYY-MM-DDT00:00:00Z to start replicating data for User Insights. All data generated after this date will be replicated.
 
 
 <a id="nestedblock--settings--jira_source"></a>
