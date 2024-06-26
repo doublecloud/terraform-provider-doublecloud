@@ -59,6 +59,7 @@ type endpointSettings struct {
 	SnowflakeSource         *endpointSnowflakeSourceSettings                 `tfsdk:"snowflake_source"`
 	JiraSource              *endpointJiraSourceSettings                      `tfsdk:"jira_source"`
 	RedshiftSource          *endpointRedshiftSourceSettings                  `tfsdk:"redshift_source"`
+	HubspotSource           *endpointHubspotSourceSettings                   `tfsdk:"hubspot_source"`
 	BigquerySource          *endpointBigquerySourceSettings                  `tfsdk:"bigquery_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
@@ -127,6 +128,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"facebookmarketing_source": transferEndpointFacebookMarketingSourceSettingsSchema(),
 					"snowflake_source":         endpointSnowflakeSourceSettingsSchema(),
 					"jira_source":              endpointJiraSourceSettingsSchema(),
+					"hubspot_source":           transferEndpointHubspotSourceSettingsSchema(),
 					"bigquery_source":          transferEndpointBigquerySourceSettingsSchema(),
 
 					"clickhouse_target":     transferEndpointChTargetSchema(),
@@ -448,6 +450,15 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
+	if m.Settings.HubspotSource != nil {
+		s, d := m.Settings.HubspotSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_HubspotSource{HubspotSource: s},
+		}, diag
+	}
 	if m.Settings.BigquerySource != nil {
 		result := new(endpoint_airbyte.BigQuerySource)
 		diag.Append(m.Settings.BigquerySource.convert(result)...)
@@ -674,6 +685,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.BigqueryTarget = &endpointBigqueryTargetSettings{}
 		}
 		diag.Append(data.Settings.BigqueryTarget.parse(settings)...)
+	}
+	if settings := e.Settings.GetHubspotSource(); settings != nil {
+		if data.Settings.HubspotSource == nil {
+			data.Settings.HubspotSource = &endpointHubspotSourceSettings{}
+		}
+		diag.Append(data.Settings.HubspotSource.parse(settings)...)
 	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")

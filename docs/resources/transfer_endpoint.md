@@ -81,6 +81,7 @@ Optional:
 - `clickhouse_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target))
 - `facebookmarketing_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--facebookmarketing_source))
 - `googleads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--googleads_source))
+- `hubspot_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--hubspot_source))
 - `jira_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--jira_source))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
@@ -312,6 +313,32 @@ Optional:
 
 - `query` (String) Query
 - `table_name` (String) Table name
+
+
+
+<a id="nestedblock--settings--hubspot_source"></a>
+### Nested Schema for `settings.hubspot_source`
+
+Optional:
+
+- `credentials` (Block, Optional) Choose how to authenticate to HubSpot (see [below for nested schema](#nestedblock--settings--hubspot_source--credentials))
+- `enable_experimental_streams` (Boolean) If enabled then experimental streams become available for sync.
+- `start_date` (String) UTC date and time in the format 2017-01-25T00:00:00Z. Any data before this date will not be replicated.
+
+<a id="nestedblock--settings--hubspot_source--credentials"></a>
+### Nested Schema for `settings.hubspot_source.credentials`
+
+Optional:
+
+- `private_app` (Block, Optional) (see [below for nested schema](#nestedblock--settings--hubspot_source--credentials--private_app))
+
+<a id="nestedblock--settings--hubspot_source--credentials--private_app"></a>
+### Nested Schema for `settings.hubspot_source.credentials.private_app`
+
+Optional:
+
+- `access_token` (String, Sensitive) Access token
+
 
 
 
