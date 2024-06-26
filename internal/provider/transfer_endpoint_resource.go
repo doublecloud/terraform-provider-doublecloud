@@ -62,6 +62,7 @@ type endpointSettings struct {
 	HubspotSource           *endpointHubspotSourceSettings                   `tfsdk:"hubspot_source"`
 	BigquerySource          *endpointBigquerySourceSettings                  `tfsdk:"bigquery_source"`
 	MssqlSource             *endpointMssqlSourceSettings                     `tfsdk:"mssql_source"`
+	InstagramSource         *endpointInstagramSourceSettings                 `tfsdk:"instagram_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -132,6 +133,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"hubspot_source":           transferEndpointHubspotSourceSettingsSchema(),
 					"bigquery_source":          transferEndpointBigquerySourceSettingsSchema(),
 					"mssql_source":             transferEndpointMssqlSourceSchema(),
+					"instagram_source":         transferEndpointInstagramSourceSchema(),
 
 					"clickhouse_target":     transferEndpointChTargetSchema(),
 					"kafka_target":          transferEndpointKafkaTargetSchema(),
@@ -475,6 +477,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
+	if m.Settings.InstagramSource != nil {
+		s, d := m.Settings.InstagramSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -706,6 +715,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.MssqlSource = &endpointMssqlSourceSettings{}
 		}
 		diag.Append(data.Settings.MssqlSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetInstagramSource(); settings != nil {
+		if data.Settings.InstagramSource == nil {
+			data.Settings.InstagramSource = &endpointInstagramSourceSettings{}
+		}
+		diag.Append(data.Settings.InstagramSource.parse(settings)...)
 	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")
