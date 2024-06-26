@@ -93,6 +93,7 @@ Optional:
 - `dbt` (Attributes) Run DBT after snapshot finish. (see [below for nested schema](#nestedatt--transformation--transformers--dbt))
 - `lambda_function` (Attributes) Lambda function (see [below for nested schema](#nestedatt--transformation--transformers--lambda_function))
 - `replace_primary_key` (Attributes) Replace the set of columns marked as PRIMARY KEYs. (see [below for nested schema](#nestedatt--transformation--transformers--replace_primary_key))
+- `sql` (Attributes) SQL Transformer (see [below for nested schema](#nestedatt--transformation--transformers--sql))
 - `table_splitter` (Attributes) Replace the name of the table to a value composed of values of columns of a row. (see [below for nested schema](#nestedatt--transformation--transformers--table_splitter))
 
 <a id="nestedatt--transformation--transformers--convert_to_string"></a>
@@ -176,6 +177,24 @@ Optional:
 
 <a id="nestedatt--transformation--transformers--replace_primary_key--tables"></a>
 ### Nested Schema for `transformation.transformers.replace_primary_key.tables`
+
+Optional:
+
+- `exclude` (List of String) Excluded tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+- `include` (List of String) Included tables (regular expressions). Start every name with `^` and finish with `$` to avoid unexpected side effects.
+
+
+
+<a id="nestedatt--transformation--transformers--sql"></a>
+### Nested Schema for `transformation.transformers.sql`
+
+Optional:
+
+- `query` (String) Script would be applied on-the-fly to all data. As SQL engine used [Clickhouse Local](https://clickhouse.com/docs/en/operations/utilities/clickhouse-local). For queries there is a common `table` source for data. For example `SELECT * FROM table` query. No state is saved. Data window is linear, but with random size. Local clickhouse run with `--no-system-tables` flag, which disables all system tables / dictionaries.
+- `tables` (Attributes) Tables. (see [below for nested schema](#nestedatt--transformation--transformers--sql--tables))
+
+<a id="nestedatt--transformation--transformers--sql--tables"></a>
+### Nested Schema for `transformation.transformers.sql.tables`
 
 Optional:
 
