@@ -75,10 +75,13 @@ resource "doublecloud_transfer_endpoint" "sample-pg2ch-target" {
 Optional:
 
 - `aws_cloudtrail_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--aws_cloudtrail_source))
+- `bigquery_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--bigquery_source))
+- `bigquery_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--bigquery_target))
 - `clickhouse_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_source))
 - `clickhouse_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--clickhouse_target))
 - `facebookmarketing_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--facebookmarketing_source))
 - `googleads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--googleads_source))
+- `hubspot_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--hubspot_source))
 - `jira_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--jira_source))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
@@ -105,6 +108,26 @@ Optional:
 - `region_name` (String) The default AWS region; for example, `us-west-1`.
 - `secret_key` (String, Sensitive) AWS CloudTrail Secret Key. See [documentation](https://docs.airbyte.io/integrations/sources/aws-cloudtrail) for information on how to obtain this value.
 - `start_date` (String) The date from which replication should start. Note that in AWS CloudTrail, historical data are available for the last 90 days only. Format `YYYY-MM-DD`; for example, `2021-01-25`.
+
+
+<a id="nestedblock--settings--bigquery_source"></a>
+### Nested Schema for `settings.bigquery_source`
+
+Optional:
+
+- `credentials_json` (String, Sensitive) The contents of your Service Account Key JSON file. See the [documentation](https://docs.airbyte.io/integrations/sources/bigquery#setup-the-bigquery-source-in-airbyte) for more information on how to obtain this key.
+- `dataset_id` (String) The dataset ID to search for tables and views. If you are only loading data from one dataset, setting this option could result in much faster schema discovery.
+- `project_id` (String) The GCP project ID for the project containing the target BigQuery dataset.
+
+
+<a id="nestedblock--settings--bigquery_target"></a>
+### Nested Schema for `settings.bigquery_target`
+
+Optional:
+
+- `credentials_json` (String, Sensitive) The contents of your Service Account Key JSON file. See the [documentation](https://docs.airbyte.io/integrations/sources/bigquery#setup-the-bigquery-source-in-airbyte) for more information on how to obtain this key.
+- `dataset_id` (String) The dataset ID to search for tables and views. If you are only loading data from one dataset, setting this option could result in much faster schema discovery.
+- `project_id` (String) The GCP project ID for the project containing the target BigQuery dataset.
 
 
 <a id="nestedblock--settings--clickhouse_source"></a>
@@ -290,6 +313,32 @@ Optional:
 
 - `query` (String) Query
 - `table_name` (String) Table name
+
+
+
+<a id="nestedblock--settings--hubspot_source"></a>
+### Nested Schema for `settings.hubspot_source`
+
+Optional:
+
+- `credentials` (Block, Optional) Choose how to authenticate to HubSpot (see [below for nested schema](#nestedblock--settings--hubspot_source--credentials))
+- `enable_experimental_streams` (Boolean) If enabled then experimental streams become available for sync.
+- `start_date` (String) UTC date and time in the format 2017-01-25T00:00:00Z. Any data before this date will not be replicated.
+
+<a id="nestedblock--settings--hubspot_source--credentials"></a>
+### Nested Schema for `settings.hubspot_source.credentials`
+
+Optional:
+
+- `private_app` (Block, Optional) (see [below for nested schema](#nestedblock--settings--hubspot_source--credentials--private_app))
+
+<a id="nestedblock--settings--hubspot_source--credentials--private_app"></a>
+### Nested Schema for `settings.hubspot_source.credentials.private_app`
+
+Optional:
+
+- `access_token` (String, Sensitive) Access token
+
 
 
 
