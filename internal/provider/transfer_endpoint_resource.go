@@ -61,6 +61,7 @@ type endpointSettings struct {
 	RedshiftSource          *endpointRedshiftSourceSettings                  `tfsdk:"redshift_source"`
 	HubspotSource           *endpointHubspotSourceSettings                   `tfsdk:"hubspot_source"`
 	BigquerySource          *endpointBigquerySourceSettings                  `tfsdk:"bigquery_source"`
+	MssqlSource             *endpointMssqlSourceSettings                     `tfsdk:"mssql_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -130,6 +131,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"jira_source":              endpointJiraSourceSettingsSchema(),
 					"hubspot_source":           transferEndpointHubspotSourceSettingsSchema(),
 					"bigquery_source":          transferEndpointBigquerySourceSettingsSchema(),
+					"mssql_source":             transferEndpointMssqlSourceSchema(),
 
 					"clickhouse_target":     transferEndpointChTargetSchema(),
 					"kafka_target":          transferEndpointKafkaTargetSchema(),
@@ -466,6 +468,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 			Settings: &transfer.EndpointSettings_BigQuerySource{BigQuerySource: result},
 		}, diag
 	}
+	if m.Settings.MssqlSource != nil {
+		s, d := m.Settings.MssqlSource.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -691,6 +700,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.HubspotSource = &endpointHubspotSourceSettings{}
 		}
 		diag.Append(data.Settings.HubspotSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetMssqlSource(); settings != nil {
+		if data.Settings.MssqlSource == nil {
+			data.Settings.MssqlSource = &endpointMssqlSourceSettings{}
+		}
+		diag.Append(data.Settings.MssqlSource.parse(settings)...)
 	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")

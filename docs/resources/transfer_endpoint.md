@@ -89,6 +89,7 @@ Optional:
 - `metrika_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--metrika_source))
 - `mongo_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source))
 - `mongo_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target))
+- `mssql_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mssql_source))
 - `mysql_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_source))
 - `mysql_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mysql_target))
 - `object_storage_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--object_storage_source))
@@ -826,6 +827,46 @@ Optional:
 
 - `ca_certificate` (String) X.509 certificate of the certificate authority which issued the server's certificate, in PEM format. When CA certificate is specified TLS is used to connect to the server
 
+
+
+
+
+<a id="nestedblock--settings--mssql_source"></a>
+### Nested Schema for `settings.mssql_source`
+
+Optional:
+
+- `database` (String) The name of the database.
+- `host` (String) The hostname of the database.
+- `password` (String, Sensitive) The password associated with the username.
+- `port` (Number) The port of the database.
+- `replication_method` (String) The replication method used for extracting data from the database. STANDARD replication requires no setup on the DB side but will not be able to represent deletions incrementally. CDC uses {TBC} to detect inserts, updates, and deletes. This needs to be configured on the source database itself.
+- `ssl_method` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mssql_source--ssl_method))
+- `username` (String) The username which is used to access the database.
+
+<a id="nestedblock--settings--mssql_source--ssl_method"></a>
+### Nested Schema for `settings.mssql_source.ssl_method`
+
+Optional:
+
+- `encrypted_trusted` (Block, Optional) Use the certificate provided by the server without verification. (For testing purposes only!) (see [below for nested schema](#nestedblock--settings--mssql_source--ssl_method--encrypted_trusted))
+- `encrypted_verify_cert` (Block, Optional) Verify and use the certificate provided by the server. (see [below for nested schema](#nestedblock--settings--mssql_source--ssl_method--encrypted_verify_cert))
+- `unencrypted` (Block, Optional) Data transfer will not be encrypted. (see [below for nested schema](#nestedblock--settings--mssql_source--ssl_method--unencrypted))
+
+<a id="nestedblock--settings--mssql_source--ssl_method--encrypted_trusted"></a>
+### Nested Schema for `settings.mssql_source.ssl_method.encrypted_trusted`
+
+
+<a id="nestedblock--settings--mssql_source--ssl_method--encrypted_verify_cert"></a>
+### Nested Schema for `settings.mssql_source.ssl_method.encrypted_verify_cert`
+
+Optional:
+
+- `host_name_in_certificate` (String) Specifies the host name of the server. The value of this property must match the subject property of the certificate.
+
+
+<a id="nestedblock--settings--mssql_source--ssl_method--unencrypted"></a>
+### Nested Schema for `settings.mssql_source.ssl_method.unencrypted`
 
 
 
