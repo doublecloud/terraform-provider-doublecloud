@@ -59,6 +59,7 @@ type endpointSettings struct {
 	SnowflakeSource         *endpointSnowflakeSourceSettings                 `tfsdk:"snowflake_source"`
 	JiraSource              *endpointJiraSourceSettings                      `tfsdk:"jira_source"`
 	RedshiftSource          *endpointRedshiftSourceSettings                  `tfsdk:"redshift_source"`
+	BigquerySource          *endpointBigquerySourceSettings                  `tfsdk:"bigquery_source"`
 
 	ClickhouseTarget    *endpointClickhouseTargetSettings    `tfsdk:"clickhouse_target"`
 	KafkaTarget         *endpointKafkaTargetSettings         `tfsdk:"kafka_target"`
@@ -66,6 +67,7 @@ type endpointSettings struct {
 	MysqlTarget         *endpointMysqlTargetSettings         `tfsdk:"mysql_target"`
 	MongoTarget         *endpointMongoTargetSettings         `tfsdk:"mongo_target"`
 	ObjectStorageTarget *endpointObjectStorageTargetSettings `tfsdk:"object_storage_target"`
+	BigqueryTarget      *endpointBigqueryTargetSettings      `tfsdk:"bigquery_target"`
 }
 
 func (r *TransferEndpointResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -125,6 +127,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"facebookmarketing_source": transferEndpointFacebookMarketingSourceSettingsSchema(),
 					"snowflake_source":         endpointSnowflakeSourceSettingsSchema(),
 					"jira_source":              endpointJiraSourceSettingsSchema(),
+					"bigquery_source":          transferEndpointBigquerySourceSettingsSchema(),
 
 					"clickhouse_target":     transferEndpointChTargetSchema(),
 					"kafka_target":          transferEndpointKafkaTargetSchema(),
@@ -132,6 +135,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"mysql_target":          transferEndpointMysqlTargetSchema(),
 					"mongo_target":          transferEndpointMongoTargetSchema(),
 					"object_storage_target": transferEndpointObjectStorageTargetSchema(),
+					"bigquery_target":       transferEndpointBigqueryTargetSettingsSchema(),
 				},
 			},
 		},
@@ -444,6 +448,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
+	if m.Settings.BigquerySource != nil {
+		result := new(endpoint_airbyte.BigQuerySource)
+		diag.Append(m.Settings.BigquerySource.convert(result)...)
+		return &transfer.EndpointSettings{
+			Settings: &transfer.EndpointSettings_BigQuerySource{BigQuerySource: result},
+		}, diag
+	}
 
 	if m.Settings.ClickhouseTarget != nil {
 		s, d := chTargetEndpointSettings(m.Settings.ClickhouseTarget)
@@ -483,6 +494,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 	}
 	if m.Settings.ObjectStorageTarget != nil {
 		s, d := m.Settings.ObjectStorageTarget.convert()
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
+	if m.Settings.BigqueryTarget != nil {
+		s, d := m.Settings.BigqueryTarget.convert()
 		if d.HasError() {
 			diag.Append(d...)
 		}
@@ -644,6 +662,18 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.RedshiftSource = &endpointRedshiftSourceSettings{}
 		}
 		diag.Append(data.Settings.RedshiftSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetBigQuerySource(); settings != nil {
+		if data.Settings.BigquerySource == nil {
+			data.Settings.BigquerySource = &endpointBigquerySourceSettings{}
+		}
+		diag.Append(data.Settings.BigquerySource.parse(settings)...)
+	}
+	if settings := e.Settings.GetBigqueryTarget(); settings != nil {
+		if data.Settings.BigqueryTarget == nil {
+			data.Settings.BigqueryTarget = &endpointBigqueryTargetSettings{}
+		}
+		diag.Append(data.Settings.BigqueryTarget.parse(settings)...)
 	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")
