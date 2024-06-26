@@ -79,7 +79,16 @@ func TestAccTransferResource(t *testing.T) {
 											]
 										}
 									}
-								}
+								},
+								{
+									sql = {
+										tables = {
+											include = ["t1"]
+											exclude = ["t2"]
+										}
+										query = "Select * from t1;"
+									}
+								},
 							]
 						}
 					}`, testProjectId)),
@@ -90,7 +99,7 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testTransferResource, "target"),
 					resource.TestCheckResourceAttr(testTransferResource, "type", "SNAPSHOT_ONLY"),
 					resource.TestCheckResourceAttr(testTransferResource, "activated", "false"),
-					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "3"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.#", "4"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.include.0", "t1"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.tables.exclude.0", "t2"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.0.replace_primary_key.keys.0", "pk_field_1"),
@@ -111,6 +120,9 @@ func TestAccTransferResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.0.value", "Bearer example-token"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.1.key", "Content-Type"),
 					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.2.lambda_function.options.headers.1.value", "application/json"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.3.sql.tables.include.0", "t1"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.3.sql.tables.exclude.0", "t2"),
+					resource.TestCheckResourceAttr(testTransferResource, "transformation.transformers.3.sql.query", "Select * from t1;"),
 				),
 			},
 			{

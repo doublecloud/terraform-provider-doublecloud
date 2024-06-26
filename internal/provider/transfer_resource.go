@@ -550,6 +550,7 @@ type transferTransformer struct {
 	DBT               *transferTransformerDBT               `tfsdk:"dbt"`
 	TableSplitter     *transferTransformerTableSplitter     `tfsdk:"table_splitter"`
 	CloudFunction     *transferTransformerCloudFunction     `tfsdk:"lambda_function"`
+	SQL               *transferTransformerSQL               `tfsdk:"sql"`
 }
 
 func transferTransformerSchema() schema.Attribute {
@@ -561,6 +562,7 @@ func transferTransformerSchema() schema.Attribute {
 				"dbt":                 transferTransformerDBTSchema(),
 				"table_splitter":      transferTransformerTableSplitterSchema(),
 				"lambda_function":     transferTransformerCloudFunctionSchema(),
+				"sql":                 transferTransformerSQLSchema(),
 			},
 		},
 		Optional: true,
@@ -591,6 +593,10 @@ func (m *transferTransformer) convert(rqt requestType, r *transfer.Transformer) 
 		tr := new(transfer.CloudFunctionTransformer)
 		diags.Append(m.CloudFunction.convert(rqt, tr)...)
 		r.Transformer = &transfer.Transformer_CloudFunctionTransformer{CloudFunctionTransformer: tr}
+	case m.SQL != nil:
+		tr := new(transfer.SQLTransformer)
+		diags.Append(m.SQL.convert(rqt, tr)...)
+		r.Transformer = &transfer.Transformer_Sql{Sql: tr}
 	default:
 		diags.Append(diag.NewErrorDiagnostic("a transformer is present, but not set to any oneof value", ""))
 	}
@@ -632,6 +638,12 @@ func (m *transferTransformer) parse(t *transfer.Transformer) diag.Diagnostics {
 			m.CloudFunction = new(transferTransformerCloudFunction)
 		}
 		diags.Append(m.CloudFunction.parse(t.GetCloudFunctionTransformer())...)
+	case t.GetSql() != nil:
+		if m.SQL == nil {
+			m.clear()
+			m.SQL = new(transferTransformerSQL)
+		}
+		diags.Append(m.SQL.parse(t.GetSql())...)
 	default:
 		m.clear()
 	}
@@ -645,6 +657,7 @@ func (m *transferTransformer) clear() {
 	m.DBT = nil
 	m.TableSplitter = nil
 	m.CloudFunction = nil
+	m.SQL = nil
 }
 
 type transferTransformerReplacePrimaryKey struct {
@@ -1155,4 +1168,52 @@ func (m *HeaderValue) parse(c *endpoint.HeaderValue) diag.Diagnostics {
 	m.Value = types.StringValue(c.Value)
 
 	return diag.Diagnostics{}
+}
+
+type transferTransformerSQL struct {
+	Tables *transferTransformerTablesFilter `tfsdk:"tables"`
+	Query  types.String                     `tfsdk:"query"`
+}
+
+func transferTransformerSQLSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		Attributes: map[string]schema.Attribute{
+			"query": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Script would be applied on-the-fly to all data. As SQL engine used [Clickhouse Local](https://clickhouse.com/docs/en/operations/utilities/clickhouse-local). For queries there is a common `table` source for data. For example `SELECT * FROM table` query. No state is saved. Data window is linear, but with random size. Local clickhouse run with `--no-system-tables` flag, which disables all system tables / dictionaries.",
+			},
+			"tables": transferTransformerTablesFilterSchema(),
+		},
+		Optional:            true,
+		MarkdownDescription: "SQL Transformer",
+	}
+}
+
+func (m *transferTransformerSQL) convert(rqt requestType, r *transfer.SQLTransformer) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	r.Query = m.Query.ValueString()
+	if m.Tables != nil {
+		r.Tables = new(transfer.TablesFilter)
+		diags.Append(m.Tables.convert(rqt, r.Tables)...)
+	}
+
+	return diags
+}
+
+func (m *transferTransformerSQL) parse(t *transfer.SQLTransformer) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if tables := t.GetTables(); tables != nil {
+		if m.Tables == nil {
+			m.Tables = new(transferTransformerTablesFilter)
+		}
+		diags.Append(m.Tables.parse(tables)...)
+	} else {
+		m.Tables = nil
+	}
+
+	m.Query = types.StringValue(t.GetQuery())
+
+	return diags
 }
