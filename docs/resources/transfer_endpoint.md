@@ -431,8 +431,14 @@ Optional:
 
 Optional:
 
+- `blank` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--blank))
 - `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json))
+- `schema_registry` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--schema_registry))
 - `tskv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv))
+
+<a id="nestedblock--settings--kafka_source--parser--blank"></a>
+### Nested Schema for `settings.kafka_source.parser.blank`
+
 
 <a id="nestedblock--settings--kafka_source--parser--json"></a>
 ### Nested Schema for `settings.kafka_source.parser.json`
@@ -478,6 +484,46 @@ Optional:
 
 - `fields` (String) Fields
 
+
+
+
+<a id="nestedblock--settings--kafka_source--parser--schema_registry"></a>
+### Nested Schema for `settings.kafka_source.parser.schema_registry`
+
+Optional:
+
+- `auth` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--schema_registry--auth))
+- `tls` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--schema_registry--tls))
+- `url` (String) Address of schema registry
+
+<a id="nestedblock--settings--kafka_source--parser--schema_registry--auth"></a>
+### Nested Schema for `settings.kafka_source.parser.schema_registry.auth`
+
+Optional:
+
+- `basic` (Block, Optional) Basic Auth (see [below for nested schema](#nestedblock--settings--kafka_source--parser--schema_registry--auth--basic))
+- `no_auth` (Block, Optional) No authentication (see [below for nested schema](#nestedblock--settings--kafka_source--parser--schema_registry--auth--no_auth))
+
+<a id="nestedblock--settings--kafka_source--parser--schema_registry--auth--basic"></a>
+### Nested Schema for `settings.kafka_source.parser.schema_registry.auth.basic`
+
+Optional:
+
+- `password` (String) Password
+- `user` (String) User name
+
+
+<a id="nestedblock--settings--kafka_source--parser--schema_registry--auth--no_auth"></a>
+### Nested Schema for `settings.kafka_source.parser.schema_registry.auth.no_auth`
+
+
+
+<a id="nestedblock--settings--kafka_source--parser--schema_registry--tls"></a>
+### Nested Schema for `settings.kafka_source.parser.schema_registry.tls`
+
+Optional:
+
+- `ca_certificate` (String) X.509 certificate of the certificate authority which issued the server's certificate, in PEM format. When CA certificate is specified TLS is used to connect to the server
 
 
 

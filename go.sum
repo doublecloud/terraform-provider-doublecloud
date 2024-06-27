@@ -40,6 +40,8 @@ github.com/doublecloud/go-genproto v0.0.0-20240529145340-26557b3e1c45 h1:QcyqANm
 github.com/doublecloud/go-genproto v0.0.0-20240529145340-26557b3e1c45/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-genproto v0.0.0-20240612040607-16fd63bcc5ed h1:RjkXoGaY2TrqlJ5Oi0O7s7CfwrN29fYlFNaJnlCXM0A=
 github.com/doublecloud/go-genproto v0.0.0-20240612040607-16fd63bcc5ed/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
+github.com/doublecloud/go-genproto v0.0.0-20240626040624-2cb8deb5faa5 h1:H9k/J5yH+j/+RlcWiRwyVTY9g6pjQd3vxHtrAcNYymU=
+github.com/doublecloud/go-genproto v0.0.0-20240626040624-2cb8deb5faa5/go.mod h1:GaWzogQ0MCW4OjW16H1DsXiKOqHXqaYsMy0wKfXwoo4=
 github.com/doublecloud/go-sdk v0.0.0-20240527153948-fe8b945d9b22 h1:4sKcayP0S4Q6QmDI3+2AVFs8FGkQOIONwx+qIPVt5V4=
 github.com/doublecloud/go-sdk v0.0.0-20240527153948-fe8b945d9b22/go.mod h1:BOcoNh31FaZe/9QFQfh1Rwyd/+DGlAxbX2qk6WqoX9Y=
 github.com/doublecloud/go-sdk v0.0.0-20240530101206-971882315327 h1:q71KkW2S4LltJrGk0rYU20b+j3PsrnmDZOM0+XMl9IE=
