@@ -135,15 +135,19 @@ type endpointOnPremiseKafka struct {
 }
 
 type endpointKafkaParser struct {
-	JSON *transferParserGeneric `tfsdk:"json"`
-	TSKV *transferParserGeneric `tfsdk:"tskv"`
+	JSON           *transferParserGeneric `tfsdk:"json"`
+	TSKV           *transferParserGeneric `tfsdk:"tskv"`
+	Blank          *blankParser           `tfsdk:"blank"`
+	SchemaRegistry *schemaRegistryParser  `tfsdk:"schema_registry"`
 }
 
 func endpointKafkaParserSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Blocks: map[string]schema.Block{
-			"json": transferParserGenericSchema(),
-			"tskv": transferParserGenericSchema(),
+			"json":            transferParserGenericSchema(),
+			"tskv":            transferParserGenericSchema(),
+			"blank":           blankParserSchema(),
+			"schema_registry": schemaRegistrySchema(),
 		},
 	}
 }
@@ -151,19 +155,38 @@ func endpointKafkaParserSchema() schema.Block {
 func (m *endpointKafkaParser) parse(e *endpoint.Parser) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	switch {
-	case e.GetJsonParser() != nil:
+	switch p := e.GetParser().(type) {
+	case *endpoint.Parser_JsonParser:
 		m.TSKV = nil
+		m.Blank = nil
+		m.SchemaRegistry = nil
 		if m.JSON == nil {
 			m.JSON = new(transferParserGeneric)
 		}
-		diags.Append(m.JSON.parse(e.GetJsonParser())...)
-	case e.GetTskvParser() != nil:
+		diags.Append(m.JSON.parse(p.JsonParser)...)
+	case *endpoint.Parser_TskvParser:
 		m.JSON = nil
+		m.Blank = nil
+		m.SchemaRegistry = nil
 		if m.TSKV == nil {
 			m.TSKV = new(transferParserGeneric)
 		}
-		diags.Append(m.TSKV.parse(e.GetTskvParser())...)
+		diags.Append(m.TSKV.parse(p.TskvParser)...)
+	case *endpoint.Parser_BlankParser:
+		m.JSON = nil
+		m.TSKV = nil
+		m.SchemaRegistry = nil
+		if m.Blank == nil {
+			m.Blank = new(blankParser)
+		}
+	case *endpoint.Parser_ConfluentSchemaRegistryParser:
+		m.JSON = nil
+		m.TSKV = nil
+		m.Blank = nil
+		if m.SchemaRegistry == nil {
+			m.SchemaRegistry = new(schemaRegistryParser)
+		}
+		diags.Append(m.SchemaRegistry.parse(p.ConfluentSchemaRegistryParser)...)
 	default:
 		diags.Append(diag.NewErrorDiagnostic("unknown parser type", fmt.Sprintf("%v", e.GetParser())))
 	}
@@ -175,6 +198,13 @@ func (m *endpointKafkaParser) convert(r *endpoint.Parser) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	switch {
+	case m.SchemaRegistry != nil:
+		prsr := new(endpoint.ConfluentSchemaRegistryParser)
+		diags.Append(m.SchemaRegistry.convert(prsr)...)
+		r.Parser = &endpoint.Parser_ConfluentSchemaRegistryParser{ConfluentSchemaRegistryParser: prsr}
+	case m.Blank != nil:
+		prsr := new(endpoint.BlankParser)
+		r.Parser = &endpoint.Parser_BlankParser{BlankParser: prsr}
 	case m.JSON != nil:
 		prsr := new(endpoint.GenericParserCommon)
 		diags.Append(m.JSON.convert(prsr)...)
@@ -188,10 +218,119 @@ func (m *endpointKafkaParser) convert(r *endpoint.Parser) diag.Diagnostics {
 	return diags
 }
 
+type blankParser struct {
+}
+
+func schemaRegistrySchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{
+			"url": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Address of schema registry",
+			},
+		},
+		Blocks: map[string]schema.Block{
+			"tls":  transferEndpointTLSMode(),
+			"auth": schemaRegistryAuthSchema(),
+		},
+	}
+}
+
+func schemaRegistryAuthSchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Blocks: map[string]schema.Block{
+			"basic": schema.SingleNestedBlock{
+				MarkdownDescription: "Basic Auth",
+				Attributes: map[string]schema.Attribute{
+					"user": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "User name",
+					},
+					"password": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Password",
+					},
+				},
+			},
+			"no_auth": schema.SingleNestedBlock{
+				MarkdownDescription: "No authentication",
+			},
+		},
+	}
+}
+
+type schemaRegistryParser struct {
+	URL  types.String        `tfsdk:"url"`
+	TLS  *endpointTLSMode    `tfsdk:"tls"`
+	Auth *schemaRegistryAuth `tfsdk:"auth"`
+}
+
+type schemaRegistryAuth struct {
+	Basic  *endpointSchemaRegistryBasicAuth `tfsdk:"basic"`
+	NoAuth *endpointSchemaRegistryNoAuth    `tfsdk:"no_auth"`
+}
+
+type endpointSchemaRegistryBasicAuth struct {
+	User     types.String `tfsdk:"user"`
+	Password types.String `tfsdk:"password"`
+}
+
+type endpointSchemaRegistryNoAuth struct {
+}
+
+func (p *schemaRegistryParser) parse(parser *endpoint.ConfluentSchemaRegistryParser) diag.Diagnostics {
+	var diags diag.Diagnostics
+	p.URL = types.StringValue(parser.Connection.SchemaRegistryUrl)
+	p.Auth = new(schemaRegistryAuth)
+	if parser.Connection.GetAuth().GetNoAuth() != nil {
+		p.Auth.NoAuth = new(endpointSchemaRegistryNoAuth)
+	} else {
+		p.Auth.Basic = new(endpointSchemaRegistryBasicAuth)
+		p.Auth.Basic.User = types.StringValue(parser.Connection.GetAuth().GetBasic().GetUser())
+		p.Auth.Basic.Password = types.StringValue(parser.Connection.GetAuth().GetBasic().GetPassword().GetRaw())
+	}
+	if parser.Connection.TlsMode.GetEnabled() != nil {
+		p.TLS = new(endpointTLSMode)
+		p.TLS.CACertificate = types.StringValue(parser.Connection.TlsMode.GetEnabled().GetCaCertificate())
+	} else {
+		p.TLS = nil
+	}
+	return diags
+}
+
+func (p *schemaRegistryParser) convert(r *endpoint.ConfluentSchemaRegistryParser) diag.Diagnostics {
+	var diags diag.Diagnostics
+	r.Connection = &endpoint.ConfluentSchemaRegistryConnection{
+		SchemaRegistryUrl: p.URL.ValueString(),
+		TlsMode:           nil,
+		Auth:              new(endpoint.ConfluentSchemaRegistryAuth),
+	}
+	if p.TLS == nil {
+		r.Connection.TlsMode = &endpoint.TLSMode{TlsMode: new(endpoint.TLSMode_Disabled)}
+	} else {
+		r.Connection.TlsMode = &endpoint.TLSMode{TlsMode: &endpoint.TLSMode_Enabled{Enabled: &endpoint.TLSConfig{CaCertificate: p.TLS.CACertificate.ValueString()}}}
+	}
+	if p.Auth.NoAuth != nil {
+		r.Connection.Auth.ConfluentSchemaRegistryAuth = &endpoint.ConfluentSchemaRegistryAuth_NoAuth{NoAuth: new(endpoint.NoAuth)}
+	} else {
+		r.Connection.Auth.ConfluentSchemaRegistryAuth = &endpoint.ConfluentSchemaRegistryAuth_Basic{Basic: &endpoint.BasicAuthSR{
+			User:     p.Auth.Basic.User.ValueString(),
+			Password: &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: p.Auth.Basic.Password.ValueString()}},
+		}}
+	}
+	return diags
+}
+
 type transferParserGeneric struct {
 	Schema          *transferParserSchema `tfsdk:"schema"`
 	NullKeysAllowed types.Bool            `tfsdk:"null_keys_allowed"`
 	AddRestColumn   types.Bool            `tfsdk:"add_rest_column"`
+}
+
+func blankParserSchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{},
+	}
 }
 
 func transferParserGenericSchema() schema.Block {
