@@ -11,7 +11,7 @@ import (
 type endpointMetrikaSourceSettings struct {
 	CounterIDs     []types.Int64            `tfsdk:"counter_ids"`
 	Token          types.String             `tfsdk:"token"`
-	MetrikaStreams []*endpointMetrikaStream `tfsdk:"metrika_stream"`
+	MetrikaStreams []*endpointMetrikaStream `tfsdk:"metrica_stream"`
 }
 
 type endpointMetrikaStream struct {
@@ -46,12 +46,12 @@ func transferEndpointMetrikaSourceSchema() schema.Block {
 			},
 		},
 		Blocks: map[string]schema.Block{
-			"metrika_stream": transferEndpointMetrikaStreamSchema(),
+			"metrica_stream": transferEndpointMetrikaStreamSchema(),
 		},
 	}
 }
 
-func (m *endpointMetrikaSourceSettings) parse(e *endpoint.MetrikaSource) diag.Diagnostics {
+func (m *endpointMetrikaSourceSettings) parse(e *endpoint.MetricaSource) diag.Diagnostics {
 	var diags diag.Diagnostics
 	if len(e.GetCounterIds()) > 0 {
 		counterIDs := make([]types.Int64, len(e.CounterIds))
@@ -78,22 +78,22 @@ func (m *endpointMetrikaSourceSettings) parse(e *endpoint.MetrikaSource) diag.Di
 	return diags
 }
 
-func (m *endpointMetrikaStream) parse(e *endpoint.MetrikaStream) diag.Diagnostics {
+func (m *endpointMetrikaStream) parse(e *endpoint.MetricaStream) diag.Diagnostics {
 	var diags diag.Diagnostics
 	if e == nil {
 		m = nil
 	}
 
-	if e.GetType() != endpoint.MetrikaStreamType_METRIKA_STREAM_TYPE_UNSPECIFIED {
+	if e.GetType() != endpoint.MetricaStreamType_METRICA_STREAM_TYPE_UNSPECIFIED {
 		m.StreamType = types.StringValue(e.GetType().String())
 	}
 
 	return diags
 }
 
-func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_MetrikaSource, diag.Diagnostics) {
+func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_MetricaSource, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	metrikaSource := endpoint.MetrikaSource{}
+	metrikaSource := endpoint.MetricaSource{}
 	if len(m.CounterIDs) > 0 {
 		counterIDs := make([]int64, len(m.CounterIDs))
 		for i, id := range m.CounterIDs {
@@ -107,7 +107,7 @@ func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_Me
 	metrikaSource.Token = &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: m.Token.ValueString()}}
 
 	if len(m.MetrikaStreams) > 0 {
-		metrikaStreams := make([]*endpoint.MetrikaStream, len(m.MetrikaStreams))
+		metrikaStreams := make([]*endpoint.MetricaStream, len(m.MetrikaStreams))
 		for i, stream := range m.MetrikaStreams {
 			convertedStream, diag := stream.convert()
 			diags = append(diags, diag...)
@@ -115,12 +115,12 @@ func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_Me
 		}
 		metrikaSource.Streams = metrikaStreams
 	} else {
-		metrikaSource.Streams = []*endpoint.MetrikaStream{}
+		metrikaSource.Streams = []*endpoint.MetricaStream{}
 	}
 
-	return &transfer.EndpointSettings_MetrikaSource{MetrikaSource: &metrikaSource}, diags
+	return &transfer.EndpointSettings_MetricaSource{MetricaSource: &metrikaSource}, diags
 }
 
-func (m *endpointMetrikaStream) convert() (*endpoint.MetrikaStream, diag.Diagnostics) {
-	return &endpoint.MetrikaStream{Type: endpoint.MetrikaStreamType(endpoint.MetrikaStreamType_value[m.StreamType.ValueString()])}, diag.Diagnostics{}
+func (m *endpointMetrikaStream) convert() (*endpoint.MetricaStream, diag.Diagnostics) {
+	return &endpoint.MetricaStream{Type: endpoint.MetricaStreamType(endpoint.MetricaStreamType_value[m.StreamType.ValueString()])}, diag.Diagnostics{}
 }
