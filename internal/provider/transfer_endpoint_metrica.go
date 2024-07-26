@@ -11,7 +11,7 @@ import (
 type endpointMetrikaSourceSettings struct {
 	CounterIDs     []types.Int64            `tfsdk:"counter_ids"`
 	Token          types.String             `tfsdk:"token"`
-	MetrikaStreams []*endpointMetrikaStream `tfsdk:"metrika_stream"`
+	MetrikaStreams []*endpointMetrikaStream `tfsdk:"metrica_stream"`
 }
 
 type endpointMetrikaStream struct {
@@ -122,5 +122,5 @@ func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_Me
 }
 
 func (m *endpointMetrikaStream) convert() (*endpoint.MetricaStream, diag.Diagnostics) {
-	return &endpoint.MetricaStream{Type: endpoint.MetricaStreamType(endpoint.MetrikaStreamType_value[m.StreamType.ValueString()])}, diag.Diagnostics{}
+	return &endpoint.MetricaStream{Type: endpoint.MetricaStreamType(endpoint.MetricaStreamType_value[m.StreamType.ValueString()])}, diag.Diagnostics{}
 }
