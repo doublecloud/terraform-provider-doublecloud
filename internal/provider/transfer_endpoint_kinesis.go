@@ -49,8 +49,12 @@ func (m *endpointKinesisSourceSettings) parse(e *endpoint.KinesisSource) diag.Di
 
 	m.Region = types.StringValue(e.Region)
 	m.StreamName = types.StringValue(e.StreamName)
-	m.AccessKey = types.StringValue(e.AwsAccessKeyId)
-	m.SecretKey = types.StringValue(e.AwsSecretAccessKey)
+	if e.AwsSecretAccessKey != "" {
+		m.AccessKey = types.StringValue(e.AwsAccessKeyId)
+	}
+	if e.AwsSecretAccessKey != "" {
+		m.SecretKey = types.StringValue(e.AwsSecretAccessKey)
+	}
 
 	if prsr := e.GetParser(); prsr != nil {
 		if m.Parser == nil {
