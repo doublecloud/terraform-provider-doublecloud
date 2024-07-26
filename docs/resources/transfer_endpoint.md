@@ -703,16 +703,13 @@ Required:
 <a id="nestedblock--settings--kinesis_source"></a>
 ### Nested Schema for `settings.kinesis_source`
 
-Required:
+Optional:
 
 - `aws_access_key_id` (String, Sensitive) AWS Access Key with access to this stream
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key with access to this stream
+- `parser` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser))
 - `region` (String) Name of AWS Region where stream is deployed
 - `stream_name` (String) Name of AWS Kinesis Data Stream
-
-Optional:
-
-- `parser` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser))
 
 <a id="nestedblock--settings--kinesis_source--parser"></a>
 ### Nested Schema for `settings.kinesis_source.parser`

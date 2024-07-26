@@ -21,21 +21,21 @@ func transferEndpointKinesisSourceSchema() schema.Block {
 		Attributes: map[string]schema.Attribute{
 			"stream_name": schema.StringAttribute{
 				MarkdownDescription: "Name of AWS Kinesis Data Stream",
-				Required:            true,
+				Optional:            true,
 			},
 			"region": schema.StringAttribute{
 				MarkdownDescription: "Name of AWS Region where stream is deployed",
-				Required:            true,
+				Optional:            true,
 			},
 			"aws_access_key_id": schema.StringAttribute{
 				MarkdownDescription: "AWS Access Key with access to this stream",
 				Sensitive:           true,
-				Required:            true,
+				Optional:            true,
 			},
 			"aws_secret_access_key": schema.StringAttribute{
 				MarkdownDescription: "AWS Secret Access Key with access to this stream",
 				Sensitive:           true,
-				Required:            true,
+				Optional:            true,
 			},
 		},
 		Blocks: map[string]schema.Block{
