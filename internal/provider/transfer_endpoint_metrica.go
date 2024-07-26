@@ -46,7 +46,7 @@ func transferEndpointMetrikaSourceSchema() schema.Block {
 			},
 		},
 		Blocks: map[string]schema.Block{
-			"metrika_stream": transferEndpointMetrikaStreamSchema(),
+			"metrica_stream": transferEndpointMetrikaStreamSchema(),
 		},
 	}
 }

@@ -48,7 +48,7 @@ type endpointSettings struct {
 	KafkaSource             *endpointKafkaSourceSettings                     `tfsdk:"kafka_source"`
 	KinesisSource           *endpointKinesisSourceSettings                   `tfsdk:"kinesis_source"`
 	PostgresSource          *endpointPostgresSourceSettings                  `tfsdk:"postgres_source"`
-	MetrikaSource           *endpointMetrikaSourceSettings                   `tfsdk:"metrika_source"`
+	MetrikaSource           *endpointMetrikaSourceSettings                   `tfsdk:"metrica_source"`
 	MysqlSource             *endpointMysqlSourceSettings                     `tfsdk:"mysql_source"`
 	MongoSource             *endpointMongoSourceSettings                     `tfsdk:"mongo_source"`
 	ObjectStorageSource     *endpointObjectStorageSourceSettings             `tfsdk:"object_storage_source"`
@@ -123,7 +123,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"postgres_source":          transferEndpointPostgresSourceSchema(),
 					"mysql_source":             transferEndpointMysqlSourceSchema(),
 					"mongo_source":             transferEndpointMongoSourceSchema(),
-					"metrika_source":           transferEndpointMetrikaSourceSchema(),
+					"metrica_source":           transferEndpointMetrikaSourceSchema(),
 					"object_storage_source":    transferEndpointObjectStorageSourceSchema(),
 					"s3_source":                transferEndpointS3SourceSchema(),
 					"linkedinads_source":       endpointLinkedinAdsSourceSettingsSchema(),

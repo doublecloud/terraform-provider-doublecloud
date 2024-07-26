@@ -88,7 +88,7 @@ Optional:
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
 - `kinesis_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source))
 - `linkedinads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source))
-- `metrika_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--metrika_source))
+- `metrica_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--metrica_source))
 - `mongo_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source))
 - `mongo_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_target))
 - `mssql_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mssql_source))
@@ -898,17 +898,17 @@ Optional:
 
 
 
-<a id="nestedblock--settings--metrika_source"></a>
-### Nested Schema for `settings.metrika_source`
+<a id="nestedblock--settings--metrica_source"></a>
+### Nested Schema for `settings.metrica_source`
 
 Optional:
 
 - `counter_ids` (List of Number) List of counter IDs
-- `metrika_stream` (Block List) Configuration for Metrika streams (see [below for nested schema](#nestedblock--settings--metrika_source--metrika_stream))
+- `metrica_stream` (Block List) Configuration for Metrika streams (see [below for nested schema](#nestedblock--settings--metrica_source--metrica_stream))
 - `token` (String, Sensitive) Access token
 
-<a id="nestedblock--settings--metrika_source--metrika_stream"></a>
-### Nested Schema for `settings.metrika_source.metrika_stream`
+<a id="nestedblock--settings--metrica_source--metrica_stream"></a>
+### Nested Schema for `settings.metrica_source.metrica_stream`
 
 Optional:
 
