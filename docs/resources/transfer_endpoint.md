@@ -86,6 +86,7 @@ Optional:
 - `jira_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--jira_source))
 - `kafka_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source))
 - `kafka_target` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_target))
+- `kinesis_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source))
 - `linkedinads_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--linkedinads_source))
 - `metrika_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--metrika_source))
 - `mongo_source` (Block, Optional) (see [below for nested schema](#nestedblock--settings--mongo_source))
@@ -695,6 +696,170 @@ Required:
 
 - `config_name` (String)
 - `config_value` (String)
+
+
+
+
+<a id="nestedblock--settings--kinesis_source"></a>
+### Nested Schema for `settings.kinesis_source`
+
+Required:
+
+- `aws_access_key_id` (String, Sensitive) AWS Access Key with access to this stream
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key with access to this stream
+- `region` (String) Name of AWS Region where stream is deployed
+- `stream_name` (String) Name of AWS Kinesis Data Stream
+
+Optional:
+
+- `parser` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser))
+
+<a id="nestedblock--settings--kinesis_source--parser"></a>
+### Nested Schema for `settings.kinesis_source.parser`
+
+Optional:
+
+- `blank` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--blank))
+- `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--json))
+- `schema_registry` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--schema_registry))
+- `tskv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--tskv))
+
+<a id="nestedblock--settings--kinesis_source--parser--blank"></a>
+### Nested Schema for `settings.kinesis_source.parser.blank`
+
+
+<a id="nestedblock--settings--kinesis_source--parser--json"></a>
+### Nested Schema for `settings.kinesis_source.parser.json`
+
+Optional:
+
+- `add_rest_column` (Boolean) Add the `_rest` column for all unknown fields
+- `null_keys_allowed` (Boolean) Allow null keys. If false, null keys are put to unparsed data
+- `schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--json--schema))
+
+<a id="nestedblock--settings--kinesis_source--parser--json--schema"></a>
+### Nested Schema for `settings.kinesis_source.parser.json.schema`
+
+Optional:
+
+- `fields` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--json--schema--fields))
+- `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--json--schema--json))
+
+<a id="nestedblock--settings--kinesis_source--parser--json--schema--fields"></a>
+### Nested Schema for `settings.kinesis_source.parser.json.schema.fields`
+
+Optional:
+
+- `field` (Block List) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--json--schema--fields--field))
+
+<a id="nestedblock--settings--kinesis_source--parser--json--schema--fields--field"></a>
+### Nested Schema for `settings.kinesis_source.parser.json.schema.fields.field`
+
+Optional:
+
+- `key` (Boolean)
+- `name` (String)
+- `path` (String)
+- `required` (Boolean)
+- `type` (String)
+
+
+
+<a id="nestedblock--settings--kinesis_source--parser--json--schema--json"></a>
+### Nested Schema for `settings.kinesis_source.parser.json.schema.json`
+
+Optional:
+
+- `fields` (String) Fields
+
+
+
+
+<a id="nestedblock--settings--kinesis_source--parser--schema_registry"></a>
+### Nested Schema for `settings.kinesis_source.parser.schema_registry`
+
+Optional:
+
+- `auth` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--schema_registry--auth))
+- `tls` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--schema_registry--tls))
+- `url` (String) Address of schema registry
+
+<a id="nestedblock--settings--kinesis_source--parser--schema_registry--auth"></a>
+### Nested Schema for `settings.kinesis_source.parser.schema_registry.auth`
+
+Optional:
+
+- `basic` (Block, Optional) Basic Auth (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--schema_registry--auth--basic))
+- `no_auth` (Block, Optional) No authentication (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--schema_registry--auth--no_auth))
+
+<a id="nestedblock--settings--kinesis_source--parser--schema_registry--auth--basic"></a>
+### Nested Schema for `settings.kinesis_source.parser.schema_registry.auth.basic`
+
+Optional:
+
+- `password` (String) Password
+- `user` (String) User name
+
+
+<a id="nestedblock--settings--kinesis_source--parser--schema_registry--auth--no_auth"></a>
+### Nested Schema for `settings.kinesis_source.parser.schema_registry.auth.no_auth`
+
+
+
+<a id="nestedblock--settings--kinesis_source--parser--schema_registry--tls"></a>
+### Nested Schema for `settings.kinesis_source.parser.schema_registry.tls`
+
+Optional:
+
+- `ca_certificate` (String) X.509 certificate of the certificate authority which issued the server's certificate, in PEM format. When CA certificate is specified TLS is used to connect to the server
+
+
+
+<a id="nestedblock--settings--kinesis_source--parser--tskv"></a>
+### Nested Schema for `settings.kinesis_source.parser.tskv`
+
+Optional:
+
+- `add_rest_column` (Boolean) Add the `_rest` column for all unknown fields
+- `null_keys_allowed` (Boolean) Allow null keys. If false, null keys are put to unparsed data
+- `schema` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--tskv--schema))
+
+<a id="nestedblock--settings--kinesis_source--parser--tskv--schema"></a>
+### Nested Schema for `settings.kinesis_source.parser.tskv.schema`
+
+Optional:
+
+- `fields` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--tskv--schema--fields))
+- `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--tskv--schema--json))
+
+<a id="nestedblock--settings--kinesis_source--parser--tskv--schema--fields"></a>
+### Nested Schema for `settings.kinesis_source.parser.tskv.schema.fields`
+
+Optional:
+
+- `field` (Block List) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--tskv--schema--fields--field))
+
+<a id="nestedblock--settings--kinesis_source--parser--tskv--schema--fields--field"></a>
+### Nested Schema for `settings.kinesis_source.parser.tskv.schema.fields.field`
+
+Optional:
+
+- `key` (Boolean)
+- `name` (String)
+- `path` (String)
+- `required` (Boolean)
+- `type` (String)
+
+
+
+<a id="nestedblock--settings--kinesis_source--parser--tskv--schema--json"></a>
+### Nested Schema for `settings.kinesis_source.parser.tskv.schema.json`
+
+Optional:
+
+- `fields` (String) Fields
+
+
 
 
 

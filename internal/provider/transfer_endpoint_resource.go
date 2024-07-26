@@ -46,6 +46,7 @@ type TransferEndpointModel struct {
 type endpointSettings struct {
 	ClickhouseSource        *endpointClickhouseSourceSettings                `tfsdk:"clickhouse_source"`
 	KafkaSource             *endpointKafkaSourceSettings                     `tfsdk:"kafka_source"`
+	KinesisSource           *endpointKinesisSourceSettings                   `tfsdk:"kinesis_source"`
 	PostgresSource          *endpointPostgresSourceSettings                  `tfsdk:"postgres_source"`
 	MetrikaSource           *endpointMetrikaSourceSettings                   `tfsdk:"metrika_source"`
 	MysqlSource             *endpointMysqlSourceSettings                     `tfsdk:"mysql_source"`
@@ -118,6 +119,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"clickhouse_source":        transferEndpointChSourceSchema(),
 					"redshift_source":          transferEndpointRedshiftSourceSchema(),
 					"kafka_source":             transferEndpointKafkaSourceSchema(),
+					"kinesis_source":           transferEndpointKinesisSourceSchema(),
 					"postgres_source":          transferEndpointPostgresSourceSchema(),
 					"mysql_source":             transferEndpointMysqlSourceSchema(),
 					"mongo_source":             transferEndpointMongoSourceSchema(),
@@ -535,6 +537,13 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
+	if m.Settings.KinesisSource != nil {
+		s, d := kinesisSourceEndpointSettings(m.Settings.KinesisSource)
+		if d.HasError() {
+			diag.Append(d...)
+		}
+		return &transfer.EndpointSettings{Settings: s}, diag
+	}
 
 	diag.AddError("unknown endpoint settings", "would you mind to specify one of endpoint settings")
 	return nil, diag
@@ -602,7 +611,7 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 		}
 		diag.Append(parseTransferEndpointPostgresTarget(ctx, settings, data.Settings.PostgresTarget)...)
 	}
-	if settings := e.Settings.GetMetrikaSource(); settings != nil {
+	if settings := e.Settings.GetMetricaSource(); settings != nil {
 		if data.Settings.MetrikaSource == nil {
 			data.Settings.MetrikaSource = &endpointMetrikaSourceSettings{}
 		}
@@ -721,6 +730,12 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 			data.Settings.InstagramSource = &endpointInstagramSourceSettings{}
 		}
 		diag.Append(data.Settings.InstagramSource.parse(settings)...)
+	}
+	if settings := e.Settings.GetKinesisSource(); settings != nil {
+		if data.Settings.KinesisSource == nil {
+			data.Settings.KinesisSource = &endpointKinesisSourceSettings{}
+		}
+		diag.Append(data.Settings.KinesisSource.parse(settings)...)
 	}
 	if data.Settings == nil {
 		diag.AddError("failed to parse", "unknown settings type")

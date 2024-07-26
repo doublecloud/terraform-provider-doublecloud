@@ -20,7 +20,7 @@ type endpointKafkaSourceSettings struct {
 	Connection *endpointKafkaConnectionOptions `tfsdk:"connection"`
 	Auth       *endpointKafkaAuth              `tfsdk:"auth"`
 	TopicName  types.String                    `tfsdk:"topic_name"`
-	Parser     *endpointKafkaParser            `tfsdk:"parser"`
+	Parser     *endpointParser                 `tfsdk:"parser"`
 }
 
 func (m *endpointKafkaSourceSettings) parse(e *endpoint.KafkaSource) diag.Diagnostics {
@@ -47,7 +47,7 @@ func (m *endpointKafkaSourceSettings) parse(e *endpoint.KafkaSource) diag.Diagno
 
 	if prsr := e.GetParser(); prsr != nil {
 		if m.Parser == nil {
-			m.Parser = new(endpointKafkaParser)
+			m.Parser = new(endpointParser)
 		}
 		diags.Append(m.Parser.parse(prsr)...)
 	} else {
@@ -134,7 +134,7 @@ type endpointOnPremiseKafka struct {
 	TLSMode    *endpointTLSMode `tfsdk:"tls_mode"`
 }
 
-type endpointKafkaParser struct {
+type endpointParser struct {
 	JSON           *transferParserGeneric `tfsdk:"json"`
 	TSKV           *transferParserGeneric `tfsdk:"tskv"`
 	Blank          *blankParser           `tfsdk:"blank"`
@@ -152,7 +152,7 @@ func endpointKafkaParserSchema() schema.Block {
 	}
 }
 
-func (m *endpointKafkaParser) parse(e *endpoint.Parser) diag.Diagnostics {
+func (m *endpointParser) parse(e *endpoint.Parser) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	switch p := e.GetParser().(type) {
@@ -194,7 +194,7 @@ func (m *endpointKafkaParser) parse(e *endpoint.Parser) diag.Diagnostics {
 	return diags
 }
 
-func (m *endpointKafkaParser) convert(r *endpoint.Parser) diag.Diagnostics {
+func (m *endpointParser) convert(r *endpoint.Parser) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	switch {
