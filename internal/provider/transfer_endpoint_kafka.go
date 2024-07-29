@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"strings"
 
 	"github.com/doublecloud/go-genproto/doublecloud/transfer/v1"
@@ -371,17 +370,14 @@ func rawTableParserSchema() schema.Block {
 			"add_timestamp": schema.BoolAttribute{
 				Optional:            true,
 				MarkdownDescription: "Add timestamp column to output virtual table",
-				Default:             booldefault.StaticBool(true),
 			},
 			"add_headers": schema.BoolAttribute{
 				Optional:            true,
 				MarkdownDescription: "Add headers column to output virtual table",
-				Default:             booldefault.StaticBool(true),
 			},
 			"add_key": schema.BoolAttribute{
 				Optional:            true,
 				MarkdownDescription: "Add key column to output virtual table",
-				Default:             booldefault.StaticBool(true),
 			},
 		},
 	}
