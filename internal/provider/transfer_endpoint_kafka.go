@@ -139,6 +139,7 @@ type endpointParser struct {
 	TSKV           *transferParserGeneric `tfsdk:"tskv"`
 	Blank          *blankParser           `tfsdk:"blank"`
 	SchemaRegistry *schemaRegistryParser  `tfsdk:"schema_registry"`
+	RawTable       *rawTableParser        `tfsdk:"raw_table"`
 }
 
 func endpointKafkaParserSchema() schema.Block {
@@ -148,6 +149,7 @@ func endpointKafkaParserSchema() schema.Block {
 			"tskv":            transferParserGenericSchema(),
 			"blank":           blankParserSchema(),
 			"schema_registry": schemaRegistrySchema(),
+			"raw_table":       rawTableParserSchema(),
 		},
 	}
 }
@@ -155,37 +157,32 @@ func endpointKafkaParserSchema() schema.Block {
 func (m *endpointParser) parse(e *endpoint.Parser) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	switch p := e.GetParser().(type) {
-	case *endpoint.Parser_JsonParser:
+	resetParsers := func() {
+		m.JSON = nil
 		m.TSKV = nil
 		m.Blank = nil
+		m.RawTable = nil
 		m.SchemaRegistry = nil
-		if m.JSON == nil {
-			m.JSON = new(transferParserGeneric)
-		}
+	}
+	switch p := e.GetParser().(type) {
+	case *endpoint.Parser_RawTable:
+		resetParsers()
+		m.RawTable = new(rawTableParser)
+		diags.Append(m.RawTable.parse(p.RawTable)...)
+	case *endpoint.Parser_JsonParser:
+		resetParsers()
+		m.JSON = new(transferParserGeneric)
 		diags.Append(m.JSON.parse(p.JsonParser)...)
 	case *endpoint.Parser_TskvParser:
-		m.JSON = nil
-		m.Blank = nil
-		m.SchemaRegistry = nil
-		if m.TSKV == nil {
-			m.TSKV = new(transferParserGeneric)
-		}
+		resetParsers()
+		m.TSKV = new(transferParserGeneric)
 		diags.Append(m.TSKV.parse(p.TskvParser)...)
 	case *endpoint.Parser_BlankParser:
-		m.JSON = nil
-		m.TSKV = nil
-		m.SchemaRegistry = nil
-		if m.Blank == nil {
-			m.Blank = new(blankParser)
-		}
+		resetParsers()
+		m.Blank = new(blankParser)
 	case *endpoint.Parser_ConfluentSchemaRegistryParser:
-		m.JSON = nil
-		m.TSKV = nil
-		m.Blank = nil
-		if m.SchemaRegistry == nil {
-			m.SchemaRegistry = new(schemaRegistryParser)
-		}
+		resetParsers()
+		m.SchemaRegistry = new(schemaRegistryParser)
 		diags.Append(m.SchemaRegistry.parse(p.ConfluentSchemaRegistryParser)...)
 	default:
 		diags.Append(diag.NewErrorDiagnostic("unknown parser type", fmt.Sprintf("%v", e.GetParser())))
@@ -198,6 +195,10 @@ func (m *endpointParser) convert(r *endpoint.Parser) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	switch {
+	case m.RawTable != nil:
+		prsr := new(endpoint.RawTable)
+		diags.Append(m.RawTable.convert(prsr)...)
+		r.Parser = &endpoint.Parser_RawTable{RawTable: prsr}
 	case m.SchemaRegistry != nil:
 		prsr := new(endpoint.ConfluentSchemaRegistryParser)
 		diags.Append(m.SchemaRegistry.convert(prsr)...)
@@ -325,6 +326,61 @@ type transferParserGeneric struct {
 	Schema          *transferParserSchema `tfsdk:"schema"`
 	NullKeysAllowed types.Bool            `tfsdk:"null_keys_allowed"`
 	AddRestColumn   types.Bool            `tfsdk:"add_rest_column"`
+}
+
+type rawTableParser struct {
+	ValueAsBytes types.Bool `tfsdk:"value_as_bytes"`
+	KeysAsBytes  types.Bool `tfsdk:"keys_as_bytes"`
+	AddTimestamp types.Bool `tfsdk:"add_timestamp"`
+	AddHeaders   types.Bool `tfsdk:"add_headers"`
+	AddKey       types.Bool `tfsdk:"add_key"`
+}
+
+func (p *rawTableParser) parse(table *endpoint.RawTable) diag.Diagnostics {
+	var diags diag.Diagnostics
+	p.ValueAsBytes = types.BoolValue(table.ValueAsBytes)
+	p.KeysAsBytes = types.BoolValue(table.KeysAsBytes)
+	p.AddTimestamp = types.BoolValue(table.AddTimestamp)
+	p.AddHeaders = types.BoolValue(table.AddHeaders)
+	p.AddKey = types.BoolValue(table.AddKey)
+	return diags
+}
+
+func (p *rawTableParser) convert(r *endpoint.RawTable) diag.Diagnostics {
+	var diags diag.Diagnostics
+	r.KeysAsBytes = p.KeysAsBytes.ValueBool()
+	r.ValueAsBytes = p.ValueAsBytes.ValueBool()
+	r.AddTimestamp = p.AddTimestamp.ValueBool()
+	r.AddHeaders = p.AddHeaders.ValueBool()
+	r.AddKey = p.AddKey.ValueBool()
+	return diags
+}
+
+func rawTableParserSchema() schema.Block {
+	return schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{
+			"value_as_bytes": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Make value column as `bytes`, for non-utf8 characters",
+			},
+			"keys_as_bytes": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Make keys column as `bytes`, for non-utf8 characters",
+			},
+			"add_timestamp": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Add timestamp column to output virtual table",
+			},
+			"add_headers": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Add headers column to output virtual table",
+			},
+			"add_key": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Add key column to output virtual table",
+			},
+		},
+	}
 }
 
 func blankParserSchema() schema.Block {
