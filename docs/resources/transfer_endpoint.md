@@ -434,6 +434,7 @@ Optional:
 
 - `blank` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--blank))
 - `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--json))
+- `raw_table` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--raw_table))
 - `schema_registry` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--schema_registry))
 - `tskv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kafka_source--parser--tskv))
 
@@ -486,6 +487,18 @@ Optional:
 - `fields` (String) Fields
 
 
+
+
+<a id="nestedblock--settings--kafka_source--parser--raw_table"></a>
+### Nested Schema for `settings.kafka_source.parser.raw_table`
+
+Optional:
+
+- `add_headers` (Boolean) Add headers column to output virtual table
+- `add_key` (Boolean) Add key column to output virtual table
+- `add_timestamp` (Boolean) Add timestamp column to output virtual table
+- `keys_as_bytes` (Boolean) Make keys column as `bytes`, for non-utf8 characters
+- `value_as_bytes` (Boolean) Make value column as `bytes`, for non-utf8 characters
 
 
 <a id="nestedblock--settings--kafka_source--parser--schema_registry"></a>
@@ -718,6 +731,7 @@ Optional:
 
 - `blank` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--blank))
 - `json` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--json))
+- `raw_table` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--raw_table))
 - `schema_registry` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--schema_registry))
 - `tskv` (Block, Optional) (see [below for nested schema](#nestedblock--settings--kinesis_source--parser--tskv))
 
@@ -770,6 +784,18 @@ Optional:
 - `fields` (String) Fields
 
 
+
+
+<a id="nestedblock--settings--kinesis_source--parser--raw_table"></a>
+### Nested Schema for `settings.kinesis_source.parser.raw_table`
+
+Optional:
+
+- `add_headers` (Boolean) Add headers column to output virtual table
+- `add_key` (Boolean) Add key column to output virtual table
+- `add_timestamp` (Boolean) Add timestamp column to output virtual table
+- `keys_as_bytes` (Boolean) Make keys column as `bytes`, for non-utf8 characters
+- `value_as_bytes` (Boolean) Make value column as `bytes`, for non-utf8 characters
 
 
 <a id="nestedblock--settings--kinesis_source--parser--schema_registry"></a>
