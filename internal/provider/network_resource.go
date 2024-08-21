@@ -52,10 +52,11 @@ type NetworkResourceModel struct {
 }
 
 type awsExternalNetworkResourceModel struct {
-	VPCID          types.String `tfsdk:"vpc_id"`
-	AccountID      types.String `tfsdk:"account_id"`
-	IAMRoleARN     types.String `tfsdk:"iam_role_arn"`
-	PrivateSubnets types.Bool   `tfsdk:"private_subnets"`
+	VPCID                          types.String `tfsdk:"vpc_id"`
+	AccountID                      types.String `tfsdk:"account_id"`
+	IAMRoleARN                     types.String `tfsdk:"iam_role_arn"`
+	IAMPolicyPermissionBoundaryARN types.String `tfsdk:"iam_policy_permission_boundary_arn"`
+	PrivateSubnets                 types.Bool   `tfsdk:"private_subnets"`
 }
 
 type googleExternalNetworkResourceModel struct {
@@ -164,6 +165,13 @@ func (r *NetworkResource) Schema(ctx context.Context, req resource.SchemaRequest
 					"iam_role_arn": schema.StringAttribute{
 						Required:            true,
 						MarkdownDescription: "ARN of an IAM role with permissions to create resources",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"iam_policy_permission_boundary_arn": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "ARN of an IAM policy which is used as a default permission boundary for created roles",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},

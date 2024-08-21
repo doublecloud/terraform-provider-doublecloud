@@ -53,6 +53,7 @@ resource "doublecloud_network" "example-network" {
 Required:
 
 - `account_id` (String) VPC owner account ID
+- `iam_policy_permission_boundary_arn` (String) ARN of an IAM policy which is used as a default permission boundary for created roles
 - `iam_role_arn` (String) ARN of an IAM role with permissions to create resources
 - `vpc_id` (String) VPC ID
 

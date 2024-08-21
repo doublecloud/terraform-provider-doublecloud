@@ -16,9 +16,10 @@ resource "doublecloud_network" "network" {
   region_id  = module.byoc.region_id
   cloud_type = "aws"
   aws = {
-    vpc_id       = module.byoc.vpc_id
-    account_id   = module.byoc.account_id
-    iam_role_arn = module.byoc.iam_role_arn
+    vpc_id                             = module.byoc.vpc_id
+    account_id                         = module.byoc.account_id
+    iam_role_arn                       = module.byoc.iam_role_arn
+    iam_policy_permission_boundary_arn = module.doublecloud_byoc.iam_policy_permission_boundary_arn
   }
 }
 

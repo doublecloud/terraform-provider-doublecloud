@@ -25,9 +25,10 @@ resource "doublecloud_network" "aws" {
   region_id  = module.doublecloud_byoc.region_id
   cloud_type = "aws"
   aws = {
-    vpc_id       = module.doublecloud_byoc.vpc_id
-    account_id   = module.doublecloud_byoc.account_id
-    iam_role_arn = module.doublecloud_byoc.iam_role_arn
+    vpc_id                             = module.doublecloud_byoc.vpc_id
+    account_id                         = module.doublecloud_byoc.account_id
+    iam_role_arn                       = module.doublecloud_byoc.iam_role_arn
+    iam_policy_permission_boundary_arn = module.doublecloud_byoc.iam_policy_permission_boundary_arn
 
     // For sake of simplicity we put it in public subnets
     // so we can access from laptops
@@ -40,9 +41,9 @@ resource "doublecloud_network_connection" "example" {
   network_id = doublecloud_network.aws.id
   aws = {
     peering = {
-      vpc_id          = aws_vpc.tutorial_vpc.id
-      account_id      = data.aws_caller_identity.peered.account_id
-      region_id       = var.aws_region
+      vpc_id     = aws_vpc.tutorial_vpc.id
+      account_id = data.aws_caller_identity.peered.account_id
+      region_id  = var.aws_region
       // This is host VPC. VPC where exist infra located (RDS and EC2 instances).
       // We peer those VPC to gain connectivity between *exist* VPC and *data* VPC
       ipv4_cidr_block = aws_vpc.tutorial_vpc.cidr_block

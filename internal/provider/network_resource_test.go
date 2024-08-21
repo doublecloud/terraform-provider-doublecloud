@@ -57,13 +57,14 @@ func TestAccNetworkResource(t *testing.T) {
 func TestBYOCNetworkResource(t *testing.T) {
 	t.Parallel()
 	const (
-		vpcID     = "vpcID"
-		regionID  = "regionID"
-		accountID = "accountID"
-		roleARN   = "roleARN"
-		networkID = "networkID"
-		ipv4      = "IPv4"
-		ipv6      = "IPv6"
+		vpcID                 = "vpcID"
+		regionID              = "regionID"
+		accountID             = "accountID"
+		roleARN               = "roleARN"
+		permissionBoundaryARN = "permissionBoundaryARN"
+		networkID             = "networkID"
+		ipv4                  = "IPv4"
+		ipv6                  = "IPv6"
 
 		netName     = "name"
 		subnetName  = "snname"
@@ -227,6 +228,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 						resource.TestCheckResourceAttr(testAccNetworkId, "aws.vpc_id", vpcID),
 						resource.TestCheckResourceAttr(testAccNetworkId, "aws.account_id", accountID),
 						resource.TestCheckResourceAttr(testAccNetworkId, "aws.iam_role_arn", roleARN),
+						resource.TestCheckResourceAttr(testAccNetworkId, "aws.iam_policy_permission_boundary_arn", permissionBoundaryARN),
 						resource.TestCheckResourceAttr(testAccNetworkId, "aws.private_subnets", "true"),
 						resource.TestCheckResourceAttr(testAccNetworkId, "ipv4_cidr_block", ipv4),
 						resource.TestCheckResourceAttr(testAccNetworkId, "ipv6_cidr_block", ipv6),
@@ -344,6 +346,7 @@ resource "doublecloud_network" %[2]q {
     vpc_id = %[3]q
     account_id = %[4]q
     iam_role_arn = %[5]q
+    iam_policy_permission_boundary_arn = %[8]q
 	private_subnets = %[7]v
   }
 }
@@ -354,6 +357,7 @@ resource "doublecloud_network" %[2]q {
 		m.AWS.IAMRoleARN.ValueString(),
 		m.RegionID.ValueString(),
 		m.AWS.PrivateSubnets,
+		m.AWS.IAMPolicyPermissionBoundaryARN.ValueString(),
 	)
 }
 
@@ -448,6 +452,7 @@ resource "doublecloud_network" "bothExternalAndCidrNetworkConfig" {
     vpc_id = "v"
     account_id = "a"
     iam_role_arn = "i"
+    iam_policy_permission_boundary_arn = "p"
   }
 }
 `
@@ -461,6 +466,7 @@ resource "doublecloud_network" "bothExternalAndCidrNetworkConfig" {
     vpc_id = "v"
     account_id = "a"
     iam_role_arn = "i"
+    iam_policy_permission_boundary_arn = "p"
   }
   gcp = {
     network_name = "n"
@@ -480,6 +486,7 @@ resource "doublecloud_network" "cloudTypeMismatchNetworkConfig" {
     vpc_id = "v"
     account_id = "a"
     iam_role_arn = "i"
+    iam_policy_permission_boundary_arn = "p"
   }
 }
 `

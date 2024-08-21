@@ -4,9 +4,10 @@ resource "doublecloud_network" "aws" {
   region_id  = module.doublecloud-byoc.region_id
   cloud_type = "aws"
   aws = {
-    vpc_id       = module.doublecloud-byoc.vpc_id
-    account_id   = module.doublecloud-byoc.account_id
-    iam_role_arn = module.doublecloud-byoc.iam_role_arn
+    vpc_id                             = module.doublecloud-byoc.vpc_id
+    account_id                         = module.doublecloud-byoc.account_id
+    iam_role_arn                       = module.doublecloud-byoc.iam_role_arn
+    iam_policy_permission_boundary_arn = module.doublecloud_byoc.iam_policy_permission_boundary_arn
   }
 }
 
@@ -32,8 +33,8 @@ resource "doublecloud_clickhouse_cluster" "alpha-clickhouse" {
     kafka {
       security_protocol = "SASL_SSL"
       sasl_mechanism    = "SCRAM_SHA_512"
-      sasl_username = resource.doublecloud_kafka_cluster.alpha-kafka.connection_info.user
-      sasl_password = resource.doublecloud_kafka_cluster.alpha-kafka.connection_info.password
+      sasl_username     = resource.doublecloud_kafka_cluster.alpha-kafka.connection_info.user
+      sasl_password     = resource.doublecloud_kafka_cluster.alpha-kafka.connection_info.password
     }
   }
 
