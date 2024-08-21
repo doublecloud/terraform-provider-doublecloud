@@ -281,11 +281,12 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 		case data.AWS != nil:
 			importReq.Params = &network.ImportNetworkRequest_Aws{
 				Aws: &network.ImportAWSVPCRequest{
-					RegionId:       data.RegionID.ValueString(),
-					VpcId:          data.AWS.VPCID.ValueString(),
-					AccountId:      data.AWS.AccountID.ValueString(),
-					IamRoleArn:     data.AWS.IAMRoleARN.ValueString(),
-					PrivateSubnets: data.AWS.PrivateSubnets.ValueBool(),
+					RegionId:                       data.RegionID.ValueString(),
+					VpcId:                          data.AWS.VPCID.ValueString(),
+					AccountId:                      data.AWS.AccountID.ValueString(),
+					IamRoleArn:                     data.AWS.IAMRoleARN.ValueString(),
+					IamPolicyPermissionBoundaryArn: data.AWS.IAMPolicyPermissionBoundaryARN.ValueString(),
+					PrivateSubnets:                 data.AWS.PrivateSubnets.ValueBool(),
 				},
 			}
 		case data.GCP != nil:
@@ -375,6 +376,7 @@ func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, re
 				data.AWS = &awsExternalNetworkResourceModel{}
 			}
 			data.AWS.IAMRoleARN = types.StringValue(awsER.IamRoleArn.GetValue())
+			data.AWS.IAMPolicyPermissionBoundaryARN = types.StringValue(awsER.IamPolicyPermissionBoundaryArn.GetValue())
 			data.AWS.AccountID = types.StringValue(awsER.AccountId.GetValue())
 			data.AWS.VPCID = types.StringValue(awsER.VpcId)
 			data.AWS.PrivateSubnets = types.BoolValue(awsER.PrivateSubnets.GetValue())

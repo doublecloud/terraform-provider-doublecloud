@@ -78,10 +78,11 @@ func TestBYOCNetworkResource(t *testing.T) {
 		RegionID:  types.StringValue(regionID),
 		CloudType: types.StringValue("aws"),
 		AWS: &awsExternalNetworkResourceModel{
-			VPCID:          types.StringValue(vpcID),
-			AccountID:      types.StringValue(accountID),
-			IAMRoleARN:     types.StringValue(roleARN),
-			PrivateSubnets: types.BoolValue(true),
+			VPCID:                          types.StringValue(vpcID),
+			AccountID:                      types.StringValue(accountID),
+			IAMRoleARN:                     types.StringValue(roleARN),
+			IAMPolicyPermissionBoundaryARN: types.StringValue(permissionBoundaryARN),
+			PrivateSubnets:                 types.BoolValue(true),
 		},
 		GCP: &googleExternalNetworkResourceModel{
 			NetworkName:    types.StringValue(netName),
@@ -100,6 +101,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 		require.Equal(t, regionID, awsParams.Aws.RegionId)
 		require.Equal(t, accountID, awsParams.Aws.AccountId)
 		require.Equal(t, roleARN, awsParams.Aws.IamRoleArn)
+		require.Equal(t, permissionBoundaryARN, awsParams.Aws.IamPolicyPermissionBoundaryArn)
 		require.True(t, awsParams.Aws.PrivateSubnets)
 		return &doublecloud.Operation{
 			Id:         uuid.NewString(),
@@ -137,10 +139,11 @@ func TestBYOCNetworkResource(t *testing.T) {
 			Status:        network.Network_NETWORK_STATUS_ACTIVE,
 			ExternalResources: &network.Network_Aws{
 				Aws: &network.AwsExternalResources{
-					VpcId:          vpcID,
-					AccountId:      &wrappers.StringValue{Value: accountID},
-					IamRoleArn:     &wrappers.StringValue{Value: roleARN},
-					PrivateSubnets: &wrappers.BoolValue{Value: true},
+					VpcId:                          vpcID,
+					AccountId:                      &wrappers.StringValue{Value: accountID},
+					IamRoleArn:                     &wrappers.StringValue{Value: roleARN},
+					IamPolicyPermissionBoundaryARN: &wrappers.StringValue{Value: permissionBoundaryARN},
+					PrivateSubnets:                 &wrappers.BoolValue{Value: true},
 				},
 			},
 			IsExternal: true,
