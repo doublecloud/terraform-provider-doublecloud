@@ -142,7 +142,7 @@ func TestBYOCNetworkResource(t *testing.T) {
 					VpcId:                          vpcID,
 					AccountId:                      &wrappers.StringValue{Value: accountID},
 					IamRoleArn:                     &wrappers.StringValue{Value: roleARN},
-					IamPolicyPermissionBoundaryARN: &wrappers.StringValue{Value: permissionBoundaryARN},
+					IamPolicyPermissionBoundaryArn: &wrappers.StringValue{Value: permissionBoundaryARN},
 					PrivateSubnets:                 &wrappers.BoolValue{Value: true},
 				},
 			},
