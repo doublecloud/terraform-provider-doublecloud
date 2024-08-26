@@ -8,30 +8,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type endpointMetrikaSourceSettings struct {
+type endpointMetricaSourceSettings struct {
 	CounterIDs     []types.Int64            `tfsdk:"counter_ids"`
 	Token          types.String             `tfsdk:"token"`
-	MetrikaStreams []*endpointMetrikaStream `tfsdk:"metrica_stream"`
+	MetricaStreams []*endpointMetricaStream `tfsdk:"metrica_stream"`
 }
 
-type endpointMetrikaStream struct {
+type endpointMetricaStream struct {
 	StreamType types.String `tfsdk:"stream_type"`
 }
 
-func transferEndpointMetrikaStreamSchema() schema.Block {
+func transferEndpointMetricaStreamSchema() schema.Block {
 	return schema.ListNestedBlock{
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
 				"stream_type": schema.StringAttribute{
 					Optional:    true,
-					Description: "The type of the Metrika stream",
+					Description: "The type of the Metrica stream",
 				},
 			},
 		},
-		Description: "Configuration for Metrika streams",
+		Description: "Configuration for Metrica streams",
 	}
 }
-func transferEndpointMetrikaSourceSchema() schema.Block {
+func transferEndpointMetricaSourceSchema() schema.Block {
 	return schema.SingleNestedBlock{
 		Attributes: map[string]schema.Attribute{
 			"counter_ids": schema.ListAttribute{
@@ -46,12 +46,12 @@ func transferEndpointMetrikaSourceSchema() schema.Block {
 			},
 		},
 		Blocks: map[string]schema.Block{
-			"metrica_stream": transferEndpointMetrikaStreamSchema(),
+			"metrica_stream": transferEndpointMetricaStreamSchema(),
 		},
 	}
 }
 
-func (m *endpointMetrikaSourceSettings) parse(e *endpoint.MetricaSource) diag.Diagnostics {
+func (m *endpointMetricaSourceSettings) parse(e *endpoint.MetricaSource) diag.Diagnostics {
 	var diags diag.Diagnostics
 	if len(e.GetCounterIds()) > 0 {
 		counterIDs := make([]types.Int64, len(e.CounterIds))
@@ -64,21 +64,21 @@ func (m *endpointMetrikaSourceSettings) parse(e *endpoint.MetricaSource) diag.Di
 	}
 
 	if len(e.GetStreams()) > 0 {
-		metrikaStreams := make([]*endpointMetrikaStream, len(e.GetStreams()))
+		metricaStreams := make([]*endpointMetricaStream, len(e.GetStreams()))
 		for i, stream := range e.GetStreams() {
-			parsedStream := &endpointMetrikaStream{}
+			parsedStream := &endpointMetricaStream{}
 			diags = append(diags, parsedStream.parse(stream)...)
-			metrikaStreams[i] = parsedStream
+			metricaStreams[i] = parsedStream
 		}
-		m.MetrikaStreams = metrikaStreams
+		m.MetricaStreams = metricaStreams
 	} else {
-		m.MetrikaStreams = []*endpointMetrikaStream{}
+		m.MetricaStreams = []*endpointMetricaStream{}
 	}
 
 	return diags
 }
 
-func (m *endpointMetrikaStream) parse(e *endpoint.MetricaStream) diag.Diagnostics {
+func (m *endpointMetricaStream) parse(e *endpoint.MetricaStream) diag.Diagnostics {
 	var diags diag.Diagnostics
 	if e == nil {
 		m = nil
@@ -91,36 +91,36 @@ func (m *endpointMetrikaStream) parse(e *endpoint.MetricaStream) diag.Diagnostic
 	return diags
 }
 
-func (m *endpointMetrikaSourceSettings) convert() (*transfer.EndpointSettings_MetricaSource, diag.Diagnostics) {
+func (m *endpointMetricaSourceSettings) convert() (*transfer.EndpointSettings_MetricaSource, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	metrikaSource := endpoint.MetricaSource{}
+	metricaSource := endpoint.MetricaSource{}
 	if len(m.CounterIDs) > 0 {
 		counterIDs := make([]int64, len(m.CounterIDs))
 		for i, id := range m.CounterIDs {
 			counterIDs[i] = id.ValueInt64()
 		}
-		metrikaSource.CounterIds = counterIDs
+		metricaSource.CounterIds = counterIDs
 	} else {
-		metrikaSource.CounterIds = []int64{}
+		metricaSource.CounterIds = []int64{}
 	}
 
-	metrikaSource.Token = &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: m.Token.ValueString()}}
+	metricaSource.Token = &endpoint.Secret{Value: &endpoint.Secret_Raw{Raw: m.Token.ValueString()}}
 
-	if len(m.MetrikaStreams) > 0 {
-		metrikaStreams := make([]*endpoint.MetricaStream, len(m.MetrikaStreams))
-		for i, stream := range m.MetrikaStreams {
+	if len(m.MetricaStreams) > 0 {
+		metricaStreams := make([]*endpoint.MetricaStream, len(m.MetricaStreams))
+		for i, stream := range m.MetricaStreams {
 			convertedStream, diag := stream.convert()
 			diags = append(diags, diag...)
-			metrikaStreams[i] = convertedStream
+			metricaStreams[i] = convertedStream
 		}
-		metrikaSource.Streams = metrikaStreams
+		metricaSource.Streams = metricaStreams
 	} else {
-		metrikaSource.Streams = []*endpoint.MetricaStream{}
+		metricaSource.Streams = []*endpoint.MetricaStream{}
 	}
 
-	return &transfer.EndpointSettings_MetricaSource{MetricaSource: &metrikaSource}, diags
+	return &transfer.EndpointSettings_MetricaSource{MetricaSource: &metricaSource}, diags
 }
 
-func (m *endpointMetrikaStream) convert() (*endpoint.MetricaStream, diag.Diagnostics) {
+func (m *endpointMetricaStream) convert() (*endpoint.MetricaStream, diag.Diagnostics) {
 	return &endpoint.MetricaStream{Type: endpoint.MetricaStreamType(endpoint.MetricaStreamType_value[m.StreamType.ValueString()])}, diag.Diagnostics{}
 }
