@@ -930,7 +930,7 @@ Optional:
 Optional:
 
 - `counter_ids` (List of Number) List of counter IDs
-- `metrica_stream` (Block List) Configuration for Metrika streams (see [below for nested schema](#nestedblock--settings--metrica_source--metrica_stream))
+- `metrica_stream` (Block List) Configuration for Metrica streams (see [below for nested schema](#nestedblock--settings--metrica_source--metrica_stream))
 - `token` (String, Sensitive) Access token
 
 <a id="nestedblock--settings--metrica_source--metrica_stream"></a>
@@ -938,7 +938,7 @@ Optional:
 
 Optional:
 
-- `stream_type` (String) The type of the Metrika stream
+- `stream_type` (String) The type of the Metrica stream
 
 
 

@@ -48,7 +48,7 @@ type endpointSettings struct {
 	KafkaSource             *endpointKafkaSourceSettings                     `tfsdk:"kafka_source"`
 	KinesisSource           *endpointKinesisSourceSettings                   `tfsdk:"kinesis_source"`
 	PostgresSource          *endpointPostgresSourceSettings                  `tfsdk:"postgres_source"`
-	MetrikaSource           *endpointMetrikaSourceSettings                   `tfsdk:"metrica_source"`
+	MetricaSource           *endpointMetricaSourceSettings                   `tfsdk:"metrica_source"`
 	MysqlSource             *endpointMysqlSourceSettings                     `tfsdk:"mysql_source"`
 	MongoSource             *endpointMongoSourceSettings                     `tfsdk:"mongo_source"`
 	ObjectStorageSource     *endpointObjectStorageSourceSettings             `tfsdk:"object_storage_source"`
@@ -123,7 +123,7 @@ func (r *TransferEndpointResource) Schema(ctx context.Context, req resource.Sche
 					"postgres_source":          transferEndpointPostgresSourceSchema(),
 					"mysql_source":             transferEndpointMysqlSourceSchema(),
 					"mongo_source":             transferEndpointMongoSourceSchema(),
-					"metrica_source":           transferEndpointMetrikaSourceSchema(),
+					"metrica_source":           transferEndpointMetricaSourceSchema(),
 					"object_storage_source":    transferEndpointObjectStorageSourceSchema(),
 					"s3_source":                transferEndpointS3SourceSchema(),
 					"linkedinads_source":       endpointLinkedinAdsSourceSettingsSchema(),
@@ -372,8 +372,8 @@ func transferEndpointSettings(m *TransferEndpointModel) (*transfer.EndpointSetti
 		}
 		return &transfer.EndpointSettings{Settings: s}, diag
 	}
-	if m.Settings.MetrikaSource != nil {
-		s, d := m.Settings.MetrikaSource.convert()
+	if m.Settings.MetricaSource != nil {
+		s, d := m.Settings.MetricaSource.convert()
 		if d.HasError() {
 			diag.Append(d...)
 		}
@@ -612,10 +612,10 @@ func (data *TransferEndpointModel) parseTransferEndpoint(ctx context.Context, e 
 		diag.Append(parseTransferEndpointPostgresTarget(ctx, settings, data.Settings.PostgresTarget)...)
 	}
 	if settings := e.Settings.GetMetricaSource(); settings != nil {
-		if data.Settings.MetrikaSource == nil {
-			data.Settings.MetrikaSource = &endpointMetrikaSourceSettings{}
+		if data.Settings.MetricaSource == nil {
+			data.Settings.MetricaSource = &endpointMetricaSourceSettings{}
 		}
-		diag.Append(data.Settings.MetrikaSource.parse(settings)...)
+		diag.Append(data.Settings.MetricaSource.parse(settings)...)
 	}
 	if settings := e.Settings.GetMysqlSource(); settings != nil {
 		if data.Settings.MysqlSource == nil {

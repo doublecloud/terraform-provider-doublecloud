@@ -11,7 +11,7 @@ var (
 	testEMetricaSourceID   string = fmt.Sprintf("doublecloud_transfer_endpoint.%v", testEMetricaSourceName)
 )
 
-func TestAccTransferEndpointMetrikaSource(t *testing.T) {
+func TestAccTransferEndpointMetricaSource(t *testing.T) {
 	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
@@ -20,7 +20,7 @@ func TestAccTransferEndpointMetrikaSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read Testing
 			{
-				Config: testAccTransferEndpointMetrikaConfig(),
+				Config: testAccTransferEndpointMetricaConfig(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testEMetricaSourceID, "name", testEMetricaSourceName),
 					resource.TestCheckResourceAttr(testEMetricaSourceID, "settings.metrica_source.counter_ids.#", "2"),
@@ -37,7 +37,7 @@ func TestAccTransferEndpointMetrikaSource(t *testing.T) {
 
 }
 
-func testAccTransferEndpointMetrikaConfig() string {
+func testAccTransferEndpointMetricaConfig() string {
 	return fmt.Sprintf(`
 resource "doublecloud_transfer_endpoint" %[1]q {
 	project_id = %[2]q
