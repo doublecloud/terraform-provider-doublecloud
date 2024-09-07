@@ -17,7 +17,7 @@ Airflow Cluster resource
 
 ### Required
 
-- `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
+- `cloud_type` (String) Cloud provider (`aws`)
 - `name` (String) Cluster name
 - `network_id` (String) Cluster network
 - `project_id` (String) Project ID
@@ -74,23 +74,23 @@ Optional:
 
 Required:
 
-- `version_id` (String) Version ID of the Airflow cluster.
+- `version_id` (String) Airflow cluster version ID
 
 Optional:
 
-- `airflow_env_variable` (Block List) Environment variables for the Airflow cluster. (see [below for nested schema](#nestedblock--config--airflow_env_variable))
-- `custom_image_digest` (String) Custom image digest for the Airflow cluster.
-- `managed_requirements_txt` (String) Path to the managed `requirements.txt` file.
-- `sync_config` (Block, Optional) Synchronization configuration for the Airflow cluster. (see [below for nested schema](#nestedblock--config--sync_config))
-- `user_service_account` (String) User service account for the Airflow cluster.
+- `airflow_env_variable` (Block List) Environment variables (see [below for nested schema](#nestedblock--config--airflow_env_variable))
+- `custom_image_digest` (String) Custom Airflow image digest
+- `managed_requirements_txt` (String) Path to the managed `requirements.txt` file
+- `sync_config` (Block, Optional) DAG repository configuration (see [below for nested schema](#nestedblock--config--sync_config))
+- `user_service_account` (String) Service account for the Airflow cluster
 
 <a id="nestedblock--config--airflow_env_variable"></a>
 ### Nested Schema for `config.airflow_env_variable`
 
 Required:
 
-- `name` (String) Name of the environment variable.
-- `value` (String) Value of the environment variable.
+- `name` (String) Environment variable name
+- `value` (String) Environment variable value
 
 
 <a id="nestedblock--config--sync_config"></a>
@@ -98,29 +98,29 @@ Required:
 
 Required:
 
-- `branch` (String) Branch name for the DAGs repository.
-- `dags_path` (String) Path to DAGs in the repository.
-- `repo_url` (String) Repository URL for DAGs.
+- `branch` (String) DAG repository branch name
+- `dags_path` (String) Path to the directory with DAGs
+- `repo_url` (String) DAG repository URL
 
 Optional:
 
-- `credentials` (Block, Optional) Credentials for the DAGs repository. (see [below for nested schema](#nestedblock--config--sync_config--credentials))
-- `revision` (String) Revision (commit hash) for the DAGs repository.
+- `credentials` (Block, Optional) DAG repository credentials (see [below for nested schema](#nestedblock--config--sync_config--credentials))
+- `revision` (String) DAG repository revision (commit hash)
 
 <a id="nestedblock--config--sync_config--credentials"></a>
 ### Nested Schema for `config.sync_config.credentials`
 
 Optional:
 
-- `api_credentials` (Block, Optional) API credentials for accessing the DAGs repository. (see [below for nested schema](#nestedblock--config--sync_config--credentials--api_credentials))
+- `api_credentials` (Block, Optional) API credentials for accessing the DAG repository (see [below for nested schema](#nestedblock--config--sync_config--credentials--api_credentials))
 
 <a id="nestedblock--config--sync_config--credentials--api_credentials"></a>
 ### Nested Schema for `config.sync_config.credentials.api_credentials`
 
 Required:
 
-- `password` (String, Sensitive) Password for API credentials.
-- `username` (String) Username for API credentials.
+- `password` (String, Sensitive) Password
+- `username` (String) Username
 
 
 
@@ -138,12 +138,12 @@ Optional:
 
 Required:
 
-- `environment_flavor` (String) Environment flavor for Airflow.
-- `max_worker_count` (Number) Maximum number of Airflow workers.
-- `min_worker_count` (Number) Minimum number of Airflow workers.
-- `worker_concurrency` (Number) Concurrency level for Airflow workers.
-- `worker_disk_size` (Number) Disk size for Airflow workers.
-- `worker_preset` (String) Worker preset configuration.
+- `environment_flavor` (String) Environment configuration
+- `max_worker_count` (Number) Maximum number of workers
+- `min_worker_count` (Number) Minimum number of workers
+- `worker_concurrency` (Number) Worker concurrency
+- `worker_disk_size` (Number) Worker disk size
+- `worker_preset` (String) Worker resource preset
 
 
 
@@ -152,6 +152,6 @@ Required:
 
 Read-Only:
 
-- `host` (String) host to use in clients
+- `host` (String) Webserver URL
 - `password` (String, Sensitive) Password for the Airflow user
 - `user` (String) Airflow user

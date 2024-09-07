@@ -641,7 +641,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 			},
 			"cloud_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Cloud provider (`aws`, `gcp`, or `azure`)",
+				MarkdownDescription: "Cloud provider (`aws`)",
 				Validators:          []validator.String{cloudTypeValidator()},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -666,7 +666,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 			},
 			"network_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Cluster network",
+				MarkdownDescription: "Cluster network ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -681,7 +681,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 			//	Computed:            true,
 			//	Attributes:          airflowCustomRemoteConnectionInfoResSchema(),
 			//	PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
-			//	MarkdownDescription: "Remote container registry connection information.",
+			//	MarkdownDescription: "Connection info for the remote container registry",
 			//},
 		},
 		Blocks: map[string]schema.Block{
@@ -692,7 +692,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 						Attributes: map[string]schema.Attribute{
 							"max_worker_count": schema.Int64Attribute{
 								Required:            true,
-								MarkdownDescription: "Maximum number of Airflow workers.",
+								MarkdownDescription: "Maximum number of workers",
 								Validators: []validator.Int64{
 									int64validator.AtLeast(1),
 									int64validator.AtMost(10),
@@ -700,7 +700,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 							},
 							"min_worker_count": schema.Int64Attribute{
 								Required:            true,
-								MarkdownDescription: "Minimum number of Airflow workers.",
+								MarkdownDescription: "Minimum number of workers",
 								Validators: []validator.Int64{
 									int64validator.AtLeast(1),
 									int64validator.AtMost(10),
@@ -708,14 +708,14 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 							},
 							"environment_flavor": schema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "Environment flavor for Airflow.",
+								MarkdownDescription: "Environment configuration",
 								Validators: []validator.String{
 									stringvalidator.OneOf("small", "medium", "large"),
 								},
 							},
 							"worker_concurrency": schema.Int64Attribute{
 								Required:            true,
-								MarkdownDescription: "Concurrency level for Airflow workers.",
+								MarkdownDescription: "Worker concurrency",
 								Validators: []validator.Int64{
 									int64validator.AtLeast(1),
 									int64validator.AtMost(30),
@@ -723,7 +723,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 							},
 							"worker_disk_size": schema.Int64Attribute{
 								Required:            true,
-								MarkdownDescription: "Disk size for Airflow workers.",
+								MarkdownDescription: "Worker disk size",
 								Validators: []validator.Int64{
 									int64validator.AtLeast(1),
 									int64validator.AtMost(10),
@@ -731,7 +731,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 							},
 							"worker_preset": schema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "Worker preset configuration.",
+								MarkdownDescription: "Worker resource preset",
 								Validators: []validator.String{
 									stringvalidator.OneOf("small", "medium", "large"),
 								},
@@ -746,72 +746,72 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 				Attributes: map[string]schema.Attribute{
 					"version_id": schema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "Version ID of the Airflow cluster.",
+						MarkdownDescription: "Airflow cluster version ID",
 					},
 					"custom_image_digest": schema.StringAttribute{
 						Optional:            true,
-						MarkdownDescription: "Custom image digest for the Airflow cluster.",
+						MarkdownDescription: "Custom Airflow image digest",
 					},
 					"managed_requirements_txt": schema.StringAttribute{
 						Optional:            true,
-						MarkdownDescription: "Path to the managed `requirements.txt` file.",
+						MarkdownDescription: "Path to the managed `requirements.txt` file",
 					},
 					"user_service_account": schema.StringAttribute{
 						Optional:            true,
-						MarkdownDescription: "User service account for the Airflow cluster.",
+						MarkdownDescription: "Service account for the Airflow cluster",
 					},
 				},
 				Blocks: map[string]schema.Block{
 					"airflow_env_variable": schema.ListNestedBlock{
-						Description: "Environment variables for the Airflow cluster.",
+						Description: "Environment variables",
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
 									Required:            true,
-									MarkdownDescription: "Name of the environment variable.",
+									MarkdownDescription: "Environment variable name",
 								},
 								"value": schema.StringAttribute{
 									Required:            true,
-									MarkdownDescription: "Value of the environment variable.",
+									MarkdownDescription: "Environment variable value",
 								},
 							},
 						},
 					},
 					"sync_config": schema.SingleNestedBlock{
-						Description: "Synchronization configuration for the Airflow cluster.",
+						Description: "DAG repository configuration",
 						Attributes: map[string]schema.Attribute{
 							"repo_url": schema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "Repository URL for DAGs.",
+								MarkdownDescription: "DAG repository URL",
 							},
 							"branch": schema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "Branch name for the DAGs repository.",
+								MarkdownDescription: "DAG repository branch name",
 							},
 							"revision": schema.StringAttribute{
 								Optional:            true,
-								MarkdownDescription: "Revision (commit hash) for the DAGs repository.",
+								MarkdownDescription: "DAG repository revision (commit hash)",
 							},
 							"dags_path": schema.StringAttribute{
 								Required:            true,
-								MarkdownDescription: "Path to DAGs in the repository.",
+								MarkdownDescription: "Path to the directory with DAGs",
 							},
 						},
 						Blocks: map[string]schema.Block{
 							"credentials": schema.SingleNestedBlock{
-								Description: "Credentials for the DAGs repository.",
+								Description: "DAG repository credentials",
 								Blocks: map[string]schema.Block{
 									"api_credentials": schema.SingleNestedBlock{
-										Description: "API credentials for accessing the DAGs repository.",
+										Description: "API credentials for accessing the DAG repository",
 										Attributes: map[string]schema.Attribute{
 											"username": schema.StringAttribute{
 												Required:            true,
-												MarkdownDescription: "Username for API credentials.",
+												MarkdownDescription: "Username",
 											},
 											"password": schema.StringAttribute{
 												Required:            true,
 												Sensitive:           true,
-												MarkdownDescription: "Password for API credentials.",
+												MarkdownDescription: "Password",
 											},
 										},
 									},
@@ -831,7 +831,7 @@ func airflowConnectionInfoResSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"host": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "host to use in clients",
+			MarkdownDescription: "Webserver URL",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"user": schema.StringAttribute{
@@ -842,7 +842,7 @@ func airflowConnectionInfoResSchema() map[string]schema.Attribute {
 		"password": schema.StringAttribute{
 			Computed:            true,
 			Sensitive:           true,
-			MarkdownDescription: "Password for the Airflow user",
+			MarkdownDescription: "Airflow user’s password",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 	}
@@ -863,7 +863,7 @@ func airflowCustomRemoteConnectionInfoResSchema() map[string]schema.Attribute {
 		"password": schema.StringAttribute{
 			Computed:            true,
 			Sensitive:           true,
-			MarkdownDescription: "Password for the Airflow user",
+			MarkdownDescription: "Airflow user’s password",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 	}
