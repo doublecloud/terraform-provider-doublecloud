@@ -90,7 +90,7 @@ func TestAccAirflowClusterResource(t *testing.T) {
 // Helper function to create Terraform configuration for Airflow Cluster Resource
 func testAccAirflowClusterResourceConfig(a *AirflowClusterModel) string {
 	return fmt.Sprintf(`
-resource "airflow_cluster" "test" {
+resource "doublecloud_airflow_cluster" "test" {
   project_id = %[1]q
   name       = %[2]q
   region_id  = %[3]q
@@ -119,10 +119,12 @@ resource "airflow_cluster" "test" {
 
   access {
     data_services = ["transfer"]
-    ipv4_cidr_blocks {
-      value       = "10.0.0.0/8"
-      description = "Office in Berlin"
-    }
+    ipv4_cidr_blocks = [
+      {
+        value       = "10.0.0.0/8"
+        description = "Office in Berlin"
+      }
+    ]
   }
 }
 `, a.ProjectID.ValueString(),

@@ -566,18 +566,17 @@ func (a *AirflowClusterResource) Delete(ctx context.Context, request resource.De
 }
 
 type AirflowClusterModel struct {
-	Id               types.String               `tfsdk:"id"`
-	ProjectID        types.String               `tfsdk:"project_id"`
-	CloudType        types.String               `tfsdk:"cloud_type"`
-	RegionID         types.String               `tfsdk:"region_id"`
-	Name             types.String               `tfsdk:"name"`
-	Description      types.String               `tfsdk:"description"`
-	NetworkId        types.String               `tfsdk:"network_id"`
-	Resources        *AirflowResourcesModel     `tfsdk:"resources"`
-	ConnectionInfo   types.Object               `tfsdk:"connection_info"`
-	CrConnectionInfo types.Object               `tfsdk:"custom_remote_connection_info"`
-	Access           *AccessModel               `tfsdk:"access"`
-	Config           *AirflowClusterConfigModel `tfsdk:"config"`
+	Id             types.String               `tfsdk:"id"`
+	ProjectID      types.String               `tfsdk:"project_id"`
+	CloudType      types.String               `tfsdk:"cloud_type"`
+	RegionID       types.String               `tfsdk:"region_id"`
+	Name           types.String               `tfsdk:"name"`
+	Description    types.String               `tfsdk:"description"`
+	NetworkId      types.String               `tfsdk:"network_id"`
+	Resources      *AirflowResourcesModel     `tfsdk:"resources"`
+	ConnectionInfo types.Object               `tfsdk:"connection_info"`
+	Access         *AccessModel               `tfsdk:"access"`
+	Config         *AirflowClusterConfigModel `tfsdk:"config"`
 }
 
 type AirflowResourcesModel struct {
@@ -677,12 +676,6 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Public connection info",
 			},
-			//"custom_remote_connection_info": schema.SingleNestedAttribute{
-			//	Computed:            true,
-			//	Attributes:          airflowCustomRemoteConnectionInfoResSchema(),
-			//	PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
-			//	MarkdownDescription: "Connection info for the remote container registry",
-			//},
 		},
 		Blocks: map[string]schema.Block{
 			"resources": schema.SingleNestedBlock{
@@ -805,11 +798,11 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 										Description: "API credentials for accessing the DAG repository",
 										Attributes: map[string]schema.Attribute{
 											"username": schema.StringAttribute{
-												Required:            true,
+												Optional:            true,
 												MarkdownDescription: "Username",
 											},
 											"password": schema.StringAttribute{
-												Required:            true,
+												Optional:            true,
 												Sensitive:           true,
 												MarkdownDescription: "Password",
 											},
