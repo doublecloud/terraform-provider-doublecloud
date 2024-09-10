@@ -44,6 +44,25 @@ func (a *AirflowClusterResource) Metadata(ctx context.Context, request resource.
 	response.TypeName = request.ProviderTypeName + "_airflow_cluster"
 }
 
+func (a *AirflowClusterResource) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if request.ProviderData == nil {
+		return
+	}
+
+	sdk, ok := request.ProviderData.(*dcsdk.SDK)
+	if !ok {
+		response.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *dcsdk.SDK, got: %T. Please report this issue to the provider developers.", request.ProviderData),
+		)
+		return
+	}
+
+	a.sdk = sdk
+	a.airflowService = a.sdk.Airflow().Cluster()
+}
+
 func createAirflowClusterRequest(a *AirflowClusterModel) (*airflow.CreateClusterRequest, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	rq := &airflow.CreateClusterRequest{}
@@ -80,6 +99,33 @@ func createAirflowClusterRequest(a *AirflowClusterModel) (*airflow.CreateCluster
 	return rq, diags
 }
 
+func (a *AirflowClusterModel) parse(rs *airflow.Cluster) diag.Diagnostics {
+	var diags diag.Diagnostics
+	a.ProjectID = types.StringValue(rs.ProjectId)
+	a.CloudType = types.StringValue(rs.CloudType)
+	a.RegionID = types.StringValue(rs.RegionId)
+	a.Name = types.StringValue(rs.Name)
+	a.Description = types.StringValue(rs.Description)
+	a.NetworkId = types.StringValue(rs.NetworkId)
+
+	if a.Resources == nil {
+		a.Resources = &AirflowResourcesModel{}
+	}
+	diags.Append(a.Resources.parse(rs.Resources)...)
+	if a.Config == nil {
+		a.Config = &AirflowClusterConfigModel{}
+	}
+	diags.Append(a.Config.parse(rs.Config)...)
+	if access := rs.GetAccess(); access != nil {
+		if a.Access == nil {
+			a.Access = new(AccessModel)
+		}
+		diags.Append(a.Access.parse(access)...)
+	}
+
+	return diags
+}
+
 func (a *AirflowClusterConfigModel) convertUpdateConfig() (*airflow.UpdateClusterRequest_UpdateAirflowConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	r := &airflow.UpdateClusterRequest_UpdateAirflowConfig{}
@@ -94,40 +140,46 @@ func (a *AirflowClusterConfigModel) convertUpdateConfig() (*airflow.UpdateCluste
 		r.UserServiceAccountId = wrapperspb.String(v)
 	}
 
-	if a.syncConfig != nil {
+	if a.SyncConfig != nil {
 		r.GitSync = &airflow.UpdateClusterRequest_UpdateAirflowConfig_UpdateGitSyncConfig{}
 
-		if v := a.syncConfig.RepoUrl.ValueString(); v != "" {
+		if v := a.SyncConfig.RepoUrl.ValueString(); v != "" {
 			r.GitSync.GetGitSync().RepoUrl = v
 		} else {
 			diags.AddError("Invalid Value", "RepoUrl cannot be empty")
 		}
 
-		if v := a.syncConfig.Branch.ValueString(); v != "" {
+		if v := a.SyncConfig.Branch.ValueString(); v != "" {
 			r.GitSync.GetGitSync().Branch = v
 		} else {
 			diags.AddError("Invalid Value", "Branch cannot be empty")
 		}
 
-		if v := a.syncConfig.Revision.ValueString(); v != "" {
+		if v := a.SyncConfig.Revision.ValueString(); v != "" {
 			r.GitSync.GetGitSync().Revision = v
 		} else {
 			diags.AddWarning("Empty Value", "Revision is not provided")
 		}
 
-		if v := a.syncConfig.DagsPath.ValueString(); v != "" {
+		if v := a.SyncConfig.DagsPath.ValueString(); v != "" {
 			r.GitSync.GetGitSync().DagsPath = v
 		} else {
 			diags.AddError("Invalid Value", "DagsPath cannot be empty")
 		}
 
-		if a.syncConfig.credentials != nil && a.syncConfig.credentials.ApiCredentials != nil {
+		if a.SyncConfig.Credentials != nil && a.SyncConfig.Credentials.ApiCredentials != nil {
 			creds := &airflow.SyncConfig_ApiCredentials{
 				ApiCredentials: &airflow.GitApiCredentials{
-					Username: a.syncConfig.credentials.ApiCredentials.Username.ValueString(),
-					Password: a.syncConfig.credentials.ApiCredentials.Password.ValueString(),
+					Password: a.SyncConfig.Credentials.ApiCredentials.Password.ValueString(),
 				},
 			}
+
+			if v := a.SyncConfig.Credentials.ApiCredentials.Username.ValueString(); v != "" {
+				creds.ApiCredentials.Username = v
+			} else {
+				creds.ApiCredentials.Username = ""
+			}
+
 			r.GitSync.GetGitSync().Credentials = creds
 		}
 	}
@@ -167,38 +219,38 @@ func (a *AirflowClusterConfigModel) convert() (*airflow.CreateClusterRequest_Air
 		r.UserServiceAccountId = v
 	}
 
-	if a.syncConfig != nil {
+	if a.SyncConfig != nil {
 		r.GitSync = &airflow.SyncConfig{}
 
-		if v := a.syncConfig.RepoUrl.ValueString(); v != "" {
+		if v := a.SyncConfig.RepoUrl.ValueString(); v != "" {
 			r.GitSync.RepoUrl = v
 		} else {
 			diags.AddError("Invalid Value", "RepoUrl cannot be empty")
 		}
 
-		if v := a.syncConfig.Branch.ValueString(); v != "" {
+		if v := a.SyncConfig.Branch.ValueString(); v != "" {
 			r.GitSync.Branch = v
 		} else {
 			diags.AddError("Invalid Value", "Branch cannot be empty")
 		}
 
-		if v := a.syncConfig.Revision.ValueString(); v != "" {
+		if v := a.SyncConfig.Revision.ValueString(); v != "" {
 			r.GitSync.Revision = v
 		} else {
 			diags.AddWarning("Empty Value", "Revision is not provided")
 		}
 
-		if v := a.syncConfig.DagsPath.ValueString(); v != "" {
+		if v := a.SyncConfig.DagsPath.ValueString(); v != "" {
 			r.GitSync.DagsPath = v
 		} else {
 			diags.AddError("Invalid Value", "DagsPath cannot be empty")
 		}
 
-		if a.syncConfig.credentials != nil && a.syncConfig.credentials.ApiCredentials != nil {
+		if a.SyncConfig.Credentials != nil && a.SyncConfig.Credentials.ApiCredentials != nil {
 			creds := &airflow.SyncConfig_ApiCredentials{
 				ApiCredentials: &airflow.GitApiCredentials{
-					Username: a.syncConfig.credentials.ApiCredentials.Username.ValueString(),
-					Password: a.syncConfig.credentials.ApiCredentials.Password.ValueString(),
+					Username: a.SyncConfig.Credentials.ApiCredentials.Username.ValueString(),
+					Password: a.SyncConfig.Credentials.ApiCredentials.Password.ValueString(),
 				},
 			}
 			r.GitSync.Credentials = creds
@@ -216,6 +268,41 @@ func (a *AirflowClusterConfigModel) convert() (*airflow.CreateClusterRequest_Air
 	}
 
 	return r, diags
+}
+
+func (a *AirflowResourcesModel) parse(rs *airflow.ClusterResources) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if a.Airflow == nil {
+		a.Airflow = &AirflowResourcesAirflowModel{}
+	}
+	if v := rs.Airflow.WorkerDiskSize; v != nil {
+		a.Airflow.WorkerDiskSize = types.Int64Value(v.GetValue())
+	} else {
+		a.Airflow.WorkerDiskSize = types.Int64Null()
+	}
+
+	if v := rs.Airflow.MaxWorkerCount; v != nil {
+		a.Airflow.MaxWorkerCount = types.Int64Value(v.GetValue())
+	} else {
+		a.Airflow.MaxWorkerCount = types.Int64Null()
+	}
+
+	if v := rs.Airflow.MinWorkerCount; v != nil {
+		a.Airflow.MinWorkerCount = types.Int64Value(v.GetValue())
+	} else {
+		a.Airflow.MinWorkerCount = types.Int64Null()
+	}
+
+	if v := rs.Airflow.WorkerConcurrency; v != nil {
+		a.Airflow.WorkerConcurrency = types.Int64Value(v.GetValue())
+	} else {
+		a.Airflow.WorkerConcurrency = types.Int64Null()
+	}
+
+	a.Airflow.EnvironmentFlavor = types.StringValue(rs.Airflow.EnvironmentFlavor)
+	a.Airflow.WorkerPreset = types.StringValue(rs.Airflow.WorkerPreset)
+
+	return diags
 }
 
 func (a *AirflowClusterResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
@@ -249,51 +336,54 @@ func (a *AirflowClusterResource) Create(ctx context.Context, request resource.Cr
 	}
 
 	data.Id = types.StringValue(op.ResourceId())
+	// Update computed fields
+	{
+		getRq, diag := getAirflowClusterResourceRequest(data)
+		if diag.HasError() {
+			response.Diagnostics.Append(diag...)
+			return
+		}
 
-	getRq, diag := getAirflowClusterResourceRequest(data)
-	if diag.HasError() {
-		response.Diagnostics.Append(diag...)
-		return
-	}
+		cluster, err := a.airflowService.Get(ctx, getRq)
+		if err != nil {
+			response.Diagnostics.AddError("failed to read", err.Error())
+			return
+		}
+		response.Diagnostics.Append(data.parse(cluster)...)
 
-	cluster, err := a.airflowService.Get(ctx, getRq)
-	if err != nil {
-		response.Diagnostics.AddError("failed to read", err.Error())
-		return
-	}
-
-	if info := cluster.GetConnectionInfo(); info != nil {
-		o, d := types.ObjectValue(map[string]attr.Type{
-			"host":     types.StringType,
-			"user":     types.StringType,
-			"password": types.StringType,
-		},
-			map[string]attr.Value{
-				"host":     types.StringValue(info.GetHost()),
-				"user":     types.StringValue(info.GetUser()),
-				"password": types.StringValue(info.GetPassword()),
+		if info := cluster.GetConnectionInfo(); info != nil {
+			o, d := types.ObjectValue(map[string]attr.Type{
+				"host":     types.StringType,
+				"user":     types.StringType,
+				"password": types.StringType,
 			},
-		)
-		response.Diagnostics.Append(d...)
-		data.ConnectionInfo = o
-	}
-	if info := cluster.GetCrConnectionInfo(); info != nil {
-		o, d := types.ObjectValue(map[string]attr.Type{
-			"host":     types.StringType,
-			"user":     types.StringType,
-			"password": types.StringType,
-		},
-			map[string]attr.Value{
-				"host":     types.StringValue(info.GetRemoteImagePath()),
-				"user":     types.StringValue(info.GetUser()),
-				"password": types.StringValue(info.GetPassword()),
+				map[string]attr.Value{
+					"host":     types.StringValue(info.GetHost()),
+					"user":     types.StringValue(info.GetUser()),
+					"password": types.StringValue(info.GetPassword()),
+				},
+			)
+			response.Diagnostics.Append(d...)
+			data.ConnectionInfo = o
+		}
+		if info := cluster.GetCrConnectionInfo(); info != nil {
+			o, d := types.ObjectValue(map[string]attr.Type{
+				"host":     types.StringType,
+				"user":     types.StringType,
+				"password": types.StringType,
 			},
-		)
-		response.Diagnostics.Append(d...)
-		data.ConnectionInfo = o
-	}
-	tflog.Info(ctx, fmt.Sprintf("doublecloud_airflow_cluster has been created: %s", op.ResourceId()))
+				map[string]attr.Value{
+					"host":     types.StringValue(info.GetRemoteImagePath()),
+					"user":     types.StringValue(info.GetUser()),
+					"password": types.StringValue(info.GetPassword()),
+				},
+			)
+			response.Diagnostics.Append(d...)
+			data.CrConnectionInfo = o
+		}
 
+		tflog.Info(ctx, fmt.Sprintf("doublecloud_airflow_cluster has been created: %s", op.ResourceId()))
+	}
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
 }
 
@@ -306,6 +396,7 @@ func getAirflowClusterResourceRequest(a *AirflowClusterModel) (*airflow.GetClust
 		Sensitive: true,
 	}, nil
 }
+
 func (a *AirflowClusterResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var data *AirflowClusterModel
 
@@ -334,7 +425,7 @@ func (a *AirflowClusterResource) Read(ctx context.Context, request resource.Read
 	data.RegionID = types.StringValue(rs.RegionId)
 	data.NetworkId = types.StringValue(rs.NetworkId)
 	data.Resources = &AirflowResourcesModel{
-		Airflow: AirflowResourcesAirflowModel{
+		Airflow: &AirflowResourcesAirflowModel{
 			MaxWorkerCount:    types.Int64Value(rs.GetResources().GetAirflow().GetMaxWorkerCount().GetValue()),
 			MinWorkerCount:    types.Int64Value(rs.GetResources().GetAirflow().GetMinWorkerCount().GetValue()),
 			EnvironmentFlavor: types.StringValue(rs.GetResources().GetAirflow().GetEnvironmentFlavor()),
@@ -386,7 +477,7 @@ func (a *AirflowClusterResource) Read(ctx context.Context, request resource.Read
 			},
 		)
 		response.Diagnostics.Append(d...)
-		data.ConnectionInfo = o
+		data.CrConnectionInfo = o
 	}
 
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -402,40 +493,43 @@ func (a *AirflowClusterConfigModel) parse(v *airflow.AirflowConfig) diag.Diagnos
 	}
 
 	if v.GitSync != nil {
-		a.syncConfig = &AirflowClusterSyncConfigModel{}
+		a.SyncConfig = &AirflowClusterSyncConfigModel{}
 
 		if v.GitSync.RepoUrl != "" {
-			a.syncConfig.RepoUrl = types.StringValue(v.GitSync.RepoUrl)
+			a.SyncConfig.RepoUrl = types.StringValue(v.GitSync.RepoUrl)
 		} else {
 			diags.AddError("Invalid Value", "RepoUrl is missing in the response")
 		}
 
 		if v.GitSync.Branch != "" {
-			a.syncConfig.Branch = types.StringValue(v.GitSync.Branch)
+			a.SyncConfig.Branch = types.StringValue(v.GitSync.Branch)
 		} else {
 			diags.AddError("Invalid Value", "Branch is missing in the response")
 		}
 
 		if v.GitSync.Revision != "" {
-			a.syncConfig.Revision = types.StringValue(v.GitSync.Revision)
+			a.SyncConfig.Revision = types.StringValue(v.GitSync.Revision)
 		} else {
 			diags.AddWarning("Empty Value", "Revision is not provided in the response")
 		}
 
 		if v.GitSync.DagsPath != "" {
-			a.syncConfig.DagsPath = types.StringValue(v.GitSync.DagsPath)
+			a.SyncConfig.DagsPath = types.StringValue(v.GitSync.DagsPath)
 		} else {
 			diags.AddError("Invalid Value", "DagsPath is missing in the response")
 		}
 
-		// Handle credentials if provided
+		if v.GitSync.Credentials != nil {
+
+		}
 		if creds, ok := v.GitSync.Credentials.(*airflow.SyncConfig_ApiCredentials); ok {
-			a.syncConfig.credentials = &Credentials{
+			a.SyncConfig.Credentials = &Credentials{
 				ApiCredentials: &GitApiCredentials{
-					Username: types.StringValue(creds.ApiCredentials.Username),
-					Password: types.StringValue(creds.ApiCredentials.Password),
+					Username: types.StringValue(creds.ApiCredentials.GetUsername()),
+					Password: types.StringValue(creds.ApiCredentials.GetPassword()),
 				},
 			}
+			tflog.Info(context.Background(), fmt.Sprintf("doublecloud_airflow_cluster password"))
 		} else {
 			diags.AddWarning("Missing Credentials", "No API credentials provided in the response")
 		}
@@ -566,21 +660,22 @@ func (a *AirflowClusterResource) Delete(ctx context.Context, request resource.De
 }
 
 type AirflowClusterModel struct {
-	Id             types.String               `tfsdk:"id"`
-	ProjectID      types.String               `tfsdk:"project_id"`
-	CloudType      types.String               `tfsdk:"cloud_type"`
-	RegionID       types.String               `tfsdk:"region_id"`
-	Name           types.String               `tfsdk:"name"`
-	Description    types.String               `tfsdk:"description"`
-	NetworkId      types.String               `tfsdk:"network_id"`
-	Resources      *AirflowResourcesModel     `tfsdk:"resources"`
-	ConnectionInfo types.Object               `tfsdk:"connection_info"`
-	Access         *AccessModel               `tfsdk:"access"`
-	Config         *AirflowClusterConfigModel `tfsdk:"config"`
+	Id               types.String               `tfsdk:"id"`
+	ProjectID        types.String               `tfsdk:"project_id"`
+	CloudType        types.String               `tfsdk:"cloud_type"`
+	RegionID         types.String               `tfsdk:"region_id"`
+	Name             types.String               `tfsdk:"name"`
+	Description      types.String               `tfsdk:"description"`
+	NetworkId        types.String               `tfsdk:"network_id"`
+	Resources        *AirflowResourcesModel     `tfsdk:"resources"`
+	ConnectionInfo   types.Object               `tfsdk:"connection_info"`
+	CrConnectionInfo types.Object               `tfsdk:"cr_connection_info"`
+	Access           *AccessModel               `tfsdk:"access"`
+	Config           *AirflowClusterConfigModel `tfsdk:"config"`
 }
 
 type AirflowResourcesModel struct {
-	Airflow AirflowResourcesAirflowModel `tfsdk:"airflow"`
+	Airflow *AirflowResourcesAirflowModel `tfsdk:"airflow"`
 }
 
 type AirflowResourcesAirflowModel struct {
@@ -594,7 +689,7 @@ type AirflowResourcesAirflowModel struct {
 
 type AirflowClusterConfigModel struct {
 	VersionId               types.String                   `tfsdk:"version_id"`
-	syncConfig              *AirflowClusterSyncConfigModel `tfsdk:"sync_config"`
+	SyncConfig              *AirflowClusterSyncConfigModel `tfsdk:"sync_config"`
 	CustomImageDigest       types.String                   `tfsdk:"custom_image_digest"`
 	ManagedRequirementsTxt  types.String                   `tfsdk:"managed_requirements_txt"`
 	UserServiceAccount      types.String                   `tfsdk:"user_service_account"`
@@ -606,11 +701,11 @@ type AirflowClusterSyncConfigModel struct {
 	Branch      types.String `tfsdk:"branch"`
 	Revision    types.String `tfsdk:"revision"`
 	DagsPath    types.String `tfsdk:"dags_path"`
-	credentials *Credentials `tfsdk:"credentials"`
+	Credentials *Credentials `tfsdk:"credentials"`
 }
 
 type Credentials struct {
-	ApiCredentials *GitApiCredentials `tfsdk:"credentials"`
+	ApiCredentials *GitApiCredentials `tfsdk:"api_credentials"`
 }
 
 type GitApiCredentials struct {
@@ -623,7 +718,7 @@ type AirflowEnvVariableModel struct {
 	Value types.String `tfsdk:"value"`
 }
 
-func (a AirflowClusterResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
+func (a *AirflowClusterResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -676,6 +771,12 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Public connection info",
 			},
+			"cr_connection_info": schema.SingleNestedAttribute{
+				Computed:            true,
+				Attributes:          airflowCustomRemoteConnectionInfoResSchema(),
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Remote connection info",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"resources": schema.SingleNestedBlock{
@@ -703,7 +804,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 								Required:            true,
 								MarkdownDescription: "Environment configuration",
 								Validators: []validator.String{
-									stringvalidator.OneOf("small", "medium", "large"),
+									stringvalidator.OneOf("dev_test", "prod"),
 								},
 							},
 							"worker_concurrency": schema.Int64Attribute{
@@ -760,11 +861,11 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									Required:            true,
+									Optional:            true,
 									MarkdownDescription: "Environment variable name",
 								},
 								"value": schema.StringAttribute{
-									Required:            true,
+									Optional:            true,
 									MarkdownDescription: "Environment variable value",
 								},
 							},
@@ -783,7 +884,7 @@ func (a AirflowClusterResource) Schema(ctx context.Context, request resource.Sch
 							},
 							"revision": schema.StringAttribute{
 								Optional:            true,
-								MarkdownDescription: "DAG repository revision (commit hash)",
+								MarkdownDescription: "DAG repository revision ",
 							},
 							"dags_path": schema.StringAttribute{
 								Required:            true,
@@ -835,7 +936,7 @@ func airflowConnectionInfoResSchema() map[string]schema.Attribute {
 		"password": schema.StringAttribute{
 			Computed:            true,
 			Sensitive:           true,
-			MarkdownDescription: "Airflow user’s password",
+			MarkdownDescription: "Password for the Airflow user",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 	}
@@ -843,7 +944,7 @@ func airflowConnectionInfoResSchema() map[string]schema.Attribute {
 
 func airflowCustomRemoteConnectionInfoResSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		"remote_image_path": schema.StringAttribute{
+		"host": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "host to use in clients",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
@@ -856,7 +957,7 @@ func airflowCustomRemoteConnectionInfoResSchema() map[string]schema.Attribute {
 		"password": schema.StringAttribute{
 			Computed:            true,
 			Sensitive:           true,
-			MarkdownDescription: "Airflow user’s password",
+			MarkdownDescription: "Password for the Airflow user",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 	}

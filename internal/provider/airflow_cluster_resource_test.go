@@ -27,10 +27,10 @@ func TestAccAirflowClusterResource(t *testing.T) {
 		NetworkId: types.StringValue(testNetworkId),
 
 		Resources: &AirflowResourcesModel{
-			Airflow: AirflowResourcesAirflowModel{
+			Airflow: &AirflowResourcesAirflowModel{
 				MaxWorkerCount:    types.Int64Value(1),
 				MinWorkerCount:    types.Int64Value(1),
-				EnvironmentFlavor: types.StringValue("small"),
+				EnvironmentFlavor: types.StringValue("dev_test"),
 				WorkerConcurrency: types.Int64Value(16),
 				WorkerDiskSize:    types.Int64Value(10),
 				WorkerPreset:      types.StringValue("small"),
@@ -39,22 +39,31 @@ func TestAccAirflowClusterResource(t *testing.T) {
 
 		Config: &AirflowClusterConfigModel{
 			VersionId: types.StringValue("2.9.0"),
-			syncConfig: &AirflowClusterSyncConfigModel{
+			SyncConfig: &AirflowClusterSyncConfigModel{
 				RepoUrl:  types.StringValue("https://github.com/apache/airflow"),
 				Branch:   types.StringValue("main"),
 				DagsPath: types.StringValue("airflow/example_dags"),
 			},
 		},
+		Access: &AccessModel{
+			DataServices: []types.String{
+				types.StringValue("transfer"),
+			},
+			Ipv4CIDRBlocks: []*CIDRBlock{{
+				Value:       types.StringValue("10.0.0.0/8"),
+				Description: types.StringValue("Office in Berlin"),
+			}},
+		},
 	}
-
 	// Updated configuration for the Airflow cluster resource
 	a2 := a
-	a2.Name = types.StringValue("terraform-airflow-changed")
 	r1 := *a.Resources
 	r2 := r1
 	a2.Resources = &r2
-	a2.Resources.Airflow.EnvironmentFlavor = types.StringValue("medium")
+	a2.Resources.Airflow.MaxWorkerCount = types.Int64Value(3)
 
+	a3 := a2
+	a3.Resources.Airflow.WorkerPreset = types.StringValue("medium")
 	// Run the acceptance test
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -67,21 +76,36 @@ func TestAccAirflowClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccAirflowId, "region_id", "eu-central-1"),
 					resource.TestCheckResourceAttr(testAccAirflowId, "name", testAccAirflowName),
 					resource.TestCheckResourceAttr(testAccAirflowId, "cloud_type", "aws"),
+
 					resource.TestCheckResourceAttr(testAccAirflowId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccAirflowId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
 					resource.TestCheckResourceAttr(testAccAirflowId, "access.ipv4_cidr_blocks.0.description", "Office in Berlin"),
-					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.environment_flavor", "small"),
+
+					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.environment_flavor", "dev_test"),
+					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.worker_preset", "small"),
+
+					resource.TestCheckResourceAttrSet(testAccAirflowId, "connection_info.host"),
+					resource.TestCheckResourceAttr(testAccAirflowId, "connection_info.user", "admin"),
+					resource.TestCheckResourceAttrSet(testAccAirflowId, "connection_info.password"),
+
+					resource.TestCheckResourceAttrSet(testAccAirflowId, "cr_connection_info.host"),
+					resource.TestCheckResourceAttrSet(testAccAirflowId, "cr_connection_info.password"),
 				),
 			},
 			{
 				// Update the resource with new attributes
 				Config: testAccAirflowClusterResourceConfig(&a2),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testAccAirflowId, "name", "terraform-airflow-changed"),
-					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.environment_flavor", "medium"),
-					resource.TestCheckResourceAttr(testAccAirflowId, "region_id", "eu-central-1"),
+					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.max_worker_count", "3"),
 				),
 			},
+			{
+				Config: testAccAirflowClusterResourceConfig(&a3),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.worker_preset", "medium"),
+				),
+			},
+
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -90,7 +114,7 @@ func TestAccAirflowClusterResource(t *testing.T) {
 // Helper function to create Terraform configuration for Airflow Cluster Resource
 func testAccAirflowClusterResourceConfig(a *AirflowClusterModel) string {
 	return fmt.Sprintf(`
-resource "doublecloud_airflow_cluster" "test" {
+resource "doublecloud_airflow_cluster" "tf-acc-airflow" {
   project_id = %[1]q
   name       = %[2]q
   region_id  = %[3]q
@@ -120,11 +144,11 @@ resource "doublecloud_airflow_cluster" "test" {
   access {
     data_services = ["transfer"]
     ipv4_cidr_blocks = [
-      {
-        value       = "10.0.0.0/8"
-        description = "Office in Berlin"
-      }
-    ]
+		{
+			value = "10.0.0.0/8"
+			description = "Office in Berlin"
+		}
+	]
   }
 }
 `, a.ProjectID.ValueString(),
@@ -139,9 +163,9 @@ resource "doublecloud_airflow_cluster" "test" {
 		a.Resources.Airflow.WorkerDiskSize.ValueInt64(),
 		a.Resources.Airflow.WorkerPreset.ValueString(),
 		a.Config.VersionId.ValueString(),
-		a.Config.syncConfig.RepoUrl.ValueString(),
-		a.Config.syncConfig.Branch.ValueString(),
-		a.Config.syncConfig.DagsPath.ValueString(),
+		a.Config.SyncConfig.RepoUrl.ValueString(),
+		a.Config.SyncConfig.Branch.ValueString(),
+		a.Config.SyncConfig.DagsPath.ValueString(),
 	)
 }
 
