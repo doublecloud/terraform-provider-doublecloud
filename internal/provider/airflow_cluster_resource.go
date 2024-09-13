@@ -52,10 +52,6 @@ func (a *AirflowClusterResource) Configure(ctx context.Context, request resource
 
 	sdk, ok := request.ProviderData.(*dcsdk.SDK)
 	if !ok {
-		response.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *dcsdk.SDK, got: %T. Please report this issue to the provider developers.", request.ProviderData),
-		)
 		return
 	}
 
@@ -499,9 +495,6 @@ func (a *AirflowClusterConfigModel) parse(v *airflow.AirflowConfig) diag.Diagnos
 			diags.AddError("Invalid Value", "DagsPath is missing in the response")
 		}
 
-		if v.GitSync.Credentials != nil {
-
-		}
 		if creds, ok := v.GitSync.Credentials.(*airflow.SyncConfig_ApiCredentials); ok {
 			a.SyncConfig.Credentials = &Credentials{
 				ApiCredentials: &GitApiCredentials{
@@ -509,7 +502,6 @@ func (a *AirflowClusterConfigModel) parse(v *airflow.AirflowConfig) diag.Diagnos
 					Password: types.StringValue(creds.ApiCredentials.GetPassword()),
 				},
 			}
-			tflog.Info(context.Background(), fmt.Sprintf("doublecloud_airflow_cluster password"))
 		} else {
 			diags.AddWarning("Missing Credentials", "No API credentials provided in the response")
 		}
