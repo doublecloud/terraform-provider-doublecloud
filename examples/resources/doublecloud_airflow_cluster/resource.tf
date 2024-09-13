@@ -24,14 +24,4 @@ resource "doublecloud_airflow_cluster" "example-airflow" {
       dags_path = "airflow/example_dags"
     }
   }
-
-  access {
-    data_services = ["transfer"]
-    ipv4_cidr_blocks = [
-      {
-        value       = "10.0.0.0/8"
-        description = "Office in Berlin"
-      }
-    ]
-  }
 }

@@ -84,12 +84,6 @@ func createAirflowClusterRequest(a *AirflowClusterModel) (*airflow.CreateCluster
 		},
 	}
 
-	if a.Access != nil {
-		access, d := a.Access.convert()
-		diags.Append(d...)
-		rq.Access = access
-	}
-
 	if a.Config != nil {
 		config, d := a.Config.convert()
 		diags.Append(d...)
@@ -114,13 +108,6 @@ func (a *AirflowClusterModel) parse(rs *airflow.Cluster) diag.Diagnostics {
 	diags.Append(a.Resources.parse(rs.Resources)...)
 	if a.Config == nil {
 		a.Config = &AirflowClusterConfigModel{}
-	}
-	diags.Append(a.Config.parse(rs.Config)...)
-	if access := rs.GetAccess(); access != nil {
-		if a.Access == nil {
-			a.Access = new(AccessModel)
-		}
-		diags.Append(a.Access.parse(access)...)
 	}
 
 	return diags
@@ -435,13 +422,6 @@ func (a *AirflowClusterResource) Read(ctx context.Context, request resource.Read
 		},
 	}
 
-	if access := rs.GetAccess(); access != nil {
-		if data.Access == nil {
-			data.Access = new(AccessModel)
-		}
-		diag.Append(data.Access.parse(access)...)
-	}
-
 	if config := rs.GetConfig(); config != nil {
 		data.Config = &AirflowClusterConfigModel{}
 		diag.Append(data.Config.parse(config)...)
@@ -610,11 +590,6 @@ func updateAirflowClusterRequest(a *AirflowClusterModel) (*airflow.UpdateCluster
 			WorkerPreset:      wrapperspb.String(a.Resources.Airflow.MaxWorkerCount.String()),
 		},
 	}
-	if a.Access != nil {
-		access, d := a.Access.convert()
-		diags.Append(d...)
-		rq.Access = access
-	}
 
 	if a.Config != nil {
 		config, d := a.Config.convertUpdateConfig()
@@ -670,7 +645,6 @@ type AirflowClusterModel struct {
 	Resources        *AirflowResourcesModel     `tfsdk:"resources"`
 	ConnectionInfo   types.Object               `tfsdk:"connection_info"`
 	CrConnectionInfo types.Object               `tfsdk:"cr_connection_info"`
-	Access           *AccessModel               `tfsdk:"access"`
 	Config           *AirflowClusterConfigModel `tfsdk:"config"`
 }
 
@@ -834,7 +808,6 @@ func (a *AirflowClusterResource) Schema(ctx context.Context, request resource.Sc
 					},
 				},
 			},
-			"access": AccessSchemaBlock(),
 			"config": schema.SingleNestedBlock{
 				Description: "Cluster configuration",
 				Attributes: map[string]schema.Attribute{
@@ -899,11 +872,11 @@ func (a *AirflowClusterResource) Schema(ctx context.Context, request resource.Sc
 										Description: "API credentials for accessing the DAG repository",
 										Attributes: map[string]schema.Attribute{
 											"username": schema.StringAttribute{
-												Optional:            true,
+												Required:            true,
 												MarkdownDescription: "Username",
 											},
 											"password": schema.StringAttribute{
-												Optional:            true,
+												Required:            true,
 												Sensitive:           true,
 												MarkdownDescription: "Password",
 											},

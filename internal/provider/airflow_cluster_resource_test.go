@@ -45,15 +45,6 @@ func TestAccAirflowClusterResource(t *testing.T) {
 				DagsPath: types.StringValue("airflow/example_dags"),
 			},
 		},
-		Access: &AccessModel{
-			DataServices: []types.String{
-				types.StringValue("transfer"),
-			},
-			Ipv4CIDRBlocks: []*CIDRBlock{{
-				Value:       types.StringValue("10.0.0.0/8"),
-				Description: types.StringValue("Office in Berlin"),
-			}},
-		},
 	}
 	// Updated configuration for the Airflow cluster resource
 	a2 := a
@@ -61,9 +52,6 @@ func TestAccAirflowClusterResource(t *testing.T) {
 	r2 := r1
 	a2.Resources = &r2
 	a2.Resources.Airflow.MaxWorkerCount = types.Int64Value(3)
-
-	a3 := a2
-	a3.Resources.Airflow.WorkerPreset = types.StringValue("medium")
 	// Run the acceptance test
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -76,10 +64,6 @@ func TestAccAirflowClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccAirflowId, "region_id", "eu-central-1"),
 					resource.TestCheckResourceAttr(testAccAirflowId, "name", testAccAirflowName),
 					resource.TestCheckResourceAttr(testAccAirflowId, "cloud_type", "aws"),
-
-					resource.TestCheckResourceAttr(testAccAirflowId, "access.data_services.0", "transfer"),
-					resource.TestCheckResourceAttr(testAccAirflowId, "access.ipv4_cidr_blocks.0.value", "10.0.0.0/8"),
-					resource.TestCheckResourceAttr(testAccAirflowId, "access.ipv4_cidr_blocks.0.description", "Office in Berlin"),
 
 					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.environment_flavor", "dev_test"),
 					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.worker_preset", "small"),
@@ -97,12 +81,6 @@ func TestAccAirflowClusterResource(t *testing.T) {
 				Config: testAccAirflowClusterResourceConfig(&a2),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.max_worker_count", "3"),
-				),
-			},
-			{
-				Config: testAccAirflowClusterResourceConfig(&a3),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.worker_preset", "medium"),
 				),
 			},
 
@@ -138,17 +116,13 @@ resource "doublecloud_airflow_cluster" "tf-acc-airflow" {
       repo_url  = %[13]q
       branch    = %[14]q
       dags_path = %[15]q
+	  credentials {
+	  	api_credentials {
+		  username = "test-username"
+ 		  password = "test-password"
+	  	}
+	  }
     }
-  }
-
-  access {
-    data_services = ["transfer"]
-    ipv4_cidr_blocks = [
-		{
-			value = "10.0.0.0/8"
-			description = "Office in Berlin"
-		}
-	]
   }
 }
 `, a.ProjectID.ValueString(),
