@@ -39,16 +39,6 @@ resource "doublecloud_airflow_cluster" "example-airflow" {
       dags_path = "airflow/example_dags"
     }
   }
-
-  access {
-    data_services = ["transfer"]
-    ipv4_cidr_blocks = [
-      {
-        value       = "10.0.0.0/8"
-        description = "Office in Berlin"
-      }
-    ]
-  }
 }
 ```
 
@@ -65,7 +55,6 @@ resource "doublecloud_airflow_cluster" "example-airflow" {
 
 ### Optional
 
-- `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) Cluster configuration (see [below for nested schema](#nestedblock--config))
 - `description` (String) Cluster description
 - `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
@@ -75,40 +64,6 @@ resource "doublecloud_airflow_cluster" "example-airflow" {
 - `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
 - `cr_connection_info` (Attributes) Remote connection info (see [below for nested schema](#nestedatt--cr_connection_info))
 - `id` (String) Cluster ID
-
-<a id="nestedblock--access"></a>
-### Nested Schema for `access`
-
-Optional:
-
-- `data_services` (List of String) List of allowed services
-- `ipv4_cidr_blocks` (Attributes List) IPv4 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv4_cidr_blocks))
-- `ipv6_cidr_blocks` (Attributes List) IPv6 CIDR blocks (see [below for nested schema](#nestedatt--access--ipv6_cidr_blocks))
-
-<a id="nestedatt--access--ipv4_cidr_blocks"></a>
-### Nested Schema for `access.ipv4_cidr_blocks`
-
-Required:
-
-- `value` (String) CIDR block
-
-Optional:
-
-- `description` (String) CIDR block description
-
-
-<a id="nestedatt--access--ipv6_cidr_blocks"></a>
-### Nested Schema for `access.ipv6_cidr_blocks`
-
-Required:
-
-- `value` (String) CIDR block
-
-Optional:
-
-- `description` (String) CIDR block description
-
-
 
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
@@ -158,7 +113,7 @@ Optional:
 <a id="nestedblock--config--sync_config--credentials--api_credentials"></a>
 ### Nested Schema for `config.sync_config.credentials.api_credentials`
 
-Optional:
+Required:
 
 - `password` (String, Sensitive) Password
 - `username` (String) Username
