@@ -60,6 +60,7 @@ resource "doublecloud_clickhouse_cluster" "example-clickhouse" {
 
 - `access` (Block, Optional) Access control configuration (see [below for nested schema](#nestedblock--access))
 - `config` (Block, Optional) (see [below for nested schema](#nestedblock--config))
+- `custom_certificate` (Block, Optional) Custom TLS certificate (see [below for nested schema](#nestedblock--custom_certificate))
 - `description` (String) Cluster description
 - `id` (String) Cluster ID
 - `resources` (Block, Optional) Cluster resources (see [below for nested schema](#nestedblock--resources))
@@ -177,6 +178,16 @@ Optional:
 - `security_protocol` (String) Security protocol used for authentication
 - `session_timeout_ms` (String) Timeout to maintain a client group session
 
+
+
+<a id="nestedblock--custom_certificate"></a>
+### Nested Schema for `custom_certificate`
+
+Optional:
+
+- `certificate` (String) Public certificate
+- `key` (String) Private certificate key
+- `root_ca` (String) Root certificate
 
 
 <a id="nestedblock--resources"></a>

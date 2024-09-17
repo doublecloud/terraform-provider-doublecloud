@@ -28,6 +28,7 @@ Clickhouse data source
 
 - `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
 - `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
+- `custom_certificate` (Attributes) Custom TLS certificate (see [below for nested schema](#nestedatt--custom_certificate))
 - `description` (String) Cluster description
 - `private_connection_info` (Attributes) Private connection info (see [below for nested schema](#nestedatt--private_connection_info))
 - `region_id` (String) Region where the cluster is located
@@ -47,6 +48,16 @@ Read-Only:
 - `password` (String, Sensitive) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
 - `user` (String) ClickHouse user
+
+
+<a id="nestedatt--custom_certificate"></a>
+### Nested Schema for `custom_certificate`
+
+Read-Only:
+
+- `certificate` (String) Public certificate
+- `key` (String) Private certificate key
+- `root_ca` (String) Root certificate
 
 
 <a id="nestedatt--private_connection_info"></a>

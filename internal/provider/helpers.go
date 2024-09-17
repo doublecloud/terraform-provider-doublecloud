@@ -30,6 +30,8 @@ func convertSchemaAttributes(resAttrs map[string]resourceschema.Attribute, dataA
 			dataAttrs[name] = convertInt64Attribute(attr)
 		case resourceschema.SingleNestedAttribute:
 			dataAttrs[name] = convertSingleNestedAttribute(attr, diags)
+		case resourceschema.BoolAttribute:
+			dataAttrs[name] = convertBoolAttribute(attr)
 		default:
 			diags.AddError("can not convert resource attribute to datasource attribute", fmt.Sprintf("unsupported type for attribute %q: %v", name, attr))
 		}
@@ -72,6 +74,16 @@ func convertSingleNestedAttribute(attr resourceschema.SingleNestedAttribute, dia
 	diags.Append(convertSchemaAttributes(attr.Attributes, dataAttrs)...)
 	return &dataschema.SingleNestedAttribute{
 		Attributes:          dataAttrs,
+		Computed:            true,
+		Sensitive:           attr.Sensitive,
+		Description:         attr.Description,
+		MarkdownDescription: attr.MarkdownDescription,
+		DeprecationMessage:  attr.DeprecationMessage,
+	}
+}
+
+func convertBoolAttribute(attr resourceschema.BoolAttribute) *dataschema.BoolAttribute {
+	return &dataschema.BoolAttribute{
 		Computed:            true,
 		Sensitive:           attr.Sensitive,
 		Description:         attr.Description,
@@ -123,6 +135,42 @@ func (*suppressAutoscaledDiskDiff) PlanModifyInt64(ctx context.Context, req plan
 		rsp.PlanValue = req.StateValue
 	} else {
 		rsp.RequiresReplace = true
+	}
+}
+
+type clickhouseCustomCertificateValidator struct{}
+
+var _ validator.Object = &clickhouseCustomCertificateValidator{}
+
+func (*clickhouseCustomCertificateValidator) Description(context.Context) string {
+	return "validate custom TLS certificate"
+}
+
+func (s *clickhouseCustomCertificateValidator) MarkdownDescription(ctx context.Context) string {
+	return s.Description(ctx)
+}
+
+func (*clickhouseCustomCertificateValidator) ValidateObject(ctx context.Context, req validator.ObjectRequest, rsp *validator.ObjectResponse) {
+	if req.ConfigValue.IsNull() {
+		return
+	}
+
+	certificatePresent := !req.ConfigValue.Attributes()["certificate"].IsNull()
+	keyPresent := !req.ConfigValue.Attributes()["key"].IsNull()
+	rootPresent := !req.ConfigValue.Attributes()["root_ca"].IsNull()
+
+	if (certificatePresent && !keyPresent) || (!certificatePresent && keyPresent) {
+		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
+			req.Path,
+			`Must be both attributea "certificate" and "key"`,
+		))
+	}
+
+	if !certificatePresent && rootPresent {
+		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
+			req.Path,
+			`Attribute "root_ca" can be only with "certificate" and "key"`,
+		))
 	}
 }
 

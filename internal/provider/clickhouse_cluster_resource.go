@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 
@@ -49,6 +50,8 @@ type clickhouseClusterModel struct {
 	// TODO: support mw
 	// https://github.com/doublecloud/api/blob/main/doublecloud/v1/maintenance.proto
 	// MaintenanceWindow *maintenanceWindow          `tfsdk:"maintenance_window"`
+
+	CustomCertificate types.Object `tfsdk:"custom_certificate"`
 }
 
 type clickhouseClusterResources struct {
@@ -350,6 +353,26 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 	}
 }
 
+func clickhouseCustomCertificateSchema() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"certificate": schema.StringAttribute{
+			Optional:            true,
+			MarkdownDescription: "Public certificate",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"key": schema.StringAttribute{
+			Optional:            true,
+			MarkdownDescription: "Private certificate key",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"root_ca": schema.StringAttribute{
+			Optional:            true,
+			MarkdownDescription: "Root certificate",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+	}
+}
+
 func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
@@ -493,6 +516,12 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 			"access": AccessSchemaBlock(),
 			"config": clickhouseConfigSchemaBlock(),
 			// maintenance window
+			"custom_certificate": schema.SingleNestedBlock{
+				Attributes:          clickhouseCustomCertificateSchema(),
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Custom TLS certificate",
+				Validators:          []validator.Object{&clickhouseCustomCertificateValidator{}},
+			},
 		},
 	}
 }
@@ -643,6 +672,21 @@ func updateClickhouseCluster(m *clickhouseClusterModel) (*clickhouse.UpdateClust
 		rq.Access = access
 	}
 
+	cc := m.CustomCertificate.Attributes()
+	rq.CustomCertificate = &clickhouse.CustomCertificate{
+		Enabled: false,
+	}
+	certificate, certOk := cc["certificate"]
+	key, keyOk := cc["key"]
+	rq.CustomCertificate.Enabled = certOk && keyOk
+	if rq.CustomCertificate.Enabled {
+		rq.CustomCertificate.Certificate = &wrappers.BytesValue{Value: []byte(certificate.(types.String).ValueString())}
+		rq.CustomCertificate.Key = &wrappers.BytesValue{Value: []byte(key.(types.String).ValueString())}
+		if rootCa, ok := cc["root_ca"]; ok {
+			rq.CustomCertificate.RootCa = &wrappers.BytesValue{Value: []byte(rootCa.(types.String).ValueString())}
+		}
+	}
+
 	return rq, diags
 }
 
@@ -733,6 +777,12 @@ func (m *clickhouseClusterModel) parse(rs *clickhouse.Cluster) diag.Diagnostics 
 		}
 		diags.Append(m.Access.parse(access)...)
 	}
+
+	oldKey := ""
+	if key, ok := m.CustomCertificate.Attributes()["key"]; ok {
+		oldKey = key.String()
+	}
+	m.CustomCertificate = parseClickhouseCustomCertificate(rs.GetCustomCertificate(), oldKey, diags).convert(diags)
 
 	// parse MW
 	return diags
