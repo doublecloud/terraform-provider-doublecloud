@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/doublecloud/go-genproto/doublecloud/airflow/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
 	dcgen "github.com/doublecloud/go-sdk/gen/airflow"
@@ -576,10 +577,11 @@ func updateAirflowClusterRequest(a *AirflowClusterModel) (*airflow.UpdateCluster
 	rq.Resources = &airflow.UpdateClusterRequest_UpdateClusterResources{
 		Airflow: &airflow.UpdateClusterRequest_UpdateClusterResources_Airflow{
 			MaxWorkerCount:    wrapperspb.Int64(a.Resources.Airflow.MaxWorkerCount.ValueInt64()),
-			MinWorkerCount:    wrapperspb.Int64(a.Resources.Airflow.MaxWorkerCount.ValueInt64()),
+			MinWorkerCount:    wrapperspb.Int64(a.Resources.Airflow.MinWorkerCount.ValueInt64()),
 			WorkerConcurrency: wrapperspb.Int64(a.Resources.Airflow.WorkerConcurrency.ValueInt64()),
 			WorkerDiskSize:    wrapperspb.Int64(a.Resources.Airflow.WorkerDiskSize.ValueInt64()),
-			WorkerPreset:      wrapperspb.String(a.Resources.Airflow.MaxWorkerCount.String()),
+			WorkerPreset:      wrapperspb.String(a.Resources.Airflow.WorkerPreset.String()),
+			EnvironmentFlavor: wrapperspb.String(a.Resources.Airflow.EnvironmentFlavor.String()),
 		},
 	}
 
