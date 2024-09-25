@@ -49,9 +49,10 @@ func TestAccAirflowClusterResource(t *testing.T) {
 	}
 	// Updated configuration for the Airflow cluster resource
 	a2 := a
-	r1 := *a.Resources
-	r2 := r1
-	a2.Resources = &r2
+	r2 := *a.Resources.Airflow
+	a2.Resources = &AirflowResourcesModel{
+		Airflow: &r2,
+	}
 	a2.Resources.Airflow.MaxWorkerCount = types.Int64Value(3)
 	a2.Resources.Airflow.EnvironmentFlavor = types.StringValue("prod")
 	// Run the acceptance test

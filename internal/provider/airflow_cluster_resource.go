@@ -125,7 +125,9 @@ func (a *AirflowClusterConfigModel) convertUpdateConfig() (*airflow.UpdateCluste
 	}
 
 	if a.SyncConfig != nil {
-		r.GitSync = &airflow.UpdateClusterRequest_UpdateAirflowConfig_UpdateGitSyncConfig{}
+		r.GitSync = &airflow.UpdateClusterRequest_UpdateAirflowConfig_UpdateGitSyncConfig{
+			GitSync: &airflow.SyncConfig{},
+		}
 
 		if v := a.SyncConfig.RepoUrl.ValueString(); v != "" {
 			r.GitSync.GetGitSync().RepoUrl = v
