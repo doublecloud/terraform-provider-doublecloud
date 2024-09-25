@@ -582,8 +582,8 @@ func updateAirflowClusterRequest(a *AirflowClusterModel) (*airflow.UpdateCluster
 			MinWorkerCount:    wrapperspb.Int64(a.Resources.Airflow.MinWorkerCount.ValueInt64()),
 			WorkerConcurrency: wrapperspb.Int64(a.Resources.Airflow.WorkerConcurrency.ValueInt64()),
 			WorkerDiskSize:    wrapperspb.Int64(a.Resources.Airflow.WorkerDiskSize.ValueInt64()),
-			WorkerPreset:      wrapperspb.String(a.Resources.Airflow.WorkerPreset.String()),
-			EnvironmentFlavor: wrapperspb.String(a.Resources.Airflow.EnvironmentFlavor.String()),
+			WorkerPreset:      wrapperspb.String(a.Resources.Airflow.WorkerPreset.ValueString()),
+			EnvironmentFlavor: wrapperspb.String(a.Resources.Airflow.EnvironmentFlavor.ValueString()),
 		},
 	}
 
