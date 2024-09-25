@@ -3,11 +3,12 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/doublecloud/go-genproto/doublecloud/airflow/v1"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"strings"
-	"testing"
 )
 
 var (
@@ -48,10 +49,12 @@ func TestAccAirflowClusterResource(t *testing.T) {
 	}
 	// Updated configuration for the Airflow cluster resource
 	a2 := a
-	r1 := *a.Resources
-	r2 := r1
-	a2.Resources = &r2
+	r2 := *a.Resources.Airflow
+	a2.Resources = &AirflowResourcesModel{
+		Airflow: &r2,
+	}
 	a2.Resources.Airflow.MaxWorkerCount = types.Int64Value(3)
+	a2.Resources.Airflow.EnvironmentFlavor = types.StringValue("prod")
 	// Run the acceptance test
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -81,6 +84,7 @@ func TestAccAirflowClusterResource(t *testing.T) {
 				Config: testAccAirflowClusterResourceConfig(&a2),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.max_worker_count", "3"),
+					resource.TestCheckResourceAttr(testAccAirflowId, "resources.airflow.environment_flavor", "prod"),
 				),
 			},
 
