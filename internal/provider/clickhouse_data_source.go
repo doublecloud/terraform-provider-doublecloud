@@ -44,39 +44,51 @@ type ClickhouseDataSourceModel struct {
 }
 
 type ClickhouseConnectionInfo struct {
-	Host           types.String `tfsdk:"host"`
-	User           types.String `tfsdk:"user"`
-	Password       types.String `tfsdk:"password"`
-	HttpsPort      types.Int64  `tfsdk:"https_port"`
-	TcpPortSecure  types.Int64  `tfsdk:"tcp_port_secure"`
-	NativeProtocol types.String `tfsdk:"native_protocol"`
-	HttpsUri       types.String `tfsdk:"https_uri"`
-	JdbcUri        types.String `tfsdk:"jdbc_uri"`
-	OdbcUri        types.String `tfsdk:"odbc_uri"`
+	Host               types.String `tfsdk:"host"`
+	User               types.String `tfsdk:"user"`
+	Password           types.String `tfsdk:"password"`
+	HttpsPort          types.Int64  `tfsdk:"https_port"`
+	TcpPortSecure      types.Int64  `tfsdk:"tcp_port_secure"`
+	NativeProtocol     types.String `tfsdk:"native_protocol"`
+	HttpsUri           types.String `tfsdk:"https_uri"`
+	JdbcUri            types.String `tfsdk:"jdbc_uri"`
+	OdbcUri            types.String `tfsdk:"odbc_uri"`
+	HttpsPortCTLS      types.Int64  `tfsdk:"https_port_ctls"`
+	TcpPortSecureCTLS  types.Int64  `tfsdk:"tcp_port_secure_ctls"`
+	NativeProtocolCTLS types.String `tfsdk:"native_protocol_ctls"`
+	HttpsUriCTLS       types.String `tfsdk:"https_uri_ctls"`
 }
 
 func (ci ClickhouseConnectionInfo) convert(diags diag.Diagnostics) types.Object {
 	res, d := types.ObjectValue(map[string]attr.Type{
-		"host":            types.StringType,
-		"user":            types.StringType,
-		"password":        types.StringType,
-		"https_port":      types.Int64Type,
-		"tcp_port_secure": types.Int64Type,
-		"native_protocol": types.StringType,
-		"https_uri":       types.StringType,
-		"jdbc_uri":        types.StringType,
-		"odbc_uri":        types.StringType,
+		"host":                 types.StringType,
+		"user":                 types.StringType,
+		"password":             types.StringType,
+		"https_port":           types.Int64Type,
+		"tcp_port_secure":      types.Int64Type,
+		"native_protocol":      types.StringType,
+		"https_uri":            types.StringType,
+		"jdbc_uri":             types.StringType,
+		"odbc_uri":             types.StringType,
+		"https_port_ctls":      types.Int64Type,
+		"tcp_port_secure_ctls": types.Int64Type,
+		"native_protocol_ctls": types.StringType,
+		"https_uri_ctls":       types.StringType,
 	},
 		map[string]attr.Value{
-			"host":            ci.Host,
-			"user":            ci.User,
-			"password":        ci.Password,
-			"https_port":      ci.HttpsPort,
-			"tcp_port_secure": ci.TcpPortSecure,
-			"native_protocol": ci.NativeProtocol,
-			"https_uri":       ci.HttpsUri,
-			"jdbc_uri":        ci.JdbcUri,
-			"odbc_uri":        ci.OdbcUri,
+			"host":                 ci.Host,
+			"user":                 ci.User,
+			"password":             ci.Password,
+			"https_port":           ci.HttpsPort,
+			"tcp_port_secure":      ci.TcpPortSecure,
+			"native_protocol":      ci.NativeProtocol,
+			"https_uri":            ci.HttpsUri,
+			"jdbc_uri":             ci.JdbcUri,
+			"odbc_uri":             ci.OdbcUri,
+			"https_port_ctls":      ci.HttpsPortCTLS,
+			"tcp_port_secure_ctls": ci.TcpPortSecureCTLS,
+			"native_protocol_ctls": ci.NativeProtocolCTLS,
+			"https_uri_ctls":       ci.HttpsUriCTLS,
 		},
 	)
 	diags.Append(d...)
@@ -89,24 +101,16 @@ type ClickhouseCustomCertificate struct {
 	RootCA      types.String `tfsdk:"root_ca"`
 }
 
-func (cc *ClickhouseCustomCertificate) convert(diags diag.Diagnostics) types.Object {
-	attrTypeMap := map[string]attr.Type{
-		"certificate": types.StringType,
-		"key":         types.StringType,
-		"root_ca":     types.StringType,
-	}
+func (cc *ClickhouseCustomCertificate) convert() *clickhouseCustomCertificate {
 	if cc == nil {
-		return types.ObjectNull(attrTypeMap)
+		return nil
 	}
-	res, d := types.ObjectValue(attrTypeMap,
-		map[string]attr.Value{
-			"certificate": cc.Certificate,
-			"key":         cc.Key,
-			"root_ca":     cc.RootCA,
-		},
-	)
-	diags.Append(d...)
-	return res
+	res := clickhouseCustomCertificate{
+		Certificate: cc.Certificate,
+		Key:         cc.Key,
+		RootCA:      cc.RootCA,
+	}
+	return &res
 }
 
 func (d *ClickhouseDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {

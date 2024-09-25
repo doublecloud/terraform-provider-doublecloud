@@ -51,7 +51,7 @@ type clickhouseClusterModel struct {
 	// https://github.com/doublecloud/api/blob/main/doublecloud/v1/maintenance.proto
 	// MaintenanceWindow *maintenanceWindow          `tfsdk:"maintenance_window"`
 
-	CustomCertificate types.Object `tfsdk:"custom_certificate"`
+	CustomCertificate *clickhouseCustomCertificate `tfsdk:"custom_certificate"`
 }
 
 type clickhouseClusterResources struct {
@@ -110,6 +110,40 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 	}
 
 	return &r, diags
+}
+
+type clickhouseCustomCertificate struct {
+	Certificate types.String `tfsdk:"certificate"`
+	Key         types.String `tfsdk:"key"`
+	RootCA      types.String `tfsdk:"root_ca"`
+}
+
+func (cc *clickhouseCustomCertificate) convert() (*clickhouse.CustomCertificate, diag.Diagnostics) {
+	res := clickhouse.CustomCertificate{
+		Enabled: false,
+	}
+
+	var diags diag.Diagnostics
+
+	if cc != nil {
+		if !cc.Certificate.IsNull() && !cc.Key.IsNull() {
+			res.Enabled = true
+			res.Certificate = &wrappers.BytesValue{Value: []byte(cc.Certificate.ValueString())}
+			res.Key = &wrappers.BytesValue{Value: []byte(cc.Key.ValueString())}
+			if !cc.RootCA.IsNull() {
+				res.RootCa = &wrappers.BytesValue{Value: []byte(cc.RootCA.ValueString())}
+			}
+		} else {
+			if cc.Certificate.IsNull() {
+				diags.AddError("missed certificate", "for custom certificate must be both certificate and key")
+			}
+			if cc.Key.IsNull() {
+				diags.AddError("missed certificate", "for custom certificate must be both certificate and key")
+			}
+		}
+	}
+
+	return &res, diags
 }
 
 type clickhouseClusterResourcesClickhouse struct {
@@ -350,6 +384,26 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 			MarkdownDescription: "URI to connect to using the ODBC protocol",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
+		"https_port_ctls": schema.Int64Attribute{
+			Computed:            true,
+			MarkdownDescription: "Port to connect to using the HTTPS protocol with custom TLS certificate",
+			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+		},
+		"tcp_port_secure_ctls": schema.Int64Attribute{
+			Computed:            true,
+			MarkdownDescription: "Port to connect to using the TCP/native protocol with custom TLS certificate",
+			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+		},
+		"native_protocol_ctls": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Connection string for the ClickHouse native protocol with custom TLS certificate",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
+		"https_uri_ctls": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "URI to connect to using the HTTPS protocol with custom TLS certificate",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		},
 	}
 }
 
@@ -359,16 +413,26 @@ func clickhouseCustomCertificateSchema() map[string]schema.Attribute {
 			Optional:            true,
 			MarkdownDescription: "Public certificate",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Validators: []validator.String{
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("key")),
+			},
 		},
 		"key": schema.StringAttribute{
 			Optional:            true,
 			MarkdownDescription: "Private certificate key",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Validators: []validator.String{
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("certificate")),
+			},
 		},
 		"root_ca": schema.StringAttribute{
 			Optional:            true,
 			MarkdownDescription: "Root certificate",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Validators: []validator.String{
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("key")),
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("certificate")),
+			},
 		},
 	}
 }
@@ -520,7 +584,6 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 				Attributes:          clickhouseCustomCertificateSchema(),
 				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Custom TLS certificate",
-				Validators:          []validator.Object{&clickhouseCustomCertificateValidator{}},
 			},
 		},
 	}
@@ -574,6 +637,10 @@ func createClickhouseClusterRequest(m *clickhouseClusterModel) (*clickhouse.Crea
 		diags.Append(d...)
 	}
 	// TODO: mw
+
+	if m.CustomCertificate != nil {
+		diags.AddError("custom_certificate exists", "custom_certificate can't be applied during cluster creation")
+	}
 
 	return rq, diags
 }
@@ -672,20 +739,9 @@ func updateClickhouseCluster(m *clickhouseClusterModel) (*clickhouse.UpdateClust
 		rq.Access = access
 	}
 
-	cc := m.CustomCertificate.Attributes()
-	rq.CustomCertificate = &clickhouse.CustomCertificate{
-		Enabled: false,
-	}
-	certificate, certOk := cc["certificate"]
-	key, keyOk := cc["key"]
-	rq.CustomCertificate.Enabled = certOk && keyOk
-	if rq.CustomCertificate.Enabled {
-		rq.CustomCertificate.Certificate = &wrappers.BytesValue{Value: []byte(certificate.(types.String).ValueString())}
-		rq.CustomCertificate.Key = &wrappers.BytesValue{Value: []byte(key.(types.String).ValueString())}
-		if rootCa, ok := cc["root_ca"]; ok {
-			rq.CustomCertificate.RootCa = &wrappers.BytesValue{Value: []byte(rootCa.(types.String).ValueString())}
-		}
-	}
+	cc, d := m.CustomCertificate.convert()
+	rq.CustomCertificate = cc
+	diags.Append(d...)
 
 	return rq, diags
 }
@@ -779,10 +835,10 @@ func (m *clickhouseClusterModel) parse(rs *clickhouse.Cluster) diag.Diagnostics 
 	}
 
 	oldKey := ""
-	if key, ok := m.CustomCertificate.Attributes()["key"]; ok {
-		oldKey = key.String()
+	if m.CustomCertificate != nil && !m.CustomCertificate.Key.IsNull() {
+		oldKey = m.CustomCertificate.Key.String()
 	}
-	m.CustomCertificate = parseClickhouseCustomCertificate(rs.GetCustomCertificate(), oldKey, diags).convert(diags)
+	m.CustomCertificate = parseClickhouseCustomCertificate(rs.GetCustomCertificate(), oldKey, diags).convert()
 
 	// parse MW
 	return diags

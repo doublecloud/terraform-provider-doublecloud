@@ -233,12 +233,16 @@ Read-Only:
 
 - `host` (String) Host to connect to
 - `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_port_ctls` (Number) Port to connect to using the HTTPS protocol with custom TLS certificate
 - `https_uri` (String) URI to connect to using the HTTPS protocol
+- `https_uri_ctls` (String) URI to connect to using the HTTPS protocol with custom TLS certificate
 - `jdbc_uri` (String) URI to connect to using the JDBC protocol
 - `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `native_protocol_ctls` (String) Connection string for the ClickHouse native protocol with custom TLS certificate
 - `odbc_uri` (String) URI to connect to using the ODBC protocol
 - `password` (String, Sensitive) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
+- `tcp_port_secure_ctls` (Number) Port to connect to using the TCP/native protocol with custom TLS certificate
 - `user` (String) ClickHouse user
 
 
@@ -249,10 +253,14 @@ Read-Only:
 
 - `host` (String) Host to connect to
 - `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_port_ctls` (Number) Port to connect to using the HTTPS protocol with custom TLS certificate
 - `https_uri` (String) URI to connect to using the HTTPS protocol
+- `https_uri_ctls` (String) URI to connect to using the HTTPS protocol with custom TLS certificate
 - `jdbc_uri` (String) URI to connect to using the JDBC protocol
 - `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `native_protocol_ctls` (String) Connection string for the ClickHouse native protocol with custom TLS certificate
 - `odbc_uri` (String) URI to connect to using the ODBC protocol
 - `password` (String, Sensitive) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
+- `tcp_port_secure_ctls` (Number) Port to connect to using the TCP/native protocol with custom TLS certificate
 - `user` (String) ClickHouse user

@@ -10,7 +10,6 @@ import (
 	"text/template"
 
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -121,18 +120,11 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 	}
 
 	m4 := m3
-	cc, _ := types.ObjectValue(map[string]attr.Type{
-		"certificate": types.StringType,
-		"key":         types.StringType,
-		"root_ca":     types.StringType,
-	},
-		map[string]attr.Value{
-			"certificate": types.StringValue(testAccClickhouseTLSCert),
-			"key":         types.StringValue(testAccClickhouseTLSKey),
-			"root_ca":     types.StringValue(testAccClickhouseTLSRootCA),
-		},
-	)
-	m4.CustomCertificate = cc
+	m4.CustomCertificate = &clickhouseCustomCertificate{
+		Certificate: types.StringValue(testAccClickhouseTLSCert),
+		Key:         types.StringValue(testAccClickhouseTLSKey),
+		RootCA:      types.StringValue(testAccClickhouseTLSRootCA),
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -197,6 +189,10 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "custom_certificate.certificate", testAccClickhouseTLSCert),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "custom_certificate.key", testAccClickhouseTLSKey),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "custom_certificate.root_ca", testAccClickhouseTLSRootCA),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.https_port_ctls", "8444"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.tcp_port_secure_ctls", "9444"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.https_port_ctls", "8444"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.tcp_port_secure_ctls", "9444"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -338,11 +334,11 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
       ]
       {{- end}}
     }
-	{{- if not .CustomCertificate.IsNull }}
+	{{- if ne .CustomCertificate nil }}
 	custom_certificate {
-	  certificate = {{ .CustomCertificate.Attributes.certificate }}
-	  key = {{ .CustomCertificate.Attributes.key }}
-	  root_ca = {{ .CustomCertificate.Attributes.root_ca }}
+	  certificate = {{ .CustomCertificate.Certificate }}
+	  key = {{ .CustomCertificate.Key }}
+	  root_ca = {{ .CustomCertificate.RootCA }}
 	}
     {{- end}}
   }`

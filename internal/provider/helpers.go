@@ -138,42 +138,6 @@ func (*suppressAutoscaledDiskDiff) PlanModifyInt64(ctx context.Context, req plan
 	}
 }
 
-type clickhouseCustomCertificateValidator struct{}
-
-var _ validator.Object = &clickhouseCustomCertificateValidator{}
-
-func (*clickhouseCustomCertificateValidator) Description(context.Context) string {
-	return "validate custom TLS certificate"
-}
-
-func (s *clickhouseCustomCertificateValidator) MarkdownDescription(ctx context.Context) string {
-	return s.Description(ctx)
-}
-
-func (*clickhouseCustomCertificateValidator) ValidateObject(ctx context.Context, req validator.ObjectRequest, rsp *validator.ObjectResponse) {
-	if req.ConfigValue.IsNull() {
-		return
-	}
-
-	certificatePresent := !req.ConfigValue.Attributes()["certificate"].IsNull()
-	keyPresent := !req.ConfigValue.Attributes()["key"].IsNull()
-	rootPresent := !req.ConfigValue.Attributes()["root_ca"].IsNull()
-
-	if (certificatePresent && !keyPresent) || (!certificatePresent && keyPresent) {
-		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
-			req.Path,
-			`Must be both attributea "certificate" and "key"`,
-		))
-	}
-
-	if !certificatePresent && rootPresent {
-		rsp.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
-			req.Path,
-			`Attribute "root_ca" can be only with "certificate" and "key"`,
-		))
-	}
-}
-
 type clusterResourcesValidator struct{}
 
 func (*clusterResourcesValidator) Description(context.Context) string {
