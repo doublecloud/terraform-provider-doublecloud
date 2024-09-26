@@ -208,6 +208,10 @@ func parseClickhouseConnectionInfo(r *clickhouse.ConnectionInfo) *ClickhouseConn
 	c.HttpsUri = types.StringValue(r.HttpsUri)
 	c.JdbcUri = types.StringValue(r.JdbcUri)
 	c.OdbcUri = types.StringValue(r.OdbcUri)
+	c.HttpsPortCTLS = types.Int64Value(r.HttpsPortCtls.Value)
+	c.TcpPortSecureCTLS = types.Int64Value(r.TcpPortSecureCtls.Value)
+	c.NativeProtocolCTLS = types.StringValue(r.NativeProtocolCtls)
+	c.HttpsUriCTLS = types.StringValue(r.HttpsUriCtls)
 	return c
 }
 
@@ -225,6 +229,10 @@ func parseClickhousePrivateConnectionInfo(r *clickhouse.PrivateConnectionInfo) *
 	c.HttpsUri = types.StringValue(r.HttpsUri)
 	c.JdbcUri = types.StringValue(r.JdbcUri)
 	c.OdbcUri = types.StringValue(r.OdbcUri)
+	c.HttpsPortCTLS = types.Int64Value(r.HttpsPortCtls.Value)
+	c.TcpPortSecureCTLS = types.Int64Value(r.TcpPortSecureCtls.Value)
+	c.NativeProtocolCTLS = types.StringValue(r.NativeProtocolCtls)
+	c.HttpsUriCTLS = types.StringValue(r.HttpsUriCtls)
 	return c
 }
 

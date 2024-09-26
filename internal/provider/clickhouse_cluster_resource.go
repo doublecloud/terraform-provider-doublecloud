@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
@@ -341,68 +340,55 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 		"host": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Host to connect to",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"user": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "ClickHouse user",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"password": schema.StringAttribute{
 			Computed:            true,
 			Sensitive:           true,
 			MarkdownDescription: "Password for the ClickHouse user",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"https_port": schema.Int64Attribute{
 			Computed:            true,
 			MarkdownDescription: "Port to connect to using the HTTPS protocol",
-			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 		},
 		"tcp_port_secure": schema.Int64Attribute{
 			Computed:            true,
 			MarkdownDescription: "Port to connect to using the TCP/native protocol",
-			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 		},
 		"native_protocol": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Connection string for the ClickHouse native protocol",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"https_uri": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "URI to connect to using the HTTPS protocol",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"jdbc_uri": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "URI to connect to using the JDBC protocol",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"odbc_uri": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "URI to connect to using the ODBC protocol",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"https_port_ctls": schema.Int64Attribute{
 			Computed:            true,
 			MarkdownDescription: "Port to connect to using the HTTPS protocol with custom TLS certificate",
-			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 		},
 		"tcp_port_secure_ctls": schema.Int64Attribute{
 			Computed:            true,
 			MarkdownDescription: "Port to connect to using the TCP/native protocol with custom TLS certificate",
-			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 		},
 		"native_protocol_ctls": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Connection string for the ClickHouse native protocol with custom TLS certificate",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"https_uri_ctls": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "URI to connect to using the HTTPS protocol with custom TLS certificate",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 	}
 }
@@ -489,13 +475,11 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 			"connection_info": schema.SingleNestedAttribute{
 				Computed:            true,
 				Attributes:          clickhouseConenctionInfoSchema(),
-				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Public connection info",
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
 				Computed:            true,
 				Attributes:          clickhouseConenctionInfoSchema(),
-				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Private connection info",
 			},
 		},
@@ -771,6 +755,18 @@ func (r *ClickhouseClusterResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update", err.Error())
 		return
+	}
+
+	{
+		response, err := r.svc.Get(ctx, &clickhouse.GetClusterRequest{
+			ClusterId: data.Id.ValueString(),
+			Sensitive: true,
+		})
+		if err != nil {
+			resp.Diagnostics.AddError("failed to get", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(data.parse(response)...)
 	}
 
 	// Save updated data into Terraform state
