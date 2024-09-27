@@ -30,6 +30,8 @@ func convertSchemaAttributes(resAttrs map[string]resourceschema.Attribute, dataA
 			dataAttrs[name] = convertInt64Attribute(attr)
 		case resourceschema.SingleNestedAttribute:
 			dataAttrs[name] = convertSingleNestedAttribute(attr, diags)
+		case resourceschema.BoolAttribute:
+			dataAttrs[name] = convertBoolAttribute(attr)
 		default:
 			diags.AddError("can not convert resource attribute to datasource attribute", fmt.Sprintf("unsupported type for attribute %q: %v", name, attr))
 		}
@@ -72,6 +74,16 @@ func convertSingleNestedAttribute(attr resourceschema.SingleNestedAttribute, dia
 	diags.Append(convertSchemaAttributes(attr.Attributes, dataAttrs)...)
 	return &dataschema.SingleNestedAttribute{
 		Attributes:          dataAttrs,
+		Computed:            true,
+		Sensitive:           attr.Sensitive,
+		Description:         attr.Description,
+		MarkdownDescription: attr.MarkdownDescription,
+		DeprecationMessage:  attr.DeprecationMessage,
+	}
+}
+
+func convertBoolAttribute(attr resourceschema.BoolAttribute) *dataschema.BoolAttribute {
+	return &dataschema.BoolAttribute{
 		Computed:            true,
 		Sensitive:           attr.Sensitive,
 		Description:         attr.Description,

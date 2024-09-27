@@ -3,8 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
 	dcsdk "github.com/doublecloud/go-sdk"
@@ -28,55 +31,86 @@ type ClickhouseDataSource struct {
 }
 
 type ClickhouseDataSourceModel struct {
-	Id                    types.String              `tfsdk:"id"`
-	ProjectID             types.String              `tfsdk:"project_id"`
-	Name                  types.String              `tfsdk:"name"`
-	Description           types.String              `tfsdk:"description"`
-	RegionID              types.String              `tfsdk:"region_id"`
-	CloudType             types.String              `tfsdk:"cloud_type"`
-	Version               types.String              `tfsdk:"version"`
-	ConnectionInfo        *ClickhouseConnectionInfo `tfsdk:"connection_info"`
-	PrivateConnectionInfo *ClickhouseConnectionInfo `tfsdk:"private_connection_info"`
+	Id                    types.String                 `tfsdk:"id"`
+	ProjectID             types.String                 `tfsdk:"project_id"`
+	Name                  types.String                 `tfsdk:"name"`
+	Description           types.String                 `tfsdk:"description"`
+	RegionID              types.String                 `tfsdk:"region_id"`
+	CloudType             types.String                 `tfsdk:"cloud_type"`
+	Version               types.String                 `tfsdk:"version"`
+	ConnectionInfo        *ClickhouseConnectionInfo    `tfsdk:"connection_info"`
+	PrivateConnectionInfo *ClickhouseConnectionInfo    `tfsdk:"private_connection_info"`
+	CustomCertificate     *ClickhouseCustomCertificate `tfsdk:"custom_certificate"`
 }
 
 type ClickhouseConnectionInfo struct {
-	Host           types.String `tfsdk:"host"`
-	User           types.String `tfsdk:"user"`
-	Password       types.String `tfsdk:"password"`
-	HttpsPort      types.Int64  `tfsdk:"https_port"`
-	TcpPortSecure  types.Int64  `tfsdk:"tcp_port_secure"`
-	NativeProtocol types.String `tfsdk:"native_protocol"`
-	HttpsUri       types.String `tfsdk:"https_uri"`
-	JdbcUri        types.String `tfsdk:"jdbc_uri"`
-	OdbcUri        types.String `tfsdk:"odbc_uri"`
+	Host               types.String `tfsdk:"host"`
+	User               types.String `tfsdk:"user"`
+	Password           types.String `tfsdk:"password"`
+	HttpsPort          types.Int64  `tfsdk:"https_port"`
+	TcpPortSecure      types.Int64  `tfsdk:"tcp_port_secure"`
+	NativeProtocol     types.String `tfsdk:"native_protocol"`
+	HttpsUri           types.String `tfsdk:"https_uri"`
+	JdbcUri            types.String `tfsdk:"jdbc_uri"`
+	OdbcUri            types.String `tfsdk:"odbc_uri"`
+	HttpsPortCTLS      types.Int64  `tfsdk:"https_port_ctls"`
+	TcpPortSecureCTLS  types.Int64  `tfsdk:"tcp_port_secure_ctls"`
+	NativeProtocolCTLS types.String `tfsdk:"native_protocol_ctls"`
+	HttpsUriCTLS       types.String `tfsdk:"https_uri_ctls"`
 }
 
 func (ci ClickhouseConnectionInfo) convert(diags diag.Diagnostics) types.Object {
 	res, d := types.ObjectValue(map[string]attr.Type{
-		"host":            types.StringType,
-		"user":            types.StringType,
-		"password":        types.StringType,
-		"https_port":      types.Int64Type,
-		"tcp_port_secure": types.Int64Type,
-		"native_protocol": types.StringType,
-		"https_uri":       types.StringType,
-		"jdbc_uri":        types.StringType,
-		"odbc_uri":        types.StringType,
+		"host":                 types.StringType,
+		"user":                 types.StringType,
+		"password":             types.StringType,
+		"https_port":           types.Int64Type,
+		"tcp_port_secure":      types.Int64Type,
+		"native_protocol":      types.StringType,
+		"https_uri":            types.StringType,
+		"jdbc_uri":             types.StringType,
+		"odbc_uri":             types.StringType,
+		"https_port_ctls":      types.Int64Type,
+		"tcp_port_secure_ctls": types.Int64Type,
+		"native_protocol_ctls": types.StringType,
+		"https_uri_ctls":       types.StringType,
 	},
 		map[string]attr.Value{
-			"host":            ci.Host,
-			"user":            ci.User,
-			"password":        ci.Password,
-			"https_port":      ci.HttpsPort,
-			"tcp_port_secure": ci.TcpPortSecure,
-			"native_protocol": ci.NativeProtocol,
-			"https_uri":       ci.HttpsUri,
-			"jdbc_uri":        ci.JdbcUri,
-			"odbc_uri":        ci.OdbcUri,
+			"host":                 ci.Host,
+			"user":                 ci.User,
+			"password":             ci.Password,
+			"https_port":           ci.HttpsPort,
+			"tcp_port_secure":      ci.TcpPortSecure,
+			"native_protocol":      ci.NativeProtocol,
+			"https_uri":            ci.HttpsUri,
+			"jdbc_uri":             ci.JdbcUri,
+			"odbc_uri":             ci.OdbcUri,
+			"https_port_ctls":      ci.HttpsPortCTLS,
+			"tcp_port_secure_ctls": ci.TcpPortSecureCTLS,
+			"native_protocol_ctls": ci.NativeProtocolCTLS,
+			"https_uri_ctls":       ci.HttpsUriCTLS,
 		},
 	)
 	diags.Append(d...)
 	return res
+}
+
+type ClickhouseCustomCertificate struct {
+	Certificate types.String `tfsdk:"certificate"`
+	Key         types.String `tfsdk:"key"`
+	RootCA      types.String `tfsdk:"root_ca"`
+}
+
+func (cc *ClickhouseCustomCertificate) convert() *clickhouseCustomCertificate {
+	if cc == nil {
+		return nil
+	}
+	res := clickhouseCustomCertificate{
+		Certificate: cc.Certificate,
+		Key:         cc.Key,
+		RootCA:      cc.RootCA,
+	}
+	return &res
 }
 
 func (d *ClickhouseDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -86,6 +120,8 @@ func (d *ClickhouseDataSource) Metadata(ctx context.Context, req datasource.Meta
 func (d *ClickhouseDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	connInfo := make(map[string]schema.Attribute)
 	resp.Diagnostics.Append(convertSchemaAttributes(clickhouseConenctionInfoSchema(), connInfo)...)
+	customCertificate := make(map[string]schema.Attribute)
+	resp.Diagnostics.Append(convertSchemaAttributes(clickhouseCustomCertificateSchema(), customCertificate)...)
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Clickhouse data source",
 		Attributes: map[string]schema.Attribute{
@@ -129,6 +165,11 @@ func (d *ClickhouseDataSource) Schema(ctx context.Context, req datasource.Schema
 				Attributes:          connInfo,
 				MarkdownDescription: "Private connection info",
 			},
+			"custom_certificate": schema.SingleNestedAttribute{
+				Computed:            true,
+				Attributes:          customCertificate,
+				MarkdownDescription: "Custom TLS certificate",
+			},
 		},
 	}
 }
@@ -167,6 +208,10 @@ func parseClickhouseConnectionInfo(r *clickhouse.ConnectionInfo) *ClickhouseConn
 	c.HttpsUri = types.StringValue(r.HttpsUri)
 	c.JdbcUri = types.StringValue(r.JdbcUri)
 	c.OdbcUri = types.StringValue(r.OdbcUri)
+	c.HttpsPortCTLS = types.Int64Value(r.HttpsPortCtls.Value)
+	c.TcpPortSecureCTLS = types.Int64Value(r.TcpPortSecureCtls.Value)
+	c.NativeProtocolCTLS = types.StringValue(r.NativeProtocolCtls)
+	c.HttpsUriCTLS = types.StringValue(r.HttpsUriCtls)
 	return c
 }
 
@@ -184,6 +229,44 @@ func parseClickhousePrivateConnectionInfo(r *clickhouse.PrivateConnectionInfo) *
 	c.HttpsUri = types.StringValue(r.HttpsUri)
 	c.JdbcUri = types.StringValue(r.JdbcUri)
 	c.OdbcUri = types.StringValue(r.OdbcUri)
+	c.HttpsPortCTLS = types.Int64Value(r.HttpsPortCtls.Value)
+	c.TcpPortSecureCTLS = types.Int64Value(r.TcpPortSecureCtls.Value)
+	c.NativeProtocolCTLS = types.StringValue(r.NativeProtocolCtls)
+	c.HttpsUriCTLS = types.StringValue(r.HttpsUriCtls)
+	return c
+}
+
+func parseClickhouseCustomCertificate(r *clickhouse.CustomCertificate, oldKey string, diags diag.Diagnostics) *ClickhouseCustomCertificate {
+	if r == nil {
+		return nil
+	}
+
+	if !r.GetEnabled() {
+		return nil
+	}
+
+	certRaw := string(r.Certificate.GetValue()[:])
+	if len(certRaw) == 0 {
+		return nil
+	}
+
+	certificate := types.StringValue(certRaw)
+	s, err := strconv.Unquote(oldKey)
+	if err != nil {
+		diags.AddError("Can't unquote TLS certificate", err.Error())
+		return nil
+	}
+	key := basetypes.NewStringValue(s)
+	rootCa := types.StringNull()
+	rootRaw := string(r.RootCa.GetValue()[:])
+	if len(rootRaw) > 0 {
+		rootCa = types.StringValue(rootRaw)
+	}
+	c := &ClickhouseCustomCertificate{
+		Certificate: certificate,
+		Key:         key,
+		RootCA:      rootCa,
+	}
 	return c
 }
 
@@ -235,6 +318,11 @@ func (d *ClickhouseDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	data.Version = types.StringValue(response.Version)
 	data.ConnectionInfo = parseClickhouseConnectionInfo(response.ConnectionInfo)
 	data.PrivateConnectionInfo = parseClickhousePrivateConnectionInfo(response.PrivateConnectionInfo)
+	oldKey := ""
+	if data.CustomCertificate != nil {
+		oldKey = data.CustomCertificate.Key.String()
+	}
+	data.CustomCertificate = parseClickhouseCustomCertificate(response.CustomCertificate, oldKey, resp.Diagnostics)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

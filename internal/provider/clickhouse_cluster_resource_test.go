@@ -17,6 +17,40 @@ import (
 var (
 	testAccClickhouseName string = fmt.Sprintf("%v-clickhouse", testPrefix)
 	testAccClickhouseId   string = fmt.Sprintf("doublecloud_clickhouse_cluster.%v", testAccClickhouseName)
+
+	testAccClickhouseTLSCert string = `
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEcKT/wmDt+qLwEVOfU0UbJO5f77+0
+nuYermx15MOZh4jg4H/r98b/tD2dNxdLAW/VJ4VTF3vD0AGY2+xN7J8aTA==
+-----END PUBLIC KEY-----
+`
+
+	testAccClickhouseTLSKey string = `
+-----BEGIN CERTIFICATE-----
+MIICoTCCAkegAwIBAgIUWdVSBHIWp+w6Gtmt4Ps+RNgky00wCgYIKoZIzj0EAwIw
+gacxCzAJBgNVBAYTAkRFMRIwEAYDVQQIDAlGcmFua2Z1cnQxEjAQBgNVBAcMCUZy
+YW5rZnVydDEVMBMGA1UECgwMZG91YmxlLmNsb3VkMSAwHgYDVQQLDBdUZXJyYWZv
+cm0gcHJvdmlkZXIgdGVzdDEVMBMGA1UEAwwMZG91YmxlLmNsb3VkMSAwHgYJKoZI
+hvcNAQkBFhFpbmZvQGRvdWJsZS5jbG91ZDAeFw0yNDA5MTkxNjE5MDNaFw0yNTA5
+MTkxNjE5MDNaMIG0MQswCQYDVQQGEwJERTESMBAGA1UECAwJRnJhbmtmdXJ0MRIw
+EAYDVQQHDAlGcmFua2Z1cnQxFTATBgNVBAoMDGRvdWJsZS5jbG91ZDElMCMGA1UE
+CwwcVGVycmFmb3JtIHByb3ZpZGVyIHRlc3QgaW1wbDEdMBsGA1UEAwwUdGVzdC5h
+dC5kb3VibGUuY2xvdWQxIDAeBgkqhkiG9w0BCQEWEWluZm9AZG91YmxlLmNsb3Vk
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEcKT/wmDt+qLwEVOfU0UbJO5f77+0
+nuYermx15MOZh4jg4H/r98b/tD2dNxdLAW/VJ4VTF3vD0AGY2+xN7J8aTKNCMEAw
+HQYDVR0OBBYEFElk8x4Sw1IYKahZDqAKrbPrMQvaMB8GA1UdIwQYMBaAFC/+xZgT
+4U3lxhcG2wdT5/NlGB7cMAoGCCqGSM49BAMCA0gAMEUCIBWS0StXMJCfOHU6UqKK
+PB+UYxG5mwIw4IP/T7sLa3XlAiEAyS8vLtbgrh8mLXwacAe/SFRS3L/DhOJQa+0e
+VQBbsVs=
+-----END CERTIFICATE-----
+`
+
+	testAccClickhouseTLSRootCA string = `
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE2fZnlTyuGtgATXh0FmgvgsqTI/aB
+Wy2sRShP40UqdTQ4pxLkpkskb7RWssyrXZEiieGSIUY33setFOOMV6b4RA==
+-----END PUBLIC KEY-----
+`
 )
 
 func TestAccClickhouseClusterResource(t *testing.T) {
@@ -27,6 +61,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 		RegionId:  types.StringValue("eu-central-1"),
 		CloudType: types.StringValue("aws"),
 		NetworkId: types.StringValue(testNetworkId),
+		Version:   types.StringValue("24.8"),
 		Resources: &clickhouseClusterResources{
 			Clickhouse: &clickhouseClusterResourcesClickhouse{
 				ResourcePresetId: types.StringValue("g2-c2-m8"),
@@ -69,7 +104,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 			SaslMechanism:    types.StringValue("SCRAM_SHA_512"),
 			SaslUsername:     types.StringValue("admin"),
 			SaslPassword:     types.StringValue("Traffic3-Mushiness-Chariot"),
-			SessionTimeoutMs: types.StringValue("1m"),
+			SessionTimeoutMs: types.StringValue("1m0s"),
 		},
 	}
 
@@ -82,6 +117,13 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 			MaxDiskSize:         types.Int64Value(68719476736),
 			ReplicaCount:        types.Int64Value(1),
 		},
+	}
+
+	m4 := m3
+	m4.CustomCertificate = &clickhouseCustomCertificate{
+		Certificate: types.StringValue(testAccClickhouseTLSCert),
+		Key:         types.StringValue(testAccClickhouseTLSKey),
+		RootCA:      types.StringValue(testAccClickhouseTLSRootCA),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -109,6 +151,10 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.user", "admin"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.https_port", "8443"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.tcp_port_secure", "9440"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.https_port_ctls", "0"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.tcp_port_secure_ctls", "0"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.https_port_ctls", "0"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.tcp_port_secure_ctls", "0"),
 				),
 			},
 			// Update and Read testing
@@ -124,7 +170,7 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_mechanism", "SCRAM_SHA_512"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_username", "admin"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.sasl_password", "Traffic3-Mushiness-Chariot"),
-					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.session_timeout_ms", "1m"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "config.kafka.session_timeout_ms", "1m0s"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.data_services.0", "transfer"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.1.value", "11.0.0.0/8"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "access.ipv4_cidr_blocks.1.description", "Office in Cupertino"),
@@ -138,6 +184,19 @@ func TestAccClickhouseClusterResource(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.min_resource_preset_id", "g2-c2-m8"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.max_resource_preset_id", "g2-c4-m16"),
 					resource.TestCheckResourceAttr(testAccClickhouseId, "resources.clickhouse.max_disk_size", "68719476736"),
+				),
+			},
+			// Check custom TLS certificate
+			{
+				Config: convertClickHouseModelToHCL(&m4),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testAccClickhouseId, "custom_certificate.certificate", testAccClickhouseTLSCert),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "custom_certificate.key", testAccClickhouseTLSKey),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "custom_certificate.root_ca", testAccClickhouseTLSRootCA),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.https_port_ctls", "8444"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "connection_info.tcp_port_secure_ctls", "9444"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.https_port_ctls", "8444"),
+					resource.TestCheckResourceAttr(testAccClickhouseId, "private_connection_info.tcp_port_secure_ctls", "9444"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -213,6 +272,8 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
     region_id =  "{{ .RegionId.ValueString }}"
     cloud_type = "{{ .CloudType.ValueString }}"
     network_id = "{{ .NetworkId.ValueString }}"
+	{{- if not .Version.IsNull }}
+    version    = "{{ .Version.ValueString }}"{{end}}
 
     resources {
       clickhouse {
@@ -277,6 +338,13 @@ resource "doublecloud_clickhouse_cluster" "tf-acc-clickhouse" {
       ]
       {{- end}}
     }
+	{{- if ne .CustomCertificate nil }}
+	custom_certificate {
+	  certificate = {{ .CustomCertificate.Certificate }}
+	  key = {{ .CustomCertificate.Key }}
+	  root_ca = {{ .CustomCertificate.RootCA }}
+	}
+    {{- end}}
   }`
 
 var clickhouseHCLTemplate *template.Template

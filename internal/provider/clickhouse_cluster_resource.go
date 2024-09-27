@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 
 	"github.com/doublecloud/go-genproto/doublecloud/clickhouse/v1"
@@ -49,6 +49,8 @@ type clickhouseClusterModel struct {
 	// TODO: support mw
 	// https://github.com/doublecloud/api/blob/main/doublecloud/v1/maintenance.proto
 	// MaintenanceWindow *maintenanceWindow          `tfsdk:"maintenance_window"`
+
+	CustomCertificate *clickhouseCustomCertificate `tfsdk:"custom_certificate"`
 }
 
 type clickhouseClusterResources struct {
@@ -107,6 +109,40 @@ func (m *clickhouseClusterResources) convert() (*clickhouse.ClusterResources, di
 	}
 
 	return &r, diags
+}
+
+type clickhouseCustomCertificate struct {
+	Certificate types.String `tfsdk:"certificate"`
+	Key         types.String `tfsdk:"key"`
+	RootCA      types.String `tfsdk:"root_ca"`
+}
+
+func (cc *clickhouseCustomCertificate) convert() (*clickhouse.CustomCertificate, diag.Diagnostics) {
+	res := clickhouse.CustomCertificate{
+		Enabled: false,
+	}
+
+	var diags diag.Diagnostics
+
+	if cc != nil {
+		if !cc.Certificate.IsNull() && !cc.Key.IsNull() {
+			res.Enabled = true
+			res.Certificate = &wrappers.BytesValue{Value: []byte(cc.Certificate.ValueString())}
+			res.Key = &wrappers.BytesValue{Value: []byte(cc.Key.ValueString())}
+			if !cc.RootCA.IsNull() {
+				res.RootCa = &wrappers.BytesValue{Value: []byte(cc.RootCA.ValueString())}
+			}
+		} else {
+			if cc.Certificate.IsNull() {
+				diags.AddError("missed certificate", "for custom certificate must be both certificate and key")
+			}
+			if cc.Key.IsNull() {
+				diags.AddError("missed certificate", "for custom certificate must be both certificate and key")
+			}
+		}
+	}
+
+	return &res, diags
 }
 
 type clickhouseClusterResourcesClickhouse struct {
@@ -304,48 +340,85 @@ func clickhouseConenctionInfoSchema() map[string]schema.Attribute {
 		"host": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Host to connect to",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"user": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "ClickHouse user",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"password": schema.StringAttribute{
 			Computed:            true,
 			Sensitive:           true,
 			MarkdownDescription: "Password for the ClickHouse user",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"https_port": schema.Int64Attribute{
 			Computed:            true,
 			MarkdownDescription: "Port to connect to using the HTTPS protocol",
-			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 		},
 		"tcp_port_secure": schema.Int64Attribute{
 			Computed:            true,
 			MarkdownDescription: "Port to connect to using the TCP/native protocol",
-			PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 		},
 		"native_protocol": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Connection string for the ClickHouse native protocol",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"https_uri": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "URI to connect to using the HTTPS protocol",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"jdbc_uri": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "URI to connect to using the JDBC protocol",
-			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 		},
 		"odbc_uri": schema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "URI to connect to using the ODBC protocol",
+		},
+		"https_port_ctls": schema.Int64Attribute{
+			Computed:            true,
+			MarkdownDescription: "Port to connect to using the HTTPS protocol with custom TLS certificate",
+		},
+		"tcp_port_secure_ctls": schema.Int64Attribute{
+			Computed:            true,
+			MarkdownDescription: "Port to connect to using the TCP/native protocol with custom TLS certificate",
+		},
+		"native_protocol_ctls": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Connection string for the ClickHouse native protocol with custom TLS certificate",
+		},
+		"https_uri_ctls": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "URI to connect to using the HTTPS protocol with custom TLS certificate",
+		},
+	}
+}
+
+func clickhouseCustomCertificateSchema() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"certificate": schema.StringAttribute{
+			Optional:            true,
+			MarkdownDescription: "Public certificate",
 			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Validators: []validator.String{
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("key")),
+			},
+		},
+		"key": schema.StringAttribute{
+			Optional:            true,
+			MarkdownDescription: "Private certificate key",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Validators: []validator.String{
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("certificate")),
+			},
+		},
+		"root_ca": schema.StringAttribute{
+			Optional:            true,
+			MarkdownDescription: "Root certificate",
+			PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			Validators: []validator.String{
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("key")),
+				stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("certificate")),
+			},
 		},
 	}
 }
@@ -402,13 +475,11 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 			"connection_info": schema.SingleNestedAttribute{
 				Computed:            true,
 				Attributes:          clickhouseConenctionInfoSchema(),
-				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Public connection info",
 			},
 			"private_connection_info": schema.SingleNestedAttribute{
 				Computed:            true,
 				Attributes:          clickhouseConenctionInfoSchema(),
-				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Private connection info",
 			},
 		},
@@ -493,6 +564,11 @@ func (r *ClickhouseClusterResource) Schema(ctx context.Context, req resource.Sch
 			"access": AccessSchemaBlock(),
 			"config": clickhouseConfigSchemaBlock(),
 			// maintenance window
+			"custom_certificate": schema.SingleNestedBlock{
+				Attributes:          clickhouseCustomCertificateSchema(),
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Custom TLS certificate",
+			},
 		},
 	}
 }
@@ -545,6 +621,10 @@ func createClickhouseClusterRequest(m *clickhouseClusterModel) (*clickhouse.Crea
 		diags.Append(d...)
 	}
 	// TODO: mw
+
+	if m.CustomCertificate != nil {
+		diags.AddError("custom_certificate exists", "custom_certificate can't be applied during cluster creation")
+	}
 
 	return rq, diags
 }
@@ -643,6 +723,10 @@ func updateClickhouseCluster(m *clickhouseClusterModel) (*clickhouse.UpdateClust
 		rq.Access = access
 	}
 
+	cc, d := m.CustomCertificate.convert()
+	rq.CustomCertificate = cc
+	diags.Append(d...)
+
 	return rq, diags
 }
 
@@ -671,6 +755,18 @@ func (r *ClickhouseClusterResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update", err.Error())
 		return
+	}
+
+	{
+		response, err := r.svc.Get(ctx, &clickhouse.GetClusterRequest{
+			ClusterId: data.Id.ValueString(),
+			Sensitive: true,
+		})
+		if err != nil {
+			resp.Diagnostics.AddError("failed to get", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(data.parse(response)...)
 	}
 
 	// Save updated data into Terraform state
@@ -733,6 +829,12 @@ func (m *clickhouseClusterModel) parse(rs *clickhouse.Cluster) diag.Diagnostics 
 		}
 		diags.Append(m.Access.parse(access)...)
 	}
+
+	oldKey := ""
+	if m.CustomCertificate != nil && !m.CustomCertificate.Key.IsNull() {
+		oldKey = m.CustomCertificate.Key.String()
+	}
+	m.CustomCertificate = parseClickhouseCustomCertificate(rs.GetCustomCertificate(), oldKey, diags).convert()
 
 	// parse MW
 	return diags

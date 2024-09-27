@@ -28,6 +28,7 @@ Clickhouse data source
 
 - `cloud_type` (String) Cloud provider (`aws`, `gcp`, or `azure`)
 - `connection_info` (Attributes) Public connection info (see [below for nested schema](#nestedatt--connection_info))
+- `custom_certificate` (Attributes) Custom TLS certificate (see [below for nested schema](#nestedatt--custom_certificate))
 - `description` (String) Cluster description
 - `private_connection_info` (Attributes) Private connection info (see [below for nested schema](#nestedatt--private_connection_info))
 - `region_id` (String) Region where the cluster is located
@@ -40,13 +41,27 @@ Read-Only:
 
 - `host` (String) Host to connect to
 - `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_port_ctls` (Number) Port to connect to using the HTTPS protocol with custom TLS certificate
 - `https_uri` (String) URI to connect to using the HTTPS protocol
+- `https_uri_ctls` (String) URI to connect to using the HTTPS protocol with custom TLS certificate
 - `jdbc_uri` (String) URI to connect to using the JDBC protocol
 - `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `native_protocol_ctls` (String) Connection string for the ClickHouse native protocol with custom TLS certificate
 - `odbc_uri` (String) URI to connect to using the ODBC protocol
 - `password` (String, Sensitive) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
+- `tcp_port_secure_ctls` (Number) Port to connect to using the TCP/native protocol with custom TLS certificate
 - `user` (String) ClickHouse user
+
+
+<a id="nestedatt--custom_certificate"></a>
+### Nested Schema for `custom_certificate`
+
+Read-Only:
+
+- `certificate` (String) Public certificate
+- `key` (String) Private certificate key
+- `root_ca` (String) Root certificate
 
 
 <a id="nestedatt--private_connection_info"></a>
@@ -56,10 +71,14 @@ Read-Only:
 
 - `host` (String) Host to connect to
 - `https_port` (Number) Port to connect to using the HTTPS protocol
+- `https_port_ctls` (Number) Port to connect to using the HTTPS protocol with custom TLS certificate
 - `https_uri` (String) URI to connect to using the HTTPS protocol
+- `https_uri_ctls` (String) URI to connect to using the HTTPS protocol with custom TLS certificate
 - `jdbc_uri` (String) URI to connect to using the JDBC protocol
 - `native_protocol` (String) Connection string for the ClickHouse native protocol
+- `native_protocol_ctls` (String) Connection string for the ClickHouse native protocol with custom TLS certificate
 - `odbc_uri` (String) URI to connect to using the ODBC protocol
 - `password` (String, Sensitive) Password for the ClickHouse user
 - `tcp_port_secure` (Number) Port to connect to using the TCP/native protocol
+- `tcp_port_secure_ctls` (Number) Port to connect to using the TCP/native protocol with custom TLS certificate
 - `user` (String) ClickHouse user
